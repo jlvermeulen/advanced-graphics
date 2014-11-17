@@ -1,13 +1,13 @@
 #pragma once
 
 #include <vector>
-#include "Triangle.h"
+#include "TriangleD.h"
 
 using namespace std;
 
 class Octree
 {
 public:
-	Octree(vector<Triangle> triangles);
+	Octree(vector<TriangleD> triangles);
 	~Octree();
 };

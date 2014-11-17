@@ -68,8 +68,9 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Matrix3x3D.h" />
     <ClInclude Include="Octree.h" />
-    <ClInclude Include="Triangle.h" />
+    <ClInclude Include="TriangleD.h" />
     <ClInclude Include="Vector3D.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
