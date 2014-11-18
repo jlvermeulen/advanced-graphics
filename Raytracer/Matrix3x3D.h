@@ -46,6 +46,8 @@ public:
 		elems[2][2] = m22;
 	}
 
+	static Matrix3x3D Identity() { return Matrix3x3D(1, 0, 0, 0, 1, 0, 0, 0, 1); }
+
 	void Transpose()
 	{
 		Matrix3x3D mat(*this);
@@ -104,4 +106,14 @@ private:
 	double elems[3][3];
 };
 
-inline Vector3D& operator*(const Matrix3x3D& lhs, const Vector3D& rhs) { return Vector3D(Vector3D::Dot(Vector3D(lhs[0]), rhs), Vector3D::Dot(Vector3D(lhs[1]), rhs), Vector3D::Dot(Vector3D(lhs[2]), rhs)); }
+inline Vector3D operator*(const Matrix3x3D& lhs, const Vector3D& rhs) { return Vector3D(Vector3D::Dot(Vector3D(lhs[0]), rhs), Vector3D::Dot(Vector3D(lhs[1]), rhs), Vector3D::Dot(Vector3D(lhs[2]), rhs)); }
+
+Matrix3x3D operator*(const Matrix3x3D& lhs, const Matrix3x3D& rhs)
+{
+	Matrix3x3D result;
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			result[i][j] = Vector3D::Dot(Vector3D(lhs[i]), Vector3D(rhs[0][j], rhs[1][j], rhs[2][j]));
+
+	return result;
+}

@@ -46,8 +46,9 @@ int main()
 
 	cout << v1.Dot(v2) << endl;*/
 
-	Matrix3x3D mat(1, 2, 3, 4, 5, 6, 7, 8, 8);
-	mat.Invert();
+	Matrix3x3D mat1(3, -1, 2, 0, 4, 1, 5, 3, -4), mat2(6, 11, 4, 9, 0, 3, 1, 6, 2);
+	//mat.Invert();
+	Matrix3x3D mat = mat1 * mat2 * Matrix3x3D::Identity();
 	cout << mat.Determinant() << endl;
 	cout << mat[0][0] << ", " << mat[0][1] << ", " << mat[0][2] << endl;
 	cout << mat[1][0] << ", " << mat[1][1] << ", " << mat[1][2] << endl;
