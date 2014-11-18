@@ -1,20 +1,20 @@
 #pragma once
 
-#include "Vector3D.h"
+#include "Vertex.h"
 
 struct TriangleD
 {
 public:
 	TriangleD() { }
 
-	TriangleD(Vector3D v1, Vector3D v2, Vector3D v3)
+	TriangleD(Vertex v1, Vertex v2, Vertex v3)
 	{
 		Vertices[0] = v1;
 		Vertices[1] = v2;
 		Vertices[2] = v3;
 	}
 
-	TriangleD(Vector3D v[3])
+	TriangleD(Vertex v[3])
 	{
 		Vertices[0] = v[0];
 		Vertices[1] = v[1];
@@ -22,7 +22,7 @@ public:
 	}
 
 	~TriangleD() { }
-	Vector3D Vertices[3];
+	Vertex Vertices[3];
 
 private:
 };
