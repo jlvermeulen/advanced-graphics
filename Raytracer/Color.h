@@ -5,19 +5,33 @@ struct Color
 public:
 	double R, G, B;
 
-	Color() { R = G = B = 0; }
-	Color(double r, double g, double b) : R(r), G(g), B(b) { }
+	Color();
+	Color(double r, double g, double b);
+	Color(unsigned char r, unsigned char g, unsigned char b);
 
-	Color(unsigned char r, unsigned char g, unsigned char b)
-	{
-		R = (double)r / 255;
-		G = (double)g / 255;
-		B = (double)b / 255;
-	}
+	void Clip();
 
-	static Color Mix(const Color& c1, const Color& c2, const double& w1, const double& w2) {}
+	static Color Mix(Color c1, Color c2, const double& w1, const double& w2);
+
+	Color& operator+=(const Color& rhs);
+	Color& operator+=(const double& rhs);
+
+	Color& operator*=(const Color& rhs);
+	Color& operator*=(const double& rhs);
+
+	Color& operator/=(const Color& rhs);
+	Color& operator/=(const double& rhs);
+
 private:
 };
 
-inline Color& operator*(const Color& lhs, const Color& rhs) {}
-inline Color& operator+(const Color& lhs, const Color& rhs) {}
+inline Color operator+(Color lhs, const Color& rhs) { return lhs += rhs; }
+inline Color operator+(Color lhs, const double& rhs) { return lhs += rhs; }
+inline Color operator+(const double& lhs, Color rhs) { return rhs += lhs; }
+
+inline Color operator*(Color lhs, const Color& rhs) { return lhs *= rhs; }
+inline Color operator*(Color lhs, const double& rhs) { return lhs *= rhs; }
+inline Color operator*(const double& lhs, Color rhs) { return rhs *= lhs; }
+
+inline Color operator/(Color lhs, const Color& rhs) { return lhs /= rhs; }
+inline Color operator/(Color lhs, const double& rhs) { return lhs /= rhs; }

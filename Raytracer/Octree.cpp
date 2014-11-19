@@ -6,8 +6,3 @@ Octree::Octree(vector<TriangleD> triangles)
 {
 
 }
-
-Octree::~Octree()
-{
-
-}

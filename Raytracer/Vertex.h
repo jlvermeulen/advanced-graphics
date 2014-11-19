@@ -7,7 +7,7 @@ struct Vertex
 {
 public:
 	Vector3D Position, Normal;
-	Color Color; // TODO: make Color
+	Color Color;
 	Vector3D UV; // TODO: make Vector2D
 
 private:

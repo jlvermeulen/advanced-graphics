@@ -10,13 +10,6 @@ Matrix3x3D::Matrix3x3D()
 			this->elems[i][j] = 0;
 }
 
-Matrix3x3D::Matrix3x3D(const Matrix3x3D& matrix)
-{
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++)
-			this->elems[i][j] = matrix[i][j];
-}
-
 Matrix3x3D::Matrix3x3D(double elems[3][3])
 {
 	for (int i = 0; i < 3; i++)

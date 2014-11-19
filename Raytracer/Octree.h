@@ -9,5 +9,6 @@ class Octree
 {
 public:
 	Octree(vector<TriangleD> triangles);
-	~Octree();
+
+private:
 };
