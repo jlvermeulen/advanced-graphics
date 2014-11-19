@@ -1,5 +1,8 @@
 #pragma once
 
+#include <math.h>
+#include "Matrix3x3D.h"
+
 struct Vector3D
 {
 public:
@@ -57,6 +60,14 @@ public:
 		return *this;
 	}
 
+	Vector3D& operator*=(const Matrix3x3D lhs)
+	{
+		X = Dot(Vector3D(lhs[0]));
+		Y = Dot(Vector3D(lhs[1]));
+		Z = Dot(Vector3D(lhs[2]));
+		return *this;
+	}
+
 	Vector3D& operator/=(const double& rhs)
 	{
 		X /= rhs;
@@ -68,18 +79,19 @@ public:
 private:
 };
 
-inline Vector3D& operator+(const Vector3D& lhs, const Vector3D& rhs) { return Vector3D(lhs) += rhs; }
-inline Vector3D& operator+(const Vector3D& lhs, const double& rhs) { return Vector3D(lhs) += rhs; }
-inline Vector3D& operator+(const double& lhs, const Vector3D& rhs) { return Vector3D(rhs) += lhs; }
+inline Vector3D operator+(Vector3D lhs, const Vector3D& rhs) { return lhs += rhs; }
+inline Vector3D operator+(Vector3D lhs, const double& rhs) { return lhs += rhs; }
+inline Vector3D operator+(const double& lhs, Vector3D rhs) { return rhs += lhs; }
 
-inline Vector3D& operator-(const Vector3D& lhs, const Vector3D& rhs) { return Vector3D(lhs) -= rhs; }
-inline Vector3D& operator-(const Vector3D& lhs, const double& rhs) { return Vector3D(lhs) -= rhs; }
-inline Vector3D& operator-(const double& lhs, const Vector3D& rhs) { return Vector3D(rhs) -= lhs; }
+inline Vector3D operator-(Vector3D lhs, const Vector3D& rhs) { return lhs -= rhs; }
+inline Vector3D operator-(Vector3D lhs, const double& rhs) { return lhs -= rhs; }
+inline Vector3D operator-(const double& lhs, Vector3D rhs) { return rhs -= lhs; }
 
-inline Vector3D& operator*(const Vector3D& lhs, const double& rhs) { return Vector3D(lhs) *= rhs; }
-inline Vector3D& operator*(const double& lhs, const Vector3D& rhs) { return Vector3D(rhs) *= lhs; }
+inline Vector3D operator*(Vector3D lhs, const double& rhs) { return lhs *= rhs; }
+inline Vector3D operator*(const double& lhs, Vector3D rhs) { return rhs *= lhs; }
+inline Vector3D operator*(const Matrix3x3D& lhs, Vector3D rhs) { return rhs *= lhs; }
 
-inline Vector3D& operator/(const Vector3D& lhs, const double& rhs) { return Vector3D(lhs) += rhs; }
+inline Vector3D operator/(Vector3D lhs, const double& rhs) { return lhs += rhs; }
 
 inline bool operator==(const Vector3D& lhs, const Vector3D& rhs) { return lhs.X == rhs.X && lhs.Y == rhs.Y && rhs.Z == lhs.Z; }
 inline bool operator!=(const Vector3D& lhs, const Vector3D& rhs) { return !operator==(lhs, rhs); }

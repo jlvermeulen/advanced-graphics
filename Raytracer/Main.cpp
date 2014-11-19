@@ -1,8 +1,11 @@
 #include <iostream>
 #include <string>
+
+#include "Color.h"
 #include "Vector3D.h"
-#include "TriangleD.h"
 #include "Matrix3x3D.h"
+#include "Vertex.h"
+#include "TriangleD.h"
 
 using namespace std;
 
