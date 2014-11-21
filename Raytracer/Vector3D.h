@@ -8,8 +8,7 @@ struct Vector3D
 public:
 	double X, Y, Z;
 
-	Vector3D();
-	Vector3D(double x, double y, double z);
+	Vector3D(const double& x, const double& y, const double& z);
 	Vector3D(const double vec[]);
 
 	double Length();
@@ -28,7 +27,7 @@ public:
 	static Vector3D Reflect(Vector3D incident, const Vector3D& normal);
 
 	void Refract(const Vector3D& normal, const double& nFrom, const double& nTo);
-	Vector3D Refracted(const Vector3D& normal, const double& nFrom, const double& nTo) const;	
+	Vector3D Refracted(const Vector3D& normal, const double& nFrom, const double& nTo) const;
 	static Vector3D Refract(Vector3D incident, const Vector3D& normal, const double& nFrom, const double& nTo);
 
 	Vector3D& operator+=(const Vector3D& rhs);

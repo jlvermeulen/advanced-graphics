@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Vector3D.h"
-#include "Color.h"
+#include "ColorD.h"
 
 struct Vertex
 {
 public:
 	Vector3D Position, Normal;
-	Color Color;
+	ColorD Color;
 	Vector3D UV; // TODO: make Vector2D
 
 private:

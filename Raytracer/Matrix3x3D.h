@@ -4,9 +4,11 @@ struct Matrix3x3D
 {
 public:
 	Matrix3x3D();
-	Matrix3x3D(double elems[3][3]);
-	Matrix3x3D(double elems[3]);
-	Matrix3x3D(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21, double m22);
+	Matrix3x3D(const double elems[3][3]);
+	Matrix3x3D(const double elems[3]);
+	Matrix3x3D(const double& m00, const double& m01, const double& m02,
+			   const double& m10, const double& m11, const double& m12,
+			   const double& m20, const double& m21, const double& m22);
 
 	static Matrix3x3D Identity();
 

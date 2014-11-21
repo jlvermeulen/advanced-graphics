@@ -1,11 +1,12 @@
 #include <iostream>
 #include <string>
 
-#include "Color.h"
+#include "ColorD.h"
 #include "Vector3D.h"
 #include "Matrix3x3D.h"
 #include "Vertex.h"
 #include "TriangleD.h"
+#include "RayD.h"
 
 int main()
 {
