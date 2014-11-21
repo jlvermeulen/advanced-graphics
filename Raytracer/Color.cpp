@@ -20,7 +20,7 @@ void Color::Clip()
 	B = std::max(0.0, std::min(1.0, B));
 }
 
-Color Color::Mix(Color c1, Color c2, const double& w1, const double& w2) { return w1 * c1 + w2 * c2; }
+Color Color::Mix(const Color& c1, const Color& c2, const double& w1, const double& w2) { return w1 * c1 + w2 * c2; }
 
 Color& Color::operator+=(const Color& rhs)
 {

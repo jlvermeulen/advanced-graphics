@@ -11,7 +11,7 @@ public:
 
 	void Clip();
 
-	static Color Mix(Color c1, Color c2, const double& w1, const double& w2);
+	static Color Mix(const Color& c1, const Color& c2, const double& w1, const double& w2);
 
 	Color& operator+=(const Color& rhs);
 	Color& operator+=(const double& rhs);

@@ -12,12 +12,24 @@ public:
 	Vector3D(double x, double y, double z);
 	Vector3D(const double vec[]);
 
-	inline double Dot(const Vector3D& other) { return Dot(*this, other); }
-	inline Vector3D Cross(const Vector3D& other) { return Cross(*this, other); }
-	inline double Length() { return sqrt(Dot(*this, *this)); }
+	double Length();
 
-	inline static double Dot(const Vector3D& lhs, const Vector3D& rhs) { return lhs.X * rhs.X + lhs.Y * rhs.Y + lhs.Z * rhs.Z; }
-	inline static Vector3D Cross(const Vector3D& lhs, const Vector3D& rhs) { return Vector3D(lhs.Y * rhs.Z - lhs.Z * rhs.Y, lhs.Z * rhs.X - lhs.X * rhs.Z, lhs.X * rhs.Y - lhs.Y * rhs.X); }
+	double Dot(const Vector3D& other) const;
+	static double Dot(const Vector3D& lhs, const Vector3D& rhs);
+
+	Vector3D Cross(const Vector3D& other) const;
+	static Vector3D Cross(const Vector3D& lhs, const Vector3D& rhs);
+
+	void Normalise();
+	static Vector3D Normalise(Vector3D vector);
+
+	void Reflect(const Vector3D& normal);
+	Vector3D Reflected(const Vector3D& normal) const;
+	static Vector3D Reflect(Vector3D incident, const Vector3D& normal);
+
+	void Refract(const Vector3D& normal, const double& nFrom, const double& nTo);
+	Vector3D Refracted(const Vector3D& normal, const double& nFrom, const double& nTo) const;	
+	static Vector3D Refract(Vector3D incident, const Vector3D& normal, const double& nFrom, const double& nTo);
 
 	Vector3D& operator+=(const Vector3D& rhs);
 	Vector3D& operator+=(const double& rhs);
@@ -40,6 +52,7 @@ inline Vector3D operator+(const double& lhs, Vector3D rhs) { return rhs += lhs; 
 inline Vector3D operator-(Vector3D lhs, const Vector3D& rhs) { return lhs -= rhs; }
 inline Vector3D operator-(Vector3D lhs, const double& rhs) { return lhs -= rhs; }
 inline Vector3D operator-(const double& lhs, Vector3D rhs) { return rhs -= lhs; }
+inline Vector3D operator-(Vector3D rhs) { return rhs *= -1; }
 
 inline Vector3D operator*(Vector3D lhs, const double& rhs) { return lhs *= rhs; }
 inline Vector3D operator*(const double& lhs, Vector3D rhs) { return rhs *= lhs; }
