@@ -10,5 +10,10 @@ public:
 	ColorD Color;
 	Vector3D UV; // TODO: make Vector2D
 
+	Vertex();
+	Vertex(Vector3D position, Vector3D normal, ColorD color, Vector3D uv);
+	Vertex(const Vertex& rhs);
+	~Vertex();
+
 private:
 };

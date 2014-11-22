@@ -1,7 +1,31 @@
 #include "Vector3D.h"
 
-Vector3D::Vector3D(const double& x, const double& y, const double& z) : X(x), Y(y), Z(z) { }
-Vector3D::Vector3D(const double vec[]) { X = vec[0]; Y = vec[1]; Z = vec[2]; }
+Vector3D::Vector3D() :
+	X(0),
+	Y(0),
+	Z(0)
+{ }
+
+Vector3D::Vector3D(const double& x, const double& y, const double& z) :
+	X(x),
+	Y(y),
+	Z(z)
+{ }
+
+Vector3D::Vector3D(const double vec[]) :
+	X(vec[0]),
+	Y(vec[1]),
+	Z(vec[2])
+{ }
+
+Vector3D::Vector3D(const Vector3D& rhs) :
+	X(rhs.X),
+	Y(rhs.Y),
+	Z(rhs.Z)
+{ }
+
+Vector3D::~Vector3D()
+{ }
 
 double Vector3D::Length() { return sqrt(Dot(*this, *this)); }
 
