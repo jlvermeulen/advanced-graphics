@@ -83,6 +83,9 @@
     <ClInclude Include="Vector3D.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Vector3D.inl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

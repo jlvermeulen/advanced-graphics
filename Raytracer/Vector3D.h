@@ -34,147 +34,34 @@ public:
 	Vector3D Refracted(const Vector3D& normal, const double& nFrom, const double& nTo) const;
 	static Vector3D Refract(Vector3D incident, const Vector3D& normal, const double& nFrom, const double& nTo);
 
-	Vector3D& operator+=(const Vector3D& rhs);
-	Vector3D& operator+=(const double& rhs);
+	inline Vector3D operator+(const Vector3D& rhs);
+	inline Vector3D operator+(const double& rhs);
+	friend inline Vector3D operator+(const double& lhs, const Vector3D& rhs);
 
-	Vector3D& operator-=(const Vector3D& rhs);
-	Vector3D& operator-=(const double& rhs);
+	inline Vector3D operator-();
+	inline Vector3D operator-(const Vector3D& rhs);
+	inline Vector3D operator-(const double& rhs);
+	friend inline Vector3D operator-(const double& lhs, const Vector3D& rhs);
+
+	inline Vector3D operator*(const double& rhs);
+	friend inline Vector3D operator*(const double& lhs, const Vector3D& rhs);
+	friend inline Vector3D operator*(const Matrix3x3D& lhs, const Vector3D& rhs);
 	
-	Vector3D& operator*=(const double& rhs);
-	Vector3D& operator*=(const Matrix3x3D lhs);
+	inline Vector3D operator/(const double& rhs);
+	
+	inline void operator+=(const Vector3D& rhs);
+	inline void operator+=(const double& rhs);
 
-	Vector3D& operator/=(const double& rhs);
+	inline void operator-=(const Vector3D& rhs);
+	inline void operator-=(const double& rhs);
+
+	inline void operator*=(const double& rhs);
+	inline void operator/=(const double& rhs);
+
+	inline bool operator==(const Vector3D& rhs);
+	inline bool operator!=(const Vector3D& rhs);
 
 private:
 };
 
-inline Vector3D operator+(const Vector3D& lhs, const Vector3D& rhs)
-{
-	Vector3D result(lhs);
-
-	result.X += rhs.X;
-	result.Y += rhs.Y;
-	result.Z += rhs.Z;
-
-	return result;
-}
-
-inline Vector3D operator+(const Vector3D& lhs, const double& rhs)
-{
-	Vector3D result(lhs);
-
-	result.X += rhs;
-	result.Y += rhs;
-	result.Z += rhs;
-
-	return result;
-}
-
-inline Vector3D operator+(const double& lhs, const Vector3D& rhs)
-{
-	Vector3D result(rhs);
-
-	result.X += lhs;
-	result.Y += lhs;
-	result.Z += lhs;
-
-	return result;
-}
-
-inline Vector3D operator-(const Vector3D& lhs, const Vector3D& rhs)
-{
-	Vector3D result(lhs);
-
-	result.X -= rhs.X;
-	result.Y -= rhs.Y;
-	result.Z -= rhs.Z;
-
-	return result;
-}
-
-inline Vector3D operator-(const Vector3D& lhs, const double& rhs)
-{
-	Vector3D result(lhs);
-
-	result.X -= rhs;
-	result.Y -= rhs;
-	result.Z -= rhs;
-
-	return result;
-}
-
-inline Vector3D operator-(const double& lhs, const Vector3D& rhs)
-{
-	Vector3D result(rhs);
-
-	result.X -= lhs;
-	result.Y -= lhs;
-	result.Z -= lhs;
-
-	return result;
-}
-
-inline Vector3D operator-(const Vector3D& rhs)
-{
-	Vector3D result(rhs);
-
-	result.X *= -1;
-	result.Y *= -1;
-	result.Z *= -1;
-
-	return result;
-}
-
-inline Vector3D operator*(const Vector3D& lhs, const double& rhs)
-{
-	Vector3D result(lhs);
-
-	result.X *= rhs;
-	result.Y *= rhs;
-	result.Z *= rhs;
-
-	return result;
-}
-
-inline Vector3D operator*(const double& lhs, const Vector3D& rhs)
-{
-	Vector3D result(rhs);
-
-	result.X *= lhs;
-	result.Y *= lhs;
-	result.Z *= lhs;
-
-	return result;
-}
-
-inline Vector3D operator*(const Matrix3x3D& lhs, const Vector3D& rhs)
-{
-	Vector3D result(rhs);
-
-	result.X = result.Dot(Vector3D(lhs[0]));
-	result.Y = result.Dot(Vector3D(lhs[1]));
-	result.Z = result.Dot(Vector3D(lhs[2]));
-
-	return result;
-}
-
-inline Vector3D operator/(const Vector3D& lhs, const double& rhs)
-{
-	Vector3D result(lhs);
-
-	result.X /= rhs;
-	result.Y /= rhs;
-	result.Z /= rhs;
-
-	return result;
-}
-
-inline bool operator==(const Vector3D& lhs, const Vector3D& rhs)
-{
-	return lhs.X == rhs.X && lhs.Y == rhs.Y && lhs.Z == rhs.Z;
-}
-
-inline bool operator!=(const Vector3D& lhs, const Vector3D& rhs)
-{
-	return lhs.X != rhs.X || lhs.Y != rhs.Y || lhs.Z != rhs.Z;
-}
+#include "Vector3D.inl"
