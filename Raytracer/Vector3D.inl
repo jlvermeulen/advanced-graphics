@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------
-inline Vector3D Vector3D::operator+(const Vector3D& rhs)
+inline Vector3D Vector3D::operator+(const Vector3D& rhs) const
 {
 	Vector3D result(*this);
 
@@ -11,7 +11,7 @@ inline Vector3D Vector3D::operator+(const Vector3D& rhs)
 }
 
 //--------------------------------------------------------------------------------------
-inline Vector3D Vector3D::operator+(const double& rhs)
+inline Vector3D Vector3D::operator+(const double& rhs) const
 {
 	Vector3D result(*this);
 
@@ -35,7 +35,7 @@ inline Vector3D operator+(const double& lhs, const Vector3D& rhs)
 }
 
 //--------------------------------------------------------------------------------------
-inline Vector3D Vector3D::operator-()
+inline Vector3D Vector3D::operator-() const
 {
 	Vector3D result(*this);
 
@@ -47,7 +47,7 @@ inline Vector3D Vector3D::operator-()
 }
 
 //--------------------------------------------------------------------------------------
-inline Vector3D Vector3D::operator-(const Vector3D& rhs)
+inline Vector3D Vector3D::operator-(const Vector3D& rhs) const
 {
 	Vector3D result(*this);
 
@@ -59,7 +59,7 @@ inline Vector3D Vector3D::operator-(const Vector3D& rhs)
 }
 
 //--------------------------------------------------------------------------------------
-inline Vector3D Vector3D::operator-(const double& rhs)
+inline Vector3D Vector3D::operator-(const double& rhs) const
 {
 	Vector3D result(*this);
 
@@ -83,7 +83,7 @@ inline Vector3D operator-(const double& lhs, const Vector3D& rhs)
 }
 
 //--------------------------------------------------------------------------------------
-inline Vector3D Vector3D::operator*(const double& rhs)
+inline Vector3D Vector3D::operator*(const double& rhs) const
 {
 	Vector3D result(*this);
 
@@ -119,7 +119,7 @@ inline Vector3D operator*(const Matrix3x3D& lhs, const Vector3D& rhs)
 }
 
 //--------------------------------------------------------------------------------------
-inline Vector3D Vector3D::operator/(const double& rhs)
+inline Vector3D Vector3D::operator/(const double& rhs) const
 {
 	Vector3D result(*this);
 
@@ -133,59 +133,59 @@ inline Vector3D Vector3D::operator/(const double& rhs)
 //--------------------------------------------------------------------------------------
 inline void Vector3D::operator+=(const Vector3D& rhs)
 {
-	this->X += rhs.X;
-	this->Y += rhs.Y;
-	this->Z += rhs.Z;
+	X += rhs.X;
+	Y += rhs.Y;
+	Z += rhs.Z;
 }
 
 //--------------------------------------------------------------------------------------
 inline void Vector3D::operator+=(const double& rhs)
 {
-	this->X += rhs;
-	this->Y += rhs;
-	this->Z += rhs;
+	X += rhs;
+	Y += rhs;
+	Z += rhs;
 }
 
 //--------------------------------------------------------------------------------------
 inline void Vector3D::operator-=(const Vector3D& rhs)
 {
-	this->X -= rhs.X;
-	this->Y -= rhs.Y;
-	this->Z -= rhs.Z;
+	X -= rhs.X;
+	Y -= rhs.Y;
+	Z -= rhs.Z;
 }
 
 //--------------------------------------------------------------------------------------
 inline void Vector3D::operator-=(const double& rhs)
 {
-	this->X -= rhs;
-	this->Y -= rhs;
-	this->Z -= rhs;
+	X -= rhs;
+	Y -= rhs;
+	Z -= rhs;
 }
 
 //--------------------------------------------------------------------------------------
 inline void Vector3D::operator*=(const double& rhs)
 {
-	this->X *= rhs;
-	this->Y *= rhs;
-	this->Z *= rhs;
+	X *= rhs;
+	Y *= rhs;
+	Z *= rhs;
 }
 
 //--------------------------------------------------------------------------------------
 inline void Vector3D::operator/=(const double& rhs)
 {
-	this->X /= rhs;
-	this->Y /= rhs;
-	this->Z /= rhs;
+	X /= rhs;
+	Y /= rhs;
+	Z /= rhs;
 }
 
 //--------------------------------------------------------------------------------------
 inline bool Vector3D::operator==(const Vector3D& rhs)
 {
-	return this->X == rhs.X && this->Y == rhs.Y && this->Z == rhs.Z;
+	return X == rhs.X && Y == rhs.Y && Z == rhs.Z;
 }
 
 //--------------------------------------------------------------------------------------
 inline bool Vector3D::operator!=(const Vector3D& rhs)
 {
-	return this->X != rhs.X || this->Y != rhs.Y || this->Z != rhs.Z;
+	return X != rhs.X || Y != rhs.Y || Z != rhs.Z;
 }

@@ -2,11 +2,12 @@
 #include <string>
 
 #include "ColorD.h"
-#include "Vector3D.h"
 #include "Matrix3x3D.h"
-#include "Vertex.h"
-#include "TriangleD.h"
+#include "Physics.h"
 #include "RayD.h"
+#include "TriangleD.h"
+#include "Vector3D.h"
+#include "Vertex.h"
 
 int main()
 {
@@ -24,9 +25,9 @@ int main()
 	Vector3D vec = mat * Vector3D(4, 5, 6);*/
 
 	Vector3D in(0.707107, -0.707107, 0), n(0, 1, 0);
-	in.Refract(n, 0.9, 1);
+	Vector3D refracted = Physics::Refract(in, n, 0.9, 1);
 
-	std::cout << in.X << ", " << in.Y << ", " << in.Z << std::endl;
+	std::cout << refracted.X << ", " << refracted.Y << ", " << refracted.Z << std::endl;
 
 	getline(std::cin, s);
 }

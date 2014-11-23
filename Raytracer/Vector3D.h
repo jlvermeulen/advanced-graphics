@@ -15,39 +15,35 @@ public:
 
 	~Vector3D();
 
-	double Length();
+	double Length() const;
+	double LengthSquared() const;
 
-	double Dot(const Vector3D& other) const;
-	static double Dot(const Vector3D& lhs, const Vector3D& rhs);
+	double Distance(const Vector3D& v) const;
+	double DistanceSquared(const Vector3D& v) const;
+
+	double Dot(const Vector3D& v) const;
+	static double Dot(const Vector3D& v1, const Vector3D& v2);
 
 	Vector3D Cross(const Vector3D& other) const;
-	static Vector3D Cross(const Vector3D& lhs, const Vector3D& rhs);
+	static Vector3D Cross(const Vector3D& v1, const Vector3D& v2);
 
 	void Normalise();
 	static Vector3D Normalise(Vector3D vector);
 
-	void Reflect(const Vector3D& normal);
-	Vector3D Reflected(const Vector3D& normal) const;
-	static Vector3D Reflect(Vector3D incident, const Vector3D& normal);
-
-	void Refract(const Vector3D& normal, const double& nFrom, const double& nTo);
-	Vector3D Refracted(const Vector3D& normal, const double& nFrom, const double& nTo) const;
-	static Vector3D Refract(Vector3D incident, const Vector3D& normal, const double& nFrom, const double& nTo);
-
-	inline Vector3D operator+(const Vector3D& rhs);
-	inline Vector3D operator+(const double& rhs);
+	inline Vector3D operator+(const Vector3D& rhs) const;
+	inline Vector3D operator+(const double& rhs) const;
 	friend inline Vector3D operator+(const double& lhs, const Vector3D& rhs);
 
-	inline Vector3D operator-();
-	inline Vector3D operator-(const Vector3D& rhs);
-	inline Vector3D operator-(const double& rhs);
+	inline Vector3D operator-() const;
+	inline Vector3D operator-(const Vector3D& rhs) const;
+	inline Vector3D operator-(const double& rhs) const;
 	friend inline Vector3D operator-(const double& lhs, const Vector3D& rhs);
 
-	inline Vector3D operator*(const double& rhs);
+	inline Vector3D operator*(const double& rhs) const;
 	friend inline Vector3D operator*(const double& lhs, const Vector3D& rhs);
 	friend inline Vector3D operator*(const Matrix3x3D& lhs, const Vector3D& rhs);
 	
-	inline Vector3D operator/(const double& rhs);
+	inline Vector3D operator/(const double& rhs) const;
 	
 	inline void operator+=(const Vector3D& rhs);
 	inline void operator+=(const double& rhs);

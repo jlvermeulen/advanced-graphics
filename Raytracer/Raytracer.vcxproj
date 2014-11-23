@@ -69,6 +69,7 @@
     <ClCompile Include="Matrix3x3D.cpp" />
     <ClCompile Include="Octree.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Physics.cpp" />
     <ClCompile Include="RayD.cpp" />
     <ClCompile Include="TriangleD.cpp" />
     <ClCompile Include="Vector3D.cpp" />
@@ -78,6 +79,7 @@
     <ClInclude Include="ColorD.h" />
     <ClInclude Include="Matrix3x3D.h" />
     <ClInclude Include="Octree.h" />
+    <ClInclude Include="Physics.h" />
     <ClInclude Include="RayD.h" />
     <ClInclude Include="TriangleD.h" />
     <ClInclude Include="Vector3D.h" />
