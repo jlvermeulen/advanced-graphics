@@ -8,6 +8,7 @@ struct Vector3D
 public:
 	double X, Y, Z;
 
+	Vector3D();
 	Vector3D(const double& x, const double& y, const double& z);
 	Vector3D(const double vec[]);
 
@@ -37,7 +38,7 @@ public:
 	Vector3D& operator-=(const double& rhs);
 	
 	Vector3D& operator*=(const double& rhs);
-	Vector3D& operator*=(const Matrix3x3D lhs);
+	Vector3D& operator*=(const Matrix3x3D& lhs);
 
 	Vector3D& operator/=(const double& rhs);
 

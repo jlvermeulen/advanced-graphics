@@ -1,8 +1,10 @@
-#include "octree.h"
+#include "Octree.h"
 
-using namespace std;
+OctreeNode::OctreeNode() { }
+OctreeNode::OctreeNode(TriangleD* triangles, int nTriangles) : Triangles(triangles), NTriangles(nTriangles) { }
 
-Octree::Octree(vector<TriangleD> triangles)
+Octree::Octree() { }
+Octree::Octree(TriangleD* triangles, int nTriangles)
 {
 
 }

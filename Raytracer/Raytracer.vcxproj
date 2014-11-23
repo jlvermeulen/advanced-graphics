@@ -70,7 +70,6 @@
     <ClCompile Include="Octree.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="RayD.cpp" />
-    <ClCompile Include="TriangleD.cpp" />
     <ClCompile Include="Vector3D.cpp" />
   </ItemGroup>
   <ItemGroup>

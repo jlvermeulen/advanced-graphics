@@ -27,9 +27,6 @@
     <ClCompile Include="Vector3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TriangleD.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RayD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

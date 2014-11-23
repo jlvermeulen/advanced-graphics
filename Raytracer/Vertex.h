@@ -10,5 +10,8 @@ public:
 	ColorD Color;
 	Vector3D UV; // TODO: make Vector2D
 
+	Vertex() { }
+	Vertex(const Vector3D& position, const Vector3D& normal, const ColorD& color, const Vector3D& uv) : Position(position), Normal(normal), Color(color), UV(uv) { }
+
 private:
 };

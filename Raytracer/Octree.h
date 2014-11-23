@@ -1,14 +1,26 @@
 #pragma once
 
-#include <vector>
 #include "TriangleD.h"
 
-using namespace std;
-
-class Octree
+struct OctreeNode
 {
 public:
-	Octree(vector<TriangleD> triangles);
+	TriangleD* Triangles;
+	int NTriangles;
+	OctreeNode* Children;
+
+	OctreeNode();
+	OctreeNode(TriangleD* triangles, int nTriangles);
 
 private:
+};
+
+struct Octree
+{
+public:
+	Octree();
+	Octree(TriangleD* triangles, int nTriangles);
+
+private:
+	OctreeNode root;
 };
