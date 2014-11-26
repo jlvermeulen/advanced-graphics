@@ -27,10 +27,10 @@
     <ClCompile Include="Vector3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RayD.cpp">
+    <ClCompile Include="ColorD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ColorD.cpp">
+    <ClCompile Include="Intersections.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,13 +47,19 @@
     <ClInclude Include="Matrix3x3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ColorD.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RayD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Intersections.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BoundingBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexD.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

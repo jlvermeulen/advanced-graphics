@@ -4,9 +4,10 @@
 #include "ColorD.h"
 #include "Vector3D.h"
 #include "Matrix3x3D.h"
-#include "Vertex.h"
+#include "VertexD.h"
 #include "TriangleD.h"
 #include "RayD.h"
+#include "Intersections.h"
 
 int main()
 {
@@ -23,10 +24,17 @@ int main()
 
 	Vector3D vec = mat * Vector3D(4, 5, 6);*/
 
-	Vector3D in(0.707107, -0.707107, 0), n(0, 1, 0);
+	/*Vector3D in(0.707107, -0.707107, 0), n(0, 1, 0);
 	in.Refract(n, 0.9, 1);
 
-	std::cout << in.X << ", " << in.Y << ", " << in.Z << std::endl;
+	std::cout << in.X << ", " << in.Y << ", " << in.Z << std::endl;*/
+
+	TriangleD tri(VertexD(Vector3D(0, 0, 0), Vector3D(0, 0, 1), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0)),
+				VertexD(Vector3D(1, 0, 0), Vector3D(0, 0, 1), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0)),
+				VertexD(Vector3D(0, 2, 0), Vector3D(0, 0, 1), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0)));
+	BoundingBox aabb(Vector3D(2.01, 0, 0), Vector3D(1, 1, 1));
+
+	std::cout << Intersects(tri, aabb) << std::endl;
 
 	getline(std::cin, s);
 }
