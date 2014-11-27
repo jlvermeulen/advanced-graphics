@@ -42,6 +42,9 @@ public:
 
 	Vector3D& operator/=(const double& rhs);
 
+	double& operator[](int index);
+	const double& operator[](int index) const;
+
 private:
 };
 

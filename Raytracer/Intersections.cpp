@@ -87,11 +87,11 @@ bool Intersects(const RayD& ray, const TriangleD& triangle, double& t)
 	rad = fa * boundingBox.Halfsize.X + fb * boundingBox.Halfsize.Y;	\
 	if(min > rad || max < - rad) return false;
 
-#define FINDMINMAX(x0, x1, x2)			\
-	min = max = x0;						\
-	if(x1 < min) min = x1;				\
-	if(x1 > max) max = x1;				\
-	if(x2 < min) min = x2;				\
+#define FINDMINMAX(x0, x1, x2)											\
+	min = max = x0;														\
+	if(x1 < min) min = x1;												\
+	if(x1 > max) max = x1;												\
+	if(x2 < min) min = x2;												\
 	if(x2 > max) max = x2;
 
 bool Intersects(const TriangleD& triangle, const BoundingBox& boundingBox)
@@ -140,37 +140,18 @@ bool Intersects(const TriangleD& triangle, const BoundingBox& boundingBox)
 		return false;
 
 	Vector3D normal = e0.Cross(e1), vMin, vMax;
-	if (normal.X > 0)
+	for (int i = 0; i < 3; ++i)
 	{
-		vMin.X = -boundingBox.Halfsize.X - v0.X;
-		vMax.X = boundingBox.Halfsize.X - v0.X;
-	}
-	else
-	{
-		vMin.X = boundingBox.Halfsize.X - v0.X;
-		vMax.X = -boundingBox.Halfsize.X - v0.X;
-	}
-
-	if (normal.Y > 0)
-	{
-		vMin.Y = -boundingBox.Halfsize.Y - v0.Y;
-		vMax.Y = boundingBox.Halfsize.Y - v0.Y;
-	}
-	else
-	{
-		vMin.Y = boundingBox.Halfsize.Y - v0.Y;
-		vMax.Y = -boundingBox.Halfsize.Y - v0.Y;
-	}
-
-	if (normal.Z > 0)
-	{
-		vMin.Z = -boundingBox.Halfsize.Z - v0.Z;
-		vMax.Z = boundingBox.Halfsize.Z - v0.Z;
-	}
-	else
-	{
-		vMin.Z = boundingBox.Halfsize.Z - v0.Z;
-		vMax.Z = -boundingBox.Halfsize.Z - v0.Z;
+		if (normal[i] > 0)
+		{
+			vMin[i] = -boundingBox.Halfsize[i] - v0[i];
+			vMax[i] = boundingBox.Halfsize[i] - v0[i];
+		}
+		else
+		{
+			vMin[i] = boundingBox.Halfsize[i] - v0[i];
+			vMax[i] = -boundingBox.Halfsize[i] - v0[i];
+		}
 	}
 
 	if (normal.Dot(vMin) > 0 || normal.Dot(vMax) < 0)

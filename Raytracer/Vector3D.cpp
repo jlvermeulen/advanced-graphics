@@ -89,3 +89,6 @@ Vector3D& Vector3D::operator/=(const double& rhs)
 	Z /= rhs;
 	return *this;
 }
+
+double& Vector3D::operator[](int index) { return index == 0 ? X : index == 1 ? Y : Z; }
+const double& Vector3D::operator[](int index) const { return index == 0 ? X : index == 1 ? Y : Z; };
