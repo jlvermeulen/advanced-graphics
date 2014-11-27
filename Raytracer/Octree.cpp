@@ -1,10 +1,7 @@
 #include "Octree.h"
 
 OctreeNode::OctreeNode() { }
-OctreeNode::OctreeNode(TriangleD* triangles, int nTriangles) : Triangles(triangles), NTriangles(nTriangles) { }
+OctreeNode::OctreeNode(std::vector<TriangleD> triangles) : Triangles(triangles) { }
 
 Octree::Octree() { }
-Octree::Octree(TriangleD* triangles, int nTriangles)
-{
-
-}
+Octree::Octree(std::vector<TriangleD> triangles) : root(OctreeNode(triangles)) { }

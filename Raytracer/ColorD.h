@@ -1,6 +1,6 @@
 #pragma once
 
-struct ColorD
+class ColorD
 {
 public:
 	double R, G, B;

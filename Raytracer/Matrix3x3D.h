@@ -1,6 +1,6 @@
 #pragma once
 
-struct Matrix3x3D
+class Matrix3x3D
 {
 public:
 	Matrix3x3D();

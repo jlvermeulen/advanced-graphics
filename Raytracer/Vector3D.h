@@ -3,7 +3,7 @@
 #include <math.h>
 #include "Matrix3x3D.h"
 
-struct Vector3D
+class Vector3D
 {
 public:
 	double X, Y, Z;

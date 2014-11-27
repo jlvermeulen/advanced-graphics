@@ -1,27 +1,26 @@
 #pragma once
 
+#include <vector>
 #include "TriangleD.h"
 #include "BoundingBox.h"
 
-struct OctreeNode
+class OctreeNode
 {
 public:
-	TriangleD* Triangles;
-	int NTriangles;
-	OctreeNode* Children;
-	BoundingBox BoundingBox;
-
 	OctreeNode();
-	OctreeNode(TriangleD* triangles, int nTriangles);
+	OctreeNode(std::vector<TriangleD> triangles);
 
 private:
+	std::vector<TriangleD> Triangles;
+	OctreeNode* Children;
+	BoundingBox BoundingBox;
 };
 
-struct Octree
+class Octree
 {
 public:
 	Octree();
-	Octree(TriangleD* triangles, int nTriangles);
+	Octree(std::vector<TriangleD> triangles);
 
 private:
 	OctreeNode root;
