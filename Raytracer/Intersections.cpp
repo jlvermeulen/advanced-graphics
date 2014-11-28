@@ -1,4 +1,5 @@
-#include <math.h>
+//#include <math.h>
+#include <cmath>
 #include "Intersections.h"
 
 #define EPSILON 0.000001
@@ -106,23 +107,23 @@ bool Intersects(const TriangleD& triangle, const BoundingBox& boundingBox)
 
 	double p0, p1, p2, min, max, rad, fex, fey, fez;
 
-	fex = fabsf(e0.X);
-	fey = fabsf(e0.Y);
-	fez = fabsf(e0.Z);
+	fex = std::abs(e0.X);
+	fey = std::abs(e0.Y);
+	fez = std::abs(e0.Z);
 	AXISTEST_X01(e0.Z, e0.Y, fez, fey);
 	AXISTEST_Y02(e0.Z, e0.X, fez, fex);
 	AXISTEST_Z12(e0.Y, e0.X, fey, fex);
 
-	fex = fabsf(e1.X);
-	fey = fabsf(e1.Y);
-	fez = fabsf(e1.Z);
+	fex = std::abs(e1.X);
+	fey = std::abs(e1.Y);
+	fez = std::abs(e1.Z);
 	AXISTEST_X01(e1.Z, e1.Y, fez, fey);
 	AXISTEST_Y02(e1.Z, e1.X, fez, fex);
 	AXISTEST_Z0(e1.Y, e1.X, fey, fex);
 
-	fex = fabsf(e2.X);
-	fey = fabsf(e2.Y);
-	fez = fabsf(e2.Z);
+	fex = std::abs(e2.X);
+	fey = std::abs(e2.Y);
+	fez = std::abs(e2.Z);
 	AXISTEST_X2(e2.Z, e2.Y, fez, fey);
 	AXISTEST_Y1(e2.Z, e2.X, fez, fex);
 	AXISTEST_Z12(e2.Y, e2.X, fey, fex);

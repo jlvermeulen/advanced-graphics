@@ -8,19 +8,20 @@ class OctreeNode
 {
 public:
 	OctreeNode();
-	OctreeNode(std::vector<TriangleD> triangles);
+	OctreeNode(const std::vector<TriangleD>& triangles, const BoundingBox& bb, unsigned int minTriangles, unsigned int maxDepth);
+	~OctreeNode();
 
 private:
-	std::vector<TriangleD> Triangles;
-	OctreeNode* Children;
-	BoundingBox BoundingBox;
+	std::vector<TriangleD> triangles;
+	OctreeNode* children;
+	BoundingBox bb;
 };
 
 class Octree
 {
 public:
 	Octree();
-	Octree(std::vector<TriangleD> triangles);
+	Octree(const std::vector<TriangleD>& triangles, int minTriangles, int maxDepth);
 
 private:
 	OctreeNode root;
