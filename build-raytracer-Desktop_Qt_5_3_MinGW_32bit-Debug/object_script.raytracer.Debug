@@ -1,0 +1,12 @@
+INPUT(
+./debug/main.o
+./debug/window.o
+./debug/glWidget.o
+./debug/ColorD.o
+./debug/Intersections.o
+./debug/Matrix3x3D.o
+./debug/Octree.o
+./debug/Vector3D.o
+./debug/moc_window.o
+./debug/moc_glWidget.o
+);
