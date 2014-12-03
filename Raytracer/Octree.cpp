@@ -2,7 +2,7 @@
 #include "Intersections.h"
 
 OctreeNode::OctreeNode() { }
-OctreeNode::OctreeNode(const std::vector<TriangleD>& triangles, const BoundingBox& bb, unsigned int minTriangles, unsigned int maxDepth)
+OctreeNode::OctreeNode(const std::vector<Triangle>& triangles, const BoundingBox& bb, unsigned int minTriangles, unsigned int maxDepth)
 {
 	this->bb = bb;
 
@@ -22,8 +22,8 @@ OctreeNode::OctreeNode(const std::vector<TriangleD>& triangles, const BoundingBo
 		double z = bb.Center.Z + (i & 1 ? half.Z : -half.Z);
 		BoundingBox childBB(Vector3D(x, y, z), half);
 
-		std::vector<TriangleD> childTriangles;
-		for(std::vector<TriangleD>::const_iterator it = triangles.begin(); it != triangles.end(); ++it)
+		std::vector<Triangle> childTriangles;
+		for(std::vector<Triangle>::const_iterator it = triangles.begin(); it != triangles.end(); ++it)
 			if (Intersects(*it, childBB))
 				childTriangles.push_back(*it);
 
@@ -34,4 +34,4 @@ OctreeNode::OctreeNode(const std::vector<TriangleD>& triangles, const BoundingBo
 OctreeNode::~OctreeNode() { delete [] children; }
 
 Octree::Octree() { }
-Octree::Octree(const std::vector<TriangleD>& triangles, int minTriangles, int maxDepth) : root(OctreeNode(triangles, BoundingBox::FromTriangles(triangles), minTriangles, maxDepth)) { }
+Octree::Octree(const std::vector<Triangle>& triangles, int minTriangles, int maxDepth) : root(OctreeNode(triangles, BoundingBox::FromTriangles(triangles), minTriangles, maxDepth)) { }

@@ -4,9 +4,9 @@
 #include "ColorD.h"
 #include "Vector3D.h"
 #include "Matrix3x3D.h"
-#include "VertexD.h"
-#include "TriangleD.h"
-#include "RayD.h"
+#include "Vertex.h"
+#include "Triangle.h"
+#include "Ray.h"
 #include "Intersections.h"
 
 int main()
@@ -29,9 +29,9 @@ int main()
 
 	std::cout << in.X << ", " << in.Y << ", " << in.Z << std::endl;*/
 
-	TriangleD tri(VertexD(Vector3D(0, 0, 0), Vector3D(0, 0, 1), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0)),
-				VertexD(Vector3D(1, 0, 0), Vector3D(0, 0, 1), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0)),
-				VertexD(Vector3D(0, 2, 0), Vector3D(0, 0, 1), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0)));
+	Triangle tri(Vertex(Vector3D(0, 0, 0), Vector3D(0, 0, 1), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0)),
+				 Vertex(Vector3D(1, 0, 0), Vector3D(0, 0, 1), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0)),
+				 Vertex(Vector3D(0, 2, 0), Vector3D(0, 0, 1), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0)));
 	BoundingBox aabb(Vector3D(2.01, 0, 0), Vector3D(1, 1, 1));
 
 	std::cout << Intersects(tri, aabb) << std::endl;
