@@ -65,6 +65,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BoundingBox.cpp" />
     <ClCompile Include="ColorD.cpp" />
     <ClCompile Include="Intersections.cpp" />
     <ClCompile Include="Matrix3x3D.cpp" />
@@ -78,10 +79,10 @@
     <ClInclude Include="Intersections.h" />
     <ClInclude Include="Matrix3x3D.h" />
     <ClInclude Include="Octree.h" />
-    <ClInclude Include="RayD.h" />
-    <ClInclude Include="TriangleD.h" />
+    <ClInclude Include="Ray.h" />
+    <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vector3D.h" />
-    <ClInclude Include="VertexD.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -33,6 +33,9 @@
     <ClCompile Include="Intersections.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BoundingBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Octree.h">
@@ -41,16 +44,10 @@
     <ClInclude Include="Vector3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TriangleD.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Matrix3x3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ColorD.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RayD.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Intersections.h">
@@ -59,7 +56,13 @@
     <ClInclude Include="BoundingBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VertexD.h">
+    <ClInclude Include="Vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Triangle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Ray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
