@@ -92,6 +92,11 @@ static void qNormalizeAngle(int &angle)
         angle -= 360 * 16;
 }
 
+void GLWidget::loadScene(QString& fileName)
+{
+  // Parse the file
+}
+
 void GLWidget::setXRotation(int angle)
 {
   qNormalizeAngle(angle);

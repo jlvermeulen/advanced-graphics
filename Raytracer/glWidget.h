@@ -11,6 +11,7 @@ public:
   ~GLWidget();
 
 public slots:
+  void loadScene(QString& fileName);
   void setXRotation(int angle);
   void setYRotation(int angle);
   void setZRotation(int angle);
