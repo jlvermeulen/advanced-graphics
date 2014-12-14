@@ -1,8 +1,12 @@
 #pragma once
 
+#include "TriangleD.h"
+#include "VertexD.h"
+
 #include <QGLWidget>
 
-typedef std::_String_iterator<std::_String_val<std::_Simple_types<char>>> IIterator;
+typedef std::_Vector_iterator<std::_Vector_val<std::_Simple_types<std::string>>> IIterator;
+typedef std::vector<Vector3D> Vector3DList;
 
 enum objType
 {
@@ -28,19 +32,18 @@ public:
   void loadScene(QString& fileName);
 
 protected:
-  void parseLine(std::string& line);
+  void parseLine(std::vector<std::string>& segments, Vector3DList& coords, Vector3DList& normals, Vector3DList& texCoords);
+  void parseFace(IIterator& it, const IIterator& end, Vector3DList& coords, Vector3DList& normals, Vector3DList& texCoords);
   objType parseType(std::string& type);
+  void parseLibrary(IIterator& it, const IIterator& end);
+  void parseMaterial(IIterator& it, const IIterator& end);
+  Vector3D parseNormal(IIterator& it) const;
+  Vector3D parseSpace(IIterator& it) const;
+  Vector3D parseTexCoords(IIterator& it) const;
+  Vector3D parseVertex(IIterator& it) const;
 
-  void parseFace(IIterator& iterator, const IIterator& end);
-  void parseLibrary(IIterator& iterator, const IIterator& end);
-  void parseMaterial(IIterator& iterator, const IIterator& end);
-  void parseNormal(IIterator& iterator, const IIterator& end);
-  void parseSpace(IIterator& iterator, const IIterator& end);
-  void parseTexCoords(IIterator& iterator, const IIterator& end);
-  void parseVertex(IIterator& iterator, const IIterator& end);
-
-  double parseDouble(IIterator& iterator, const IIterator& end);
-  int parseInteger(IIterator& iterator, const IIterator& end);
+  double parseDouble(const IIterator& iterator) const;
+  int parseInteger(const IIterator& iterator) const;
 
   void initializeGL();
   void resizeGL(const int& w, const int& h);
@@ -66,4 +69,5 @@ private:
   int yRot;
   int zRot;
   QPoint lastPos;
+  std::vector<TriangleD> triangles;
 };

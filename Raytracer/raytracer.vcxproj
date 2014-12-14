@@ -273,6 +273,7 @@
     </ClCompile>
     <ClCompile Include="Intersections.cpp" />
     <ClCompile Include="Matrix3x3D.cpp" />
+    <ClCompile Include="ObjReader.cpp" />
     <ClCompile Include="Octree.cpp" />
     <ClCompile Include="Release\moc_glWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -293,6 +294,7 @@
     <ClInclude Include="GeneratedFiles\ui_window.h" />
     <ClInclude Include="Intersections.h" />
     <ClInclude Include="Matrix3x3D.h" />
+    <ClInclude Include="ObjReader.h" />
     <ClInclude Include="Octree.h" />
     <ClInclude Include="RayD.h" />
     <ClInclude Include="TriangleD.h" />

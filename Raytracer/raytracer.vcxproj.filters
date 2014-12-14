@@ -83,6 +83,9 @@
     <ClCompile Include="Release\moc_window.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="ObjReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoundingBox.h">
@@ -120,6 +123,9 @@
     </CustomBuild>
     <ClInclude Include="GeneratedFiles\ui_window.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjReader.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

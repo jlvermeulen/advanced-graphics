@@ -1,5 +1,8 @@
 #include "glWidget.h"
 
+#include "ObjReader.h"
+#include "Vector3D.h"
+
 #include <fstream>
 
 #include <QMouseEvent>
@@ -29,52 +32,56 @@ void GLWidget::loadScene(QString& fileName)
 
   std::string line;
 
+  std::vector<Vector3D> coords;
+  std::vector<Vector3D> normals;
+  std::vector<Vector3D> texCoords;
+
   while (std::getline(fin, line))
-    parseLine(line);
+  {
+    std::vector<std::string> segments = ObjReader::splitLine(line, ' ');
+
+    parseLine(segments, coords, normals, texCoords);
+  }
 }
 
 //--------------------------------------------------------------------------------
-void GLWidget::parseLine(std::string& line)
+void GLWidget::parseLine(std::vector<std::string>& segments, Vector3DList& coords, Vector3DList& normals, Vector3DList& texCoords)
 {
-  IIterator begin = line.begin();
-  IIterator iterator = line.begin();
-  IIterator end = line.end();
+  IIterator it = segments.begin();
+  IIterator end = segments.end();
 
-  // Read until first white-space or end-of-file
-  while (iterator != line.end() && *iterator != ' ')
-    ++iterator;
+  // No segments at all
+  if (it == segments.end())
+    return;
 
-  // Corner-case where iterator == begin is not handled!
-  std::string type(begin, iterator - 1);
-
-  switch (parseType(type))
+  switch (parseType(*it))
   {
     case objType::face:
-      parseFace(++iterator, end);
+      parseFace(++it, end, coords, normals, texCoords);
       break;
 
     case objType::library:
-      parseLibrary(++iterator, end);
+      parseLibrary(++it, end);
       break;
 
     case objType::material:
-      parseMaterial(++iterator, end);
+      parseMaterial(++it, end);
       break;
 
     case objType::normal:
-      parseNormal(++iterator, end);
+      normals.push_back(parseNormal(++it));
       break;
 
     case objType::space:
-      parseSpace(++iterator, end);
+      parseSpace(++it);
       break;
 
     case objType::texCoords:
-      parseTexCoords(++iterator, end);
+      texCoords.push_back(parseTexCoords(++it));
       break;
 
     case objType::vertex:
-      parseVertex(++iterator, end);
+      coords.push_back(parseVertex(++it));
       break;
 
     case objType::nil:
@@ -82,35 +89,6 @@ void GLWidget::parseLine(std::string& line)
       // Don't do anything
       break;
   }
-
-  //size_t length = line.length();
-
-  //std::vector<std::string> args;
-  //std::string arg;
-
-  //size_t startPos = 0;
-  //size_t endPos;
-
-  //do 
-  //{
-  //  // Find end of argument
-  //  endPos = line.find(' ', startPos);
-
-  //  // Retrieve argument
-  //  if (endPos == std::string::npos)
-  //    arg = line.substr(startPos);
-  //  else
-  //    arg = line.substr(startPos, endPos - startPos);
-
-  //  // Add argument
-  //  args.push_back(arg);
-
-  //  // Move to next character
-  //  if (endPos < length)
-  //    startPos = endPos + 1;
-  //  else
-  //    startPos = std::string::npos;
-  //} while (startPos != std::string::npos);
 }
 
 //--------------------------------------------------------------------------------
@@ -135,97 +113,99 @@ objType GLWidget::parseType(std::string& type)
 }
 
 //--------------------------------------------------------------------------------
-void GLWidget::parseFace(IIterator& iterator, const IIterator& end)
+void GLWidget::parseFace(IIterator& it, const IIterator& end, Vector3DList& coords, Vector3DList& normals, Vector3DList& texCoords)
 {
-  std::vector<int> vertices;
-  std::vector<int> texCoords;
-  std::vector<int> normals;
+  VertexD vertices[3];
 
-  while (false) // TODO: Read only until next letter
+  // Only parse triangles
+  for (int i = 0; i < 3; ++i)
   {
-    // TODO: make parts optional?
-    vertices.push_back(parseInteger(iterator, end));
-    texCoords.push_back(parseInteger(iterator, end));
-    normals.push_back(parseInteger(iterator, end));
+    std::vector<std::string> indices = ObjReader::splitLine(*it, '/');
+
+    IIterator vIt = indices.begin();
+
+    VertexD vertex;
+    vertex.Position = coords.at(parseInteger(vIt) - 1);
+    vertex.UV = coords.at(parseInteger(++vIt) - 1);
+    vertex.Normal = coords.at(parseInteger(++vIt) - 1);
+
+    vertices[i] = vertex;
+    ++it;
   }
+
+  triangles.push_back(TriangleD(vertices));
 }
 
 //--------------------------------------------------------------------------------
-void GLWidget::parseLibrary(IIterator& iterator, const IIterator& end)
+void GLWidget::parseLibrary(IIterator& it, const IIterator& end)
 {
   // TODO: mtllib import
 }
 
 //--------------------------------------------------------------------------------
-void GLWidget::parseMaterial(IIterator& iterator, const IIterator& end)
+void GLWidget::parseMaterial(IIterator& it, const IIterator& end)
 {
   // TODO: usemtl
 }
 
 //--------------------------------------------------------------------------------
-void GLWidget::parseNormal(IIterator& iterator, const IIterator& end)
+Vector3D GLWidget::parseNormal(IIterator& it) const
 {
-  double x = parseDouble(iterator, end);
-  double y = parseDouble(iterator, end);
-  double z = parseDouble(iterator, end);
+  Vector3D result;
+
+  result.X = parseDouble(it);
+  result.Y = parseDouble(++it);
+  result.Z = parseDouble(++it);
+
+  return result;
 }
 
 //--------------------------------------------------------------------------------
-void GLWidget::parseSpace(IIterator& iterator, const IIterator& end)
+Vector3D GLWidget::parseSpace(IIterator& it) const
 { // Do we want to support this?
-  double u = parseDouble(iterator, end);
-  double v = parseDouble(iterator, end);
-  // double w = parseDouble(iterator, end);
-  double w = 1.0;
+  Vector3D result;
+
+  result.X = parseDouble(it);
+  result.Y = parseDouble(++it);
+  result.Z = parseDouble(++it);
+
+  return result;
 }
 
 //--------------------------------------------------------------------------------
-void GLWidget::parseTexCoords(IIterator& iterator, const IIterator& end)
+Vector3D GLWidget::parseTexCoords(IIterator& it) const
 {
-  double u = parseDouble(iterator, end);
-  double v = parseDouble(iterator, end);
-  // double w = parseDouble(iterator, end);
-  double w = 1.0;
+  Vector3D result;
+
+  result.X = parseDouble(it);
+  result.Y = parseDouble(++it);
+  result.Z = parseDouble(++it);
+
+  return result;
 }
 
 //--------------------------------------------------------------------------------
-void GLWidget::parseVertex(IIterator& iterator, const IIterator& end)
+Vector3D GLWidget::parseVertex(IIterator& it) const
 {
-  double x = parseDouble(iterator, end);
-  double y = parseDouble(iterator, end);
-  double z = parseDouble(iterator, end);
-  // double w = parseDouble(iterator, end);
-  double w = 1.0;
+  Vector3D result;
+
+  result.X = parseDouble(it);
+  result.Y = parseDouble(++it);
+  result.Z = parseDouble(++it);
+
+  return result;
 }
 
 //--------------------------------------------------------------------------------
-double GLWidget::parseDouble(IIterator& iterator, const IIterator& end)
+double GLWidget::parseDouble(const IIterator& it) const
 {
-  IIterator begin(iterator);
-
-  // Read until first white-space or end-of-file
-  while (iterator != end && *iterator != ' ')
-    ++iterator;
-
-  // Corner-case, where equal
-  std::string value(begin, iterator - 1);
-
-  return atof(value.c_str());
+  return atof((*it).c_str());
 }
 
 //--------------------------------------------------------------------------------
-int GLWidget::parseInteger(IIterator& iterator, const IIterator& end)
+int GLWidget::parseInteger(const IIterator& it) const
 {
-  IIterator begin(iterator);
-
-  // Read until first white-space or end-of-file
-  while (iterator != end && *iterator != ' ' && *iterator != '/')
-    ++iterator;
-
-  // Corner-case, where equal
-  std::string value(begin, iterator - 1);
-
-  return atoi(value.c_str());
+  return atoi((*it).c_str());
 }
 
 //--------------------------------------------------------------------------------
