@@ -43,7 +43,7 @@
     <PrimaryOutput>Raytracer</PrimaryOutput>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <PlatformToolSet>v120</PlatformToolSet>
+    <PlatformToolSet>v110</PlatformToolSet>
     <OutputDirectory>debug\</OutputDirectory>
     <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
     <CharacterSet>NotSet</CharacterSet>
@@ -262,6 +262,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BoundingBox.cpp" />
     <ClCompile Include="ColorD.cpp" />
     <ClCompile Include="Debug\moc_glWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -272,6 +273,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Intersections.cpp" />
+    <ClCompile Include="Main.cpp" />
     <ClCompile Include="Matrix3x3D.cpp" />
     <ClCompile Include="ObjReader.cpp" />
     <ClCompile Include="Octree.cpp" />
@@ -285,7 +287,6 @@
     </ClCompile>
     <ClCompile Include="Vector3D.cpp" />
     <ClCompile Include="glWidget.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -296,10 +297,10 @@
     <ClInclude Include="Matrix3x3D.h" />
     <ClInclude Include="ObjReader.h" />
     <ClInclude Include="Octree.h" />
-    <ClInclude Include="RayD.h" />
-    <ClInclude Include="TriangleD.h" />
+    <ClInclude Include="Ray.h" />
+    <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vector3D.h" />
-    <ClInclude Include="VertexD.h" />
+    <ClInclude Include="Vertex.h" />
     <CustomBuild Include="glWidget.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
@@ -394,7 +395,7 @@ endlocal
   <ImportGroup Label="ExtensionTargets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_x64="5.4" />
+      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_x64="5.4" Qt5Version_x0020_Win32="msvc2012_opengl" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

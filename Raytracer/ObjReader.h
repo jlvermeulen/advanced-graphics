@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <TriangleD.h>
+#include <Triangle.h>
 #include <Vector3D.h>
 
 typedef std::_String_const_iterator<std::_String_val<std::_Simple_types<char>>> CIIterator;
@@ -27,7 +27,7 @@ public:
   ~ObjReader();
 
 public:
-  std::vector<TriangleD> parseFile(const char* fileName);
+  std::vector<Triangle> parseFile(const char* fileName);
   void parseLine(std::vector<std::string>& segments);
 
   void parseLibrary(IIterator& it, const IIterator& end);
@@ -50,7 +50,7 @@ private:
   std::vector<Vector3D> normals;
   std::vector<Vector3D> positions;
   std::vector<Vector3D> texCoords;
-  std::vector<TriangleD> triangles;
+  std::vector<Triangle> triangles;
 
   bool combined_;
 };
