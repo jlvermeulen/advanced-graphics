@@ -70,9 +70,6 @@ void ObjReader::parseLine(std::vector<std::string>& segments)
       break;
 
     case objType::vertex:
-      if (combined_)
-        reset();
-
       parseVertex(++it);
       break;
 
@@ -99,12 +96,22 @@ void ObjReader::parseFace(IIterator& it)
 
     Vertex vertex;
     vertex.Position = positions.at(parseInteger(vIt) - 1);
-    vertex.UV = texCoords.at(parseInteger(++vIt) - 1);
+
+    if (indices.size() == 3)
+      vertex.UV = texCoords.at(parseInteger(++vIt) - 1);
+
     vertex.Normal = normals.at(parseInteger(++vIt) - 1);
 
     vertices[i] = vertex;
     ++it;
   }
+
+  size_t capacity = triangles.capacity();
+  size_t size = triangles.size();
+
+  // Allocate memory for 1000000 more
+  if (capacity == size)
+    triangles.reserve(capacity + 1000000);
 
   // Add triangle
   triangles.push_back(Triangle(vertices));
@@ -131,6 +138,13 @@ void ObjReader::parseNormal(IIterator& it)
   normal.Y = parseDouble(++it);
   normal.Z = parseDouble(++it);
 
+  size_t capacity = normals.capacity();
+  size_t size = normals.size();
+
+  // Allocate memory for 1000000 more
+  if (capacity == size)
+    normals.reserve(capacity + 1000000);
+
   normals.push_back(normal);
 }
 
@@ -143,6 +157,13 @@ void ObjReader::parseTexCoords(IIterator& it)
   texCoord.Y = parseDouble(++it);
   texCoord.Z = parseDouble(++it);
 
+  size_t capacity = texCoords.capacity();
+  size_t size = texCoords.size();
+
+  // Allocate memory for 1000000 more
+  if (capacity == size)
+    texCoords.reserve(capacity + 1000000);
+
   texCoords.push_back(texCoord);
 }
 
@@ -154,6 +175,13 @@ void ObjReader::parseVertex(IIterator& it)
   position.X = parseDouble(it);
   position.Y = parseDouble(++it);
   position.Z = parseDouble(++it);
+
+  size_t capacity = positions.capacity();
+  size_t size = positions.size();
+
+  // Allocate memory for 1000000 more
+  if (capacity == size)
+    positions.reserve(capacity + 1000000);
 
   positions.push_back(position);
 }

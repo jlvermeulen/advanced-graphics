@@ -25,6 +25,10 @@ GLWidget::~GLWidget()
 //--------------------------------------------------------------------------------
 void GLWidget::loadScene(QString& fileName)
 {
+  // Remove possible old data
+  triangles.clear();
+  triangles.reserve(0);
+
   ObjReader reader;
   triangles = reader.parseFile(fileName.toUtf8().data());
 }
@@ -66,14 +70,14 @@ void GLWidget::paintGL()
   Vector3D position = camera_.getPosition();
   Vector3D rotation = camera_.getRotation();
 
-  // Some random gl code for testing
+  // Camera position
   glLoadIdentity();
-  glRotatef(rotation.X, 1.0, 0.0, 0.0);
-  glRotatef(rotation.Y, 0.0, 1.0, 0.0);
-  glRotatef(rotation.Z, 0.0, 0.0, 1.0);
-  glTranslatef(position.X, position.Y, position.Z);
+  glRotatef(-rotation.X, 1.0, 0.0, 0.0);
+  glRotatef(-rotation.Y, 0.0, 1.0, 0.0);
+  glRotatef(-rotation.Z, 0.0, 0.0, 1.0);
+  glTranslatef(-position.X, -position.Y, -position.Z);
 
-  // Draw triangle
+  // Draw triangles
   glBegin(GL_TRIANGLES);
 
   for (Triangle& triangle : triangles)
@@ -139,8 +143,8 @@ void GLWidget::mouseMoveEvent(QMouseEvent* event)
     int dx = pos.x() - lastPos.x();
     int dy = pos.y() - lastPos.y();
 
-    camera_.RotateX(0.05 * dx);         // Horizontal
-    camera_.RotateY(0.05 * dy);         // Vertical
+    camera_.RotateX(0.1 * dx);         // Horizontal
+    camera_.RotateY(0.1 * dy);         // Vertical
 
     updateGL();
 
