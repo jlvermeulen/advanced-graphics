@@ -1,31 +1,33 @@
 #pragma once
 
-#include <Matrix4x4D.h>
 #include <Vector3D.h>
 
 class Camera
 {
 public:
-  Camera(Vector3D eye, Vector3D focus, Vector3D up, double aspectRatio = 16.0f / 9.0f);
+  Camera();
   ~Camera();
 
+public:
+  void MoveForward(const float& distance);
+  void MoveSideways(const float& distance);
+  void Move(const Vector3D& direction);
+  void RotateX(float angle);
+  void RotateY(float angle);
+  void RotateZ(float angle);
+
+  Vector3D getPosition() const { return eye_; }
+  Vector3D getRotation() const { return Vector3D(rotX_, rotY_, rotZ_); }
+  const Vector3D& getViewDirection();
+
 private:
-  void updateViewMatrix();
-
-  Vector3D getEye() { return eye_; }
-  void setEye(Vector3D eye);
-
-  Vector3D getFocus() { return focus_; }
-  void setFocus(Vector3D focus);
-
-  Vector3D getUp() { return up_; }
-  void setUp(Vector3D up);
-
-private:
-  Matrix4x4D view_;
-  Matrix4x4D projection_;
+  bool changed_;
 
   Vector3D eye_;
   Vector3D focus_;
-  Vector3D up_;
+  Vector3D view_;
+
+  float rotX_;
+  float rotY_;
+  float rotZ_;
 };

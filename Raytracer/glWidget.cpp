@@ -1,18 +1,19 @@
+#define _USE_MATH_DEFINES
+
 #include <glWidget.h>
 
 #include <fstream>
+#include <math.h>
 #include <ObjReader.h>
+#include <QKeyEvent>
 #include <QMouseEvent>
 #include <Vector3D.h>
 
 //--------------------------------------------------------------------------------
 GLWidget::GLWidget(QWidget* parent)
   : QGLWidget(parent),
-    xRot(0),
-    yRot(0),
-    zRot(0)
+    lastPos()
 {
-
 }
 
 //--------------------------------------------------------------------------------
@@ -26,45 +27,6 @@ void GLWidget::loadScene(QString& fileName)
 {
   ObjReader reader;
   triangles = reader.parseFile(fileName.toUtf8().data());
-}
-
-//--------------------------------------------------------------------------------
-void GLWidget::setXRotation(int angle)
-{
-  qNormalizeAngle(angle);
-
-  if (angle != xRot)
-  {
-    xRot = angle;
-    emit xRotationChanged(angle);
-    updateGL();
-  }
-}
-
-//--------------------------------------------------------------------------------
-void GLWidget::setYRotation(int angle)
-{
-  qNormalizeAngle(angle);
-
-  if (angle != yRot)
-  {
-    yRot = angle;
-    emit xRotationChanged(angle);
-    updateGL();
-  }
-}
-
-//--------------------------------------------------------------------------------
-void GLWidget::setZRotation(int angle)
-{
-  qNormalizeAngle(angle);
-
-  if (angle != zRot)
-  {
-    zRot = angle;
-    emit xRotationChanged(angle);
-    updateGL();
-  }
 }
 
 //--------------------------------------------------------------------------------
@@ -92,7 +54,7 @@ void GLWidget::resizeGL(const int& w, const int& h)
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(-1, +1, -1, +1, -50, 150);
+  glPerspective(40.0, (double) w / (double) h, 0.5, 20.0);
   glMatrixMode(GL_MODELVIEW);
 }
 
@@ -101,11 +63,15 @@ void GLWidget::paintGL()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  Vector3D position = camera_.getPosition();
+  Vector3D rotation = camera_.getRotation();
+
   // Some random gl code for testing
   glLoadIdentity();
-  glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
-  glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
-  glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
+  glRotatef(rotation.X, 1.0, 0.0, 0.0);
+  glRotatef(rotation.Y, 0.0, 1.0, 0.0);
+  glRotatef(rotation.Z, 0.0, 0.0, 1.0);
+  glTranslatef(position.X, position.Y, position.Z);
 
   // Draw triangle
   glBegin(GL_TRIANGLES);
@@ -123,34 +89,76 @@ void GLWidget::paintGL()
 }
 
 //--------------------------------------------------------------------------------
-void GLWidget::mousePressEvent(QMouseEvent* event)
+void GLWidget::keyPressEvent(QKeyEvent* event)
 {
-  lastPos = event->pos();
+  float step = 0.05;
+  bool changed = false;
+
+  if (event->key() == Qt::Key_W)        // Forward
+  {
+    changed = true;
+    camera_.MoveForward(step);
+  }
+  else if (event->key() == Qt::Key_A)   // Left
+  {
+    changed = true;
+    camera_.MoveSideways(-step);
+  }
+  else if (event->key() == Qt::Key_S)   // Backward
+  {
+    changed = true;
+    camera_.MoveForward(-step);
+  }
+  else if (event->key() == Qt::Key_D)   // Right
+  {
+    changed = true;
+    camera_.MoveSideways(step);
+  }
+  else if (event->key() == Qt::Key_Z)   // Up
+  {
+    changed = true;
+    camera_.Move(Vector3D::Up);
+  }
+  else if (event->key() == Qt::Key_X)   // Down
+  {
+    changed = true;
+    camera_.Move(-Vector3D::Up);
+  }
+
+  if (changed)
+    updateGL();
 }
 
 //--------------------------------------------------------------------------------
 void GLWidget::mouseMoveEvent(QMouseEvent* event)
 {
-  int dx = event->x() - lastPos.x();
-  int dy = event->y() - lastPos.y();
-
   if (event->buttons() & Qt::LeftButton)
   {
-    setXRotation(xRot + 8 * dy);
-    setYRotation(yRot + 8 * dx);
-  }
-  else if (event->buttons() & Qt::RightButton)
-  {
-    setXRotation(xRot + 8 * dy);
-    setZRotation(zRot + 8 * dx);
+    QPoint pos = event->pos();
+
+    int dx = pos.x() - lastPos.x();
+    int dy = pos.y() - lastPos.y();
+
+    camera_.RotateX(0.05 * dx);         // Horizontal
+    camera_.RotateY(0.05 * dy);         // Vertical
+
+    updateGL();
+
+    lastPos = pos;
   }
 }
 
+
+
 //--------------------------------------------------------------------------------
-void GLWidget::qNormalizeAngle(int& angle)
+void GLWidget::glPerspective(double fovY, double aspect, double zNear, double zFar)
 {
-    while (angle < 0)
-        angle += 360 * 16;
-    while (angle > 360 * 16)
-        angle -= 360 * 16;
+  double xMin, xMax, yMin, yMax;
+
+  yMax = zNear * tan(fovY * M_PI / 360.0);
+  yMin = -yMax;
+  xMin = yMin * aspect;
+  xMax = yMax * aspect;
+
+  glFrustum(xMin, xMax, yMin, yMax, zNear, zFar);
 }

@@ -1,39 +1,92 @@
-#define _USE_MATH_DEFINES
-
 #include <Camera.h>
-#include <math.h>
 
-Camera::Camera(Vector3D eye, Vector3D focus, Vector3D up, double aspectRatio) :
-  eye_(eye),
-  focus_(focus),
-  up_(up)
+#define PI 3.1415265359
+#define PId 3.1415265359/180.0
+
+//--------------------------------------------------------------------------------
+Camera::Camera() :
+  changed_(false),
+  focus_(Vector3D::Forward)
 {
-  // Instantiate the projection matrix
-  projection_ = Matrix4x4D::createPerspectiveFieldOfView(M_1_PI, aspectRatio, 1.0, 300.0);
 
-  // Instantiate the view matrix
-  updateViewMatrix();
 }
 
-void Camera::setEye(Vector3D eye)
+//--------------------------------------------------------------------------------
+Camera::~Camera()
 {
-  eye_ = eye;
-  updateViewMatrix();
+
 }
 
-void Camera::setFocus(Vector3D focus)
+//--------------------------------------------------------------------------------
+void Camera::MoveForward(const float& distance)
 {
-  focus_ = focus;
-  updateViewMatrix();
+  Vector3D viewDir = getViewDirection();
+
+  Vector3D move;
+  move.X = viewDir.X * -distance;
+  move.Y = viewDir.Y * -distance;
+  move.Z = viewDir.Z * -distance;
+
+  eye_ += move;
 }
 
-void Camera::setUp(Vector3D up)
+//--------------------------------------------------------------------------------
+void Camera::MoveSideways(const float& distance)
 {
-  up_ = up;
-  updateViewMatrix();
+  Vector3D viewDir = getViewDirection();
+
+  Vector3D move;
+  move.X = viewDir.Z * -distance;
+  move.Y = 0.0;
+  move.Z = -viewDir.X * -distance;
+
+  eye_ += move;
 }
 
-void Camera::updateViewMatrix()
+//--------------------------------------------------------------------------------
+void Camera::Move(const Vector3D& direction)
 {
-  view_ = Matrix4x4D::createLookAt(eye_, focus_, up_);
+  eye_ += direction;
+}
+
+//--------------------------------------------------------------------------------
+void Camera::RotateX(float angle)
+{
+  changed_ = true;
+  rotX_ += angle;
+}
+
+//--------------------------------------------------------------------------------
+void Camera::RotateY(float angle)
+{
+  changed_ = true;
+  rotY_ += angle;
+}
+
+//--------------------------------------------------------------------------------
+void Camera::RotateZ(float angle)
+{
+  changed_ = true;
+  rotZ_ += angle;
+}
+
+//--------------------------------------------------------------------------------
+const Vector3D& Camera::getViewDirection()
+{
+  if (changed_)
+  {
+    Vector3D temp;
+
+    // Rotate around Y-axis
+    temp.X = cos((rotY_ + 90.0) * PId);
+    temp.Z = -sin((rotY_ + 90.0) * PId);
+
+    // Rotate around X-axis
+    double cosX = cos(rotX_ * PId);
+    view_.X = temp.X * cosX;
+    view_.Y = sin(rotX_ * PId);
+    view_.Z = temp.Z * cosX;
+  }
+  
+  return view_;
 }

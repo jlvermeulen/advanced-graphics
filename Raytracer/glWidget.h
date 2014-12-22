@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Camera.h>
 #include <Triangle.h>
 #include <Vertex.h>
 
@@ -17,30 +18,17 @@ public:
   void loadScene(QString& fileName);
 
 protected:
+  void glPerspective(double fovY, double aspect, double zNear, double zFar);
 
   void initializeGL();
   void resizeGL(const int& w, const int& h);
   void paintGL();
 
-  void mousePressEvent(QMouseEvent* event);
+  void keyPressEvent(QKeyEvent* event);
   void mouseMoveEvent(QMouseEvent* event);
 
-  static void qNormalizeAngle(int& angle);
-
-public slots:
-  void setXRotation(int angle);
-  void setYRotation(int angle);
-  void setZRotation(int angle);
-
-signals:
-  void xRotationChanged(int angle);
-  void yRotationChanged(int angle);
-  void zRotationChanged(int angle);
-
 private:
-  int xRot;
-  int yRot;
-  int zRot;
+  Camera camera_;
   QPoint lastPos;
   std::vector<Triangle> triangles;
 };

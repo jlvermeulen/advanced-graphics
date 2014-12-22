@@ -45,6 +45,11 @@ public:
 	double& operator[](int index);
 	const double& operator[](int index) const;
 
+public:
+  static Vector3D Forward;
+  static Vector3D Right;
+  static Vector3D Up;
+
 private:
 };
 

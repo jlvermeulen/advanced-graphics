@@ -92,3 +92,7 @@ Vector3D& Vector3D::operator/=(const double& rhs)
 
 double& Vector3D::operator[](int index) { return index == 0 ? X : index == 1 ? Y : Z; }
 const double& Vector3D::operator[](int index) const { return index == 0 ? X : index == 1 ? Y : Z; };
+
+Vector3D Vector3D::Forward = Vector3D(0, 0, -1);
+Vector3D Vector3D::Right = Vector3D(1, 0, 0);
+Vector3D Vector3D::Up = Vector3D(0, 1, 0);
