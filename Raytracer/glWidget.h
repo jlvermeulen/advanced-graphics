@@ -1,5 +1,8 @@
 #pragma once
 
+#include <TriangleD.h>
+#include <VertexD.h>
+
 #include <QGLWidget>
 
 class GLWidget : public QGLWidget
@@ -9,6 +12,20 @@ class GLWidget : public QGLWidget
 public:
   GLWidget(QWidget* parent);
   ~GLWidget();
+
+public:
+  void loadScene(QString& fileName);
+
+protected:
+
+  void initializeGL();
+  void resizeGL(const int& w, const int& h);
+  void paintGL();
+
+  void mousePressEvent(QMouseEvent* event);
+  void mouseMoveEvent(QMouseEvent* event);
+
+  static void qNormalizeAngle(int& angle);
 
 public slots:
   void setXRotation(int angle);
@@ -20,17 +37,10 @@ signals:
   void yRotationChanged(int angle);
   void zRotationChanged(int angle);
 
-protected:
-  void initializeGL();
-  void resizeGL(const int& w, const int& h);
-  void paintGL();
-
-  void mousePressEvent(QMouseEvent* event);
-  void mouseMoveEvent(QMouseEvent* event);
-
 private:
   int xRot;
   int yRot;
   int zRot;
   QPoint lastPos;
+  std::vector<TriangleD> triangles;
 };

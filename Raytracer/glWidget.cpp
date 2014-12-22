@@ -1,7 +1,11 @@
-#include "glWidget.h"
+#include <glWidget.h>
 
+#include <fstream>
+#include <ObjReader.h>
 #include <QMouseEvent>
+#include <Vector3D.h>
 
+//--------------------------------------------------------------------------------
 GLWidget::GLWidget(QWidget* parent)
   : QGLWidget(parent),
     xRot(0),
@@ -11,11 +15,59 @@ GLWidget::GLWidget(QWidget* parent)
 
 }
 
+//--------------------------------------------------------------------------------
 GLWidget::~GLWidget()
 {
 
 }
 
+//--------------------------------------------------------------------------------
+void GLWidget::loadScene(QString& fileName)
+{
+  ObjReader reader;
+  triangles = reader.parseFile(fileName.toUtf8().data());
+}
+
+//--------------------------------------------------------------------------------
+void GLWidget::setXRotation(int angle)
+{
+  qNormalizeAngle(angle);
+
+  if (angle != xRot)
+  {
+    xRot = angle;
+    emit xRotationChanged(angle);
+    updateGL();
+  }
+}
+
+//--------------------------------------------------------------------------------
+void GLWidget::setYRotation(int angle)
+{
+  qNormalizeAngle(angle);
+
+  if (angle != yRot)
+  {
+    yRot = angle;
+    emit xRotationChanged(angle);
+    updateGL();
+  }
+}
+
+//--------------------------------------------------------------------------------
+void GLWidget::setZRotation(int angle)
+{
+  qNormalizeAngle(angle);
+
+  if (angle != zRot)
+  {
+    zRot = angle;
+    emit xRotationChanged(angle);
+    updateGL();
+  }
+}
+
+//--------------------------------------------------------------------------------
 void GLWidget::initializeGL()
 {
   qglClearColor(QColor::fromRgb(0, 0, 0, 255));
@@ -33,16 +85,18 @@ void GLWidget::initializeGL()
   glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 }
 
+//--------------------------------------------------------------------------------
 void GLWidget::resizeGL(const int& w, const int& h)
 {
   glViewport(0, 0, (GLint) w, (GLint) h);
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
+  glOrtho(-1, +1, -1, +1, -50, 150);
   glMatrixMode(GL_MODELVIEW);
 }
 
+//--------------------------------------------------------------------------------
 void GLWidget::paintGL()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -55,18 +109,26 @@ void GLWidget::paintGL()
 
   // Draw triangle
   glBegin(GL_TRIANGLES);
-  glColor3f(0.1, 0.2, 0.3);
-  glVertex3f(-0.5, 0, 0);
-  glVertex3f(+0.5, 0, 0);
-  glVertex3f(0, +0.5, 0);
+
+  for (TriangleD& triangle : triangles)
+  {
+    for (VertexD& vertex : triangle.Vertices)
+    {
+      glColor3f(vertex.Color.R, vertex.Color.G, vertex.Color.B);
+      glVertex3f(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
+    }
+  }
+
   glEnd();
 }
 
+//--------------------------------------------------------------------------------
 void GLWidget::mousePressEvent(QMouseEvent* event)
 {
   lastPos = event->pos();
 }
 
+//--------------------------------------------------------------------------------
 void GLWidget::mouseMoveEvent(QMouseEvent* event)
 {
   int dx = event->x() - lastPos.x();
@@ -84,46 +146,11 @@ void GLWidget::mouseMoveEvent(QMouseEvent* event)
   }
 }
 
-static void qNormalizeAngle(int &angle)
+//--------------------------------------------------------------------------------
+void GLWidget::qNormalizeAngle(int& angle)
 {
     while (angle < 0)
         angle += 360 * 16;
     while (angle > 360 * 16)
         angle -= 360 * 16;
-}
-
-void GLWidget::setXRotation(int angle)
-{
-  qNormalizeAngle(angle);
-
-  if (angle != xRot)
-  {
-    xRot = angle;
-    emit xRotationChanged(angle);
-    updateGL();
-  }
-}
-
-void GLWidget::setYRotation(int angle)
-{
-  qNormalizeAngle(angle);
-
-  if (angle != yRot)
-  {
-    yRot = angle;
-    emit xRotationChanged(angle);
-    updateGL();
-  }
-}
-
-void GLWidget::setZRotation(int angle)
-{
-  qNormalizeAngle(angle);
-
-  if (angle != zRot)
-  {
-    zRot = angle;
-    emit xRotationChanged(angle);
-    updateGL();
-  }
 }

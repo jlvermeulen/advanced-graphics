@@ -3,7 +3,7 @@
 #include <QMainWindow>
 
 namespace Ui {
-class Window;
+  class Window;
 }
 
 class Window : public QMainWindow
@@ -13,6 +13,9 @@ class Window : public QMainWindow
 public:
   explicit Window(QWidget *parent = 0);
   ~Window();
+
+public slots:
+  void openFileDialog();
 
 private:
   Ui::Window *ui;
