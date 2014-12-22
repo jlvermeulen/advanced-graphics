@@ -262,6 +262,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ColorD.cpp" />
     <ClCompile Include="Debug\moc_glWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -273,6 +274,7 @@
     </ClCompile>
     <ClCompile Include="Intersections.cpp" />
     <ClCompile Include="Matrix3x3D.cpp" />
+    <ClCompile Include="Matrix4x4D.cpp" />
     <ClCompile Include="ObjReader.cpp" />
     <ClCompile Include="Octree.cpp" />
     <ClCompile Include="Release\moc_glWidget.cpp">
@@ -286,19 +288,23 @@
     <ClCompile Include="Vector3D.cpp" />
     <ClCompile Include="glWidget.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Vector4D.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoundingBox.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="ColorD.h" />
     <ClInclude Include="GeneratedFiles\ui_window.h" />
     <ClInclude Include="Intersections.h" />
     <ClInclude Include="Matrix3x3D.h" />
+    <ClInclude Include="Matrix4x4D.h" />
     <ClInclude Include="ObjReader.h" />
     <ClInclude Include="Octree.h" />
     <ClInclude Include="RayD.h" />
     <ClInclude Include="TriangleD.h" />
     <ClInclude Include="Vector3D.h" />
+    <ClInclude Include="Vector4D.h" />
     <ClInclude Include="VertexD.h" />
     <CustomBuild Include="glWidget.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
