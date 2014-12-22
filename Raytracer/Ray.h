@@ -7,10 +7,10 @@
 struct Ray
 {
 public:
-	Vector3D Origin, Direction;
+	Vector3D Origin, Direction, InverseDirection;
 	ColorD Color;
 
-	Ray(const Vector3D& origin, const Vector3D& direction, const ColorD& color) : Origin(origin), Direction(direction), Color(color) { }
+	Ray(const Vector3D& origin, const Vector3D& direction, const ColorD& color) : Origin(origin), Direction(direction), InverseDirection(Vector3D(1 / direction.X, 1 / direction.Y, 1 / direction.Z)), Color(color) { }
 
 private:
 };

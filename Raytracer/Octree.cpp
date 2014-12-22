@@ -33,5 +33,35 @@ OctreeNode::OctreeNode(const std::vector<Triangle>& triangles, const BoundingBox
 
 OctreeNode::~OctreeNode() { delete [] children; }
 
+bool OctreeNode::Query(const Ray& ray, Triangle& triangle, double& t) const
+{
+	double tMin;
+	if (!Intersects(ray, bb, tMin))
+		return false;
+
+	bool hit = false;
+	const Triangle* tri = nullptr;
+	for(std::vector<Triangle>::const_iterator it = triangles.begin(); it != triangles.end(); ++it)
+	{
+		double tCurr = 0;
+		if (Intersects(ray, *it, tCurr) && tCurr < tMin)
+		{
+			tMin = tCurr;
+			tri = &*it;
+			hit = true;
+		}
+	}
+
+	if (children != nullptr)
+		for (int i = 0; i < 8; i++)
+			hit &= children[i].Query(ray, triangle, tMin);
+
+	triangle = *tri;
+	t = tMin;
+	return hit;
+}
+
 Octree::Octree() { }
 Octree::Octree(const std::vector<Triangle>& triangles, int minTriangles, int maxDepth) : root(OctreeNode(triangles, BoundingBox::FromTriangles(triangles), minTriangles, maxDepth)) { }
+
+bool Octree::Query(const Ray& ray, Triangle& triangle, double& t) const { return root.Query(ray, triangle, t); }

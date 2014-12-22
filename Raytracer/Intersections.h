@@ -5,4 +5,5 @@
 #include "BoundingBox.h"
 
 bool Intersects(const Ray& ray, const Triangle& triangle, double& t);
+bool Intersects(const Ray& ray, const BoundingBox& bb, double& t);
 bool Intersects(const Triangle& triangle, const BoundingBox& boundingBox);
