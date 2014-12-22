@@ -4,8 +4,37 @@
 
 #define EPSILON 0.000001
 
+bool Intersects(const Ray& ray, const BoundingBox& bb, double& t)
+{
+	double tx1 = (bb.Center.X - bb.Halfsize.X - ray.Origin.X) * ray.InverseDirection.X;
+	double tx2 = (bb.Center.X + bb.Halfsize.X - ray.Origin.X) * ray.InverseDirection.X;
+
+	double tmin = std::min(tx1, tx2);
+	double tmax = std::max(tx1, tx2);
+
+	double ty1 = (bb.Center.Y - bb.Halfsize.Y - ray.Origin.Y) * ray.InverseDirection.Y;
+	double ty2 = (bb.Center.Y + bb.Halfsize.Y - ray.Origin.Y) * ray.InverseDirection.Y;
+
+	tmin = std::max(tmin, std::min(ty1, ty2));
+	tmax = std::min(tmax, std::max(ty1, ty2));
+
+	double tz1 = (bb.Center.Z - bb.Halfsize.Z - ray.Origin.Z) * ray.InverseDirection.Z;
+	double tz2 = (bb.Center.Z + bb.Halfsize.Z - ray.Origin.Z) * ray.InverseDirection.Z;
+
+	tmin = std::max(tmin, std::min(tz1, tz2));
+	tmax = std::min(tmax, std::max(tz1, tz2));
+
+	if (tmax >= 0 && tmax >= tmin)
+	{
+		t = tmin;
+		return true;
+	}
+
+	return false;
+}
+
 // Möller-Trumbore intersection algorithm
-bool Intersects(const RayD& ray, const TriangleD& triangle, double& t)
+bool Intersects(const Ray& ray, const Triangle& triangle, double& t)
 {
 	Vector3D e1 = triangle.Vertices[1].Position - triangle.Vertices[0].Position;
 	Vector3D e2 = triangle.Vertices[2].Position - triangle.Vertices[0].Position;
@@ -95,7 +124,7 @@ bool Intersects(const RayD& ray, const TriangleD& triangle, double& t)
 	if(x2 < min) min = x2;												\
 	if(x2 > max) max = x2;
 
-bool Intersects(const TriangleD& triangle, const BoundingBox& boundingBox)
+bool Intersects(const Triangle& triangle, const BoundingBox& boundingBox)
 {
 	Vector3D v0 = triangle.Vertices[0].Position - boundingBox.Center;
 	Vector3D v1 = triangle.Vertices[1].Position - boundingBox.Center;

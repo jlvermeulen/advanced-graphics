@@ -1,7 +1,7 @@
 #pragma once
 
-#include <TriangleD.h>
-#include <VertexD.h>
+#include <Triangle.h>
+#include <Vertex.h>
 
 #include <QGLWidget>
 
@@ -42,5 +42,5 @@ private:
   int yRot;
   int zRot;
   QPoint lastPos;
-  std::vector<TriangleD> triangles;
+  std::vector<Triangle> triangles;
 };

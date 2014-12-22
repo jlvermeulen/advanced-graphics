@@ -1,8 +1,9 @@
 #pragma once
 
-#include "RayD.h"
-#include "TriangleD.h"
+#include "Ray.h"
+#include "Triangle.h"
 #include "BoundingBox.h"
 
-bool Intersects(const RayD& ray, const TriangleD& triangle, double& t);
-bool Intersects(const TriangleD& triangle, const BoundingBox& boundingBox);
+bool Intersects(const Ray& ray, const Triangle& triangle, double& t);
+bool Intersects(const Ray& ray, const BoundingBox& bb, double& t);
+bool Intersects(const Triangle& triangle, const BoundingBox& boundingBox);

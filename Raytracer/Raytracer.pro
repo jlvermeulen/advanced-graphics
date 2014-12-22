@@ -14,7 +14,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = raytracer
 TEMPLATE = app
 
-SOURCES  += main.cpp\
+SOURCES  += Main.cpp\
             window.cpp \
             glWidget.cpp \
             ColorD.cpp \

@@ -17,7 +17,7 @@ ObjReader::~ObjReader()
 }
 
 //--------------------------------------------------------------------------------
-std::vector<TriangleD> ObjReader::parseFile(const char* fileName)
+std::vector<Triangle> ObjReader::parseFile(const char* fileName)
 {
   // Open file stream
   std::ifstream fin;
@@ -88,7 +88,7 @@ void ObjReader::parseLine(std::vector<std::string>& segments)
 //--------------------------------------------------------------------------------
 void ObjReader::parseFace(IIterator& it)
 {
-  VertexD vertices[3];
+  Vertex vertices[3];
 
   // Only parse triangles
   for (int i = 0; i < 3; ++i)
@@ -97,7 +97,7 @@ void ObjReader::parseFace(IIterator& it)
 
     IIterator vIt = indices.begin();
 
-    VertexD vertex;
+    Vertex vertex;
     vertex.Position = positions.at(parseInteger(vIt) - 1);
     vertex.UV = texCoords.at(parseInteger(++vIt) - 1);
     vertex.Normal = normals.at(parseInteger(++vIt) - 1);
@@ -107,7 +107,7 @@ void ObjReader::parseFace(IIterator& it)
   }
 
   // Add triangle
-  triangles.push_back(TriangleD(vertices));
+  triangles.push_back(Triangle(vertices));
 }
 
 //--------------------------------------------------------------------------------

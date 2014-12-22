@@ -1,20 +1,20 @@
 #pragma once
 
-#include "VertexD.h"
+#include "Vertex.h"
 
-struct TriangleD
+struct Triangle
 {
 public:
-	VertexD Vertices[3];
+	Vertex Vertices[3];
 
-	TriangleD(const VertexD& v1, const VertexD& v2, const VertexD& v3)
+	Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
 		Vertices[0] = v1;
 		Vertices[1] = v2;
 		Vertices[2] = v3;
 	}
 
-	TriangleD(const VertexD v[3])
+	Triangle(const Vertex v[3])
 	{
 		Vertices[0] = v[0];
 		Vertices[1] = v[1];

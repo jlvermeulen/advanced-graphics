@@ -110,9 +110,9 @@ void GLWidget::paintGL()
   // Draw triangle
   glBegin(GL_TRIANGLES);
 
-  for (TriangleD& triangle : triangles)
+  for (Triangle& triangle : triangles)
   {
-    for (VertexD& vertex : triangle.Vertices)
+    for (Vertex& vertex : triangle.Vertices)
     {
       glColor3f(vertex.Color.R, vertex.Color.G, vertex.Color.B);
       glVertex3f(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
