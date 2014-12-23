@@ -50,7 +50,7 @@ inline Vector4D operator*(Vector4D lhs, const double& rhs) { return lhs *= rhs; 
 inline Vector4D operator*(const double& lhs, Vector4D rhs) { return rhs *= lhs; }
 inline Vector4D operator*(const Matrix4x4D& lhs, Vector4D rhs) { return rhs *= lhs; }
 
-inline Vector4D operator/(Vector4D lhs, const double& rhs) { return lhs += rhs; }
+inline Vector4D operator/(Vector4D lhs, const double& rhs) { return lhs /= rhs; }
 
 inline bool operator==(const Vector4D& lhs, const Vector4D& rhs) { return lhs.X == rhs.X && lhs.Y == rhs.Y && rhs.Z == lhs.Z && lhs.W == rhs.W; }
 inline bool operator!=(const Vector4D& lhs, const Vector4D& rhs) { return !operator==(lhs, rhs); }

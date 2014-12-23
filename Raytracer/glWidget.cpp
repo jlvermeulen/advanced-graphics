@@ -67,6 +67,9 @@ void GLWidget::resizeGL(int width, int height)
 //--------------------------------------------------------------------------------
 void GLWidget::paintGL()
 {
+	if (triangles.empty())
+		return;
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   Vector3D eye = camera_.getEye();
@@ -105,8 +108,8 @@ void GLWidget::paintGL()
   for (int i = 0; i < 8; i++)
   {
 	  double x = i & 4 ? bb.Halfsize.X : -bb.Halfsize.X;
-	  double y = i & 2 ? bb.Halfsize.X : -bb.Halfsize.X;
-	  double z = i & 1 ? bb.Halfsize.X : -bb.Halfsize.X;
+	  double y = i & 2 ? bb.Halfsize.Y : -bb.Halfsize.Y;
+	  double z = i & 1 ? bb.Halfsize.Z : -bb.Halfsize.Z;
 
 	  verts[i] = bb.Center + Vector3D(x, y, z);
   }
