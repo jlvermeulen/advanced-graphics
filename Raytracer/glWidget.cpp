@@ -88,6 +88,7 @@ void GLWidget::paintGL()
     for (Vertex& vertex : triangle.Vertices)
     {
       glColor3f(vertex.Color.R, vertex.Color.G, vertex.Color.B);
+      glNormal3f(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
       glVertex3f(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
     }
   }
