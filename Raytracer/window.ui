@@ -26,6 +26,9 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::StrongFocus</enum>
+   </property>
    <layout class="QGridLayout" name="gridLayout">
     <property name="leftMargin">
      <number>1</number>

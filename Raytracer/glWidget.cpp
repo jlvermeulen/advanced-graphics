@@ -138,6 +138,10 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
     changed = true;
     camera_.MoveUpward(-step);
   }
+  else
+  {
+    QGLWidget::keyPressEvent(event);
+  }
 
   if (changed)
     updateGL();
