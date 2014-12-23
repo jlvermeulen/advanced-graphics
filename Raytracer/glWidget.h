@@ -1,5 +1,6 @@
 #pragma once
 
+#include <deque>
 #include <Camera.h>
 #include <Triangle.h>
 #include <Vertex.h>
@@ -32,5 +33,5 @@ protected:
 private:
   Camera camera_;
   QPoint lastPos;
-  std::vector<Triangle> triangles;
+  std::deque<Triangle> triangles;
 };

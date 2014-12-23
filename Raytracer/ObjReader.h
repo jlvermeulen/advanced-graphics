@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <deque>
 #include <Triangle.h>
 #include <Vector3D.h>
 
@@ -27,7 +28,7 @@ public:
   ~ObjReader();
 
 public:
-  std::vector<Triangle> parseFile(const char* fileName);
+  std::deque<Triangle> parseFile(const char* fileName);
   void parseLine(std::vector<std::string>& segments);
 
   void parseLibrary(IIterator& it, const IIterator& end);
@@ -47,10 +48,10 @@ private:
   void reset();
 
 private:
-  std::vector<Vector3D> normals;
-  std::vector<Vector3D> positions;
-  std::vector<Vector3D> texCoords;
-  std::vector<Triangle> triangles;
+  std::deque<Vector3D> normals;
+  std::deque<Vector3D> positions;
+  std::deque<Vector3D> texCoords;
+  std::deque<Triangle> triangles;
 
   bool combined_;
 };

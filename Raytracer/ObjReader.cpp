@@ -17,7 +17,7 @@ ObjReader::~ObjReader()
 }
 
 //--------------------------------------------------------------------------------
-std::vector<Triangle> ObjReader::parseFile(const char* fileName)
+std::deque<Triangle> ObjReader::parseFile(const char* fileName)
 {
   // Open file stream
   std::ifstream fin;
@@ -106,13 +106,6 @@ void ObjReader::parseFace(IIterator& it)
     ++it;
   }
 
-  size_t capacity = triangles.capacity();
-  size_t size = triangles.size();
-
-  // Allocate memory for 1000000 more
-  if (capacity == size)
-    triangles.reserve(capacity + 1000000);
-
   // Add triangle
   triangles.push_back(Triangle(vertices));
 }
@@ -138,13 +131,6 @@ void ObjReader::parseNormal(IIterator& it)
   normal.Y = parseDouble(++it);
   normal.Z = parseDouble(++it);
 
-  size_t capacity = normals.capacity();
-  size_t size = normals.size();
-
-  // Allocate memory for 1000000 more
-  if (capacity == size)
-    normals.reserve(capacity + 1000000);
-
   normals.push_back(normal);
 }
 
@@ -157,13 +143,6 @@ void ObjReader::parseTexCoords(IIterator& it)
   texCoord.Y = parseDouble(++it);
   texCoord.Z = parseDouble(++it);
 
-  size_t capacity = texCoords.capacity();
-  size_t size = texCoords.size();
-
-  // Allocate memory for 1000000 more
-  if (capacity == size)
-    texCoords.reserve(capacity + 1000000);
-
   texCoords.push_back(texCoord);
 }
 
@@ -175,13 +154,6 @@ void ObjReader::parseVertex(IIterator& it)
   position.X = parseDouble(it);
   position.Y = parseDouble(++it);
   position.Z = parseDouble(++it);
-
-  size_t capacity = positions.capacity();
-  size_t size = positions.size();
-
-  // Allocate memory for 1000000 more
-  if (capacity == size)
-    positions.reserve(capacity + 1000000);
 
   positions.push_back(position);
 }

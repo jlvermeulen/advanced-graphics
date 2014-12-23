@@ -28,7 +28,7 @@ void GLWidget::loadScene(QString& fileName)
 {
   // Remove possible old data
   triangles.clear();
-  triangles.reserve(0);
+  //triangles.reserve(0);
 
   ObjReader reader;
   triangles = reader.parseFile(fileName.toUtf8().data());
