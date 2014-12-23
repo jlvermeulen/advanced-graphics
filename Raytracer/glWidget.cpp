@@ -70,6 +70,7 @@ void GLWidget::paintGL()
 	if (triangles.empty())
 		return;
 
+  glEnable(GL_LIGHTING);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   Vector3D eye = camera_.getEye();
@@ -99,6 +100,7 @@ void GLWidget::paintGL()
   glEnd();
 
   // Draw octree raster
+  glDisable(GL_LIGHTING);
   glBegin(GL_LINES);
 
   glColor3f(1, 0, 0);
