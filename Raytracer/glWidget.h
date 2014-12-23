@@ -21,10 +21,12 @@ protected:
   void glPerspective(double fovY, double aspect, double zNear, double zFar);
 
   void initializeGL();
-  void resizeGL(const int& w, const int& h);
+  void resizeGL(int width, int height);
   void paintGL();
 
   void keyPressEvent(QKeyEvent* event);
+
+  void mousePressEvent(QMouseEvent* event);
   void mouseMoveEvent(QMouseEvent* event);
 
 private:

@@ -37,30 +37,31 @@ void GLWidget::loadScene(QString& fileName)
 //--------------------------------------------------------------------------------
 void GLWidget::initializeGL()
 {
-  qglClearColor(QColor::fromRgb(0, 0, 0, 255));
+  //qglClearColor(QColor::fromRgb(0, 0, 0, 255));
+  
+  glClearColor(0.0, 0.0, 0.0, 0.0);
 
-  //glClearColor(0.0, 0.0, 0.0, 0.0);
-
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glShadeModel(GL_SMOOTH);
+  //glEnable(GL_DEPTH_TEST);
+  //glEnable(GL_CULL_FACE);
+  //glShadeModel(GL_SMOOTH);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
-  glEnable(GL_MULTISAMPLE);
+  //glEnable(GL_MULTISAMPLE);
 
   const GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
   glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 }
 
 //--------------------------------------------------------------------------------
-void GLWidget::resizeGL(const int& w, const int& h)
+void GLWidget::resizeGL(int width, int height)
 {
+  glViewport(0, 0, width, height);
+
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glPerspective(40.0, (double) w / (double) h, 0.5, 20.0);
+  glPerspective(40.0, (double) width / (double) height, 0.5, 40.0);
 
   glMatrixMode(GL_MODELVIEW);
-  glViewport(0, 0, (GLint) w, (GLint) h);
 }
 
 //--------------------------------------------------------------------------------
@@ -99,14 +100,12 @@ void GLWidget::paintGL()
 
 
   glEnd();
-
-  glFlush();
 }
 
 //--------------------------------------------------------------------------------
 void GLWidget::keyPressEvent(QKeyEvent* event)
 {
-  float step = 0.05;
+  float step = 0.25;
   bool changed = false;
 
   if (event->key() == Qt::Key_W)        // Forward
@@ -129,12 +128,12 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
     changed = true;
     camera_.MoveRight(step);
   }
-  else if (event->key() == Qt::Key_Z)   // Up
+  else if (event->key() == Qt::Key_X)   // Up
   {
     changed = true;
     camera_.MoveUpward(step);
   }
-  else if (event->key() == Qt::Key_X)   // Down
+  else if (event->key() == Qt::Key_Z)   // Down
   {
     changed = true;
     camera_.MoveUpward(-step);
@@ -142,6 +141,12 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
 
   if (changed)
     updateGL();
+}
+
+//--------------------------------------------------------------------------------
+void GLWidget::mousePressEvent(QMouseEvent* event)
+{
+  lastPos = event->pos();
 }
 
 //--------------------------------------------------------------------------------
@@ -154,16 +159,14 @@ void GLWidget::mouseMoveEvent(QMouseEvent* event)
     int dx = pos.x() - lastPos.x();
     int dy = pos.y() - lastPos.y();
 
-    camera_.RotateX(0.1 * dx);         // Horizontal
-    camera_.RotateY(0.1 * dy);         // Vertical
+    camera_.RotateY(0.1 * dx);         // Horizontal
+    camera_.RotateX(0.1 * dy);         // Vertical
 
     updateGL();
 
     lastPos = pos;
   }
 }
-
-
 
 //--------------------------------------------------------------------------------
 void GLWidget::glPerspective(double fovY, double aspect, double zNear, double zFar)

@@ -7,7 +7,7 @@
 
 //--------------------------------------------------------------------------------
 Camera::Camera() :
-  eye_(Vector3D()),
+  eye_(Vector3D(0, 0, 20)),
   focus_(Vector3D::Forward),
   right_(Vector3D::Right),
   up_(Vector3D::Up)
@@ -24,7 +24,7 @@ Camera::~Camera()
 //--------------------------------------------------------------------------------
 void Camera::MoveForward(const float& distance)
 {
-  eye_ += focus_ * -distance;
+  eye_ += focus_ * distance;
 }
 
 //--------------------------------------------------------------------------------
@@ -34,9 +34,9 @@ void Camera::MoveRight(const float& distance)
 }
 
 //--------------------------------------------------------------------------------
-void Camera::MoveUpward(const float& direction)
+void Camera::MoveUpward(const float& distance)
 {
-  eye_ += up_ * direction;
+  eye_ += up_ * distance;
 }
 
 //--------------------------------------------------------------------------------
