@@ -117,6 +117,13 @@ void GLWidget::paintGL()
   for (int i = 0; i < 8; i++)
 	  for (int j = 0; j < 8; j++)
 	  {
+		  int k = 0;
+		  for (int x = 0; x < 3; x++)
+			  k += verts[i][x] == verts[j][x] ? 1 : 0;
+
+		  if (k != 2)
+			  continue;
+
 		  glVertex3f(verts[i].X, verts[i].Y, verts[i].Z);
 		  glVertex3f(verts[j].X, verts[j].Y, verts[j].Z);
 	  }
