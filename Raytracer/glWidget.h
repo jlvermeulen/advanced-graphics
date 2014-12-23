@@ -32,6 +32,8 @@ protected:
   void mouseMoveEvent(QMouseEvent* event);
 
 private:
+  void drawLine(const Vector3D& v1, const Vector3D& v2) const;
+
   Camera camera_;
   QPoint lastPos;
   std::deque<Triangle> triangles;

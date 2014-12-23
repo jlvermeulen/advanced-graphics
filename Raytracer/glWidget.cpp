@@ -9,6 +9,7 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <Vector3D.h>
+#include <queue>
 
 //--------------------------------------------------------------------------------
 GLWidget::GLWidget(QWidget* parent)
@@ -105,30 +106,41 @@ void GLWidget::paintGL()
 
   glColor3f(1, 0, 0);
 
-  BoundingBox bb = octree.root.bb;
-  Vector3D verts[8];
-  for (int i = 0; i < 8; i++)
+  std::queue<OctreeNode> q;
+  q.push(octree.root);
+
+  while (!q.empty())
   {
-	  double x = i & 4 ? bb.Halfsize.X : -bb.Halfsize.X;
-	  double y = i & 2 ? bb.Halfsize.Y : -bb.Halfsize.Y;
-	  double z = i & 1 ? bb.Halfsize.Z : -bb.Halfsize.Z;
+	  OctreeNode node = q.front();
+	  q.pop();
 
-	  verts[i] = bb.Center + Vector3D(x, y, z);
-  }
-
-  for (int i = 0; i < 8; i++)
-	  for (int j = 0; j < 8; j++)
+	  BoundingBox bb = node.bb;
+	  Vector3D verts[8];
+	  for (int i = 0; i < 8; i++)
 	  {
-		  int k = 0;
-		  for (int x = 0; x < 3; x++)
-			  k += verts[i][x] == verts[j][x] ? 1 : 0;
+		  double x = i & 4 ? bb.Halfsize.X : -bb.Halfsize.X;
+		  double y = i & 2 ? bb.Halfsize.Y : -bb.Halfsize.Y;
+		  double z = i & 1 ? bb.Halfsize.Z : -bb.Halfsize.Z;
 
-		  if (k != 2)
-			  continue;
-
-		  glVertex3f(verts[i].X, verts[i].Y, verts[i].Z);
-		  glVertex3f(verts[j].X, verts[j].Y, verts[j].Z);
+		  verts[i] = bb.Center + Vector3D(x, y, z);
 	  }
+
+	  drawLine(verts[0], verts[1]);
+	  drawLine(verts[0], verts[2]);
+	  drawLine(verts[0], verts[4]);
+	  drawLine(verts[1], verts[3]);
+	  drawLine(verts[1], verts[5]);
+	  drawLine(verts[2], verts[3]);
+	  drawLine(verts[2], verts[6]);
+	  drawLine(verts[3], verts[7]);
+	  drawLine(verts[4], verts[5]);
+	  drawLine(verts[4], verts[6]);
+	  drawLine(verts[5], verts[7]);
+	  drawLine(verts[6], verts[7]);
+
+	  for (OctreeNode& n : node.children)
+		  q.push(n);
+  }
 
   glEnd();
 }
@@ -214,4 +226,11 @@ void GLWidget::glPerspective(double fovY, double aspect, double zNear, double zF
   xMax = yMax * aspect;
 
   glFrustum(xMin, xMax, yMin, yMax, zNear, zFar);
+}
+
+//--------------------------------------------------------------------------------
+void GLWidget::drawLine(const Vector3D& v1, const Vector3D& v2) const
+{
+  glVertex3f(v1.X, v1.Y, v1.Z);
+  glVertex3f(v2.X, v2.Y, v2.Z);
 }
