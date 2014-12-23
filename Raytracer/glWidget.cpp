@@ -28,10 +28,10 @@ void GLWidget::loadScene(QString& fileName)
 {
   // Remove possible old data
   triangles.clear();
-  //triangles.reserve(0);
 
   ObjReader reader;
   triangles = reader.parseFile(fileName.toUtf8().data());
+  octree = Octree(triangles, 100, 5);
 }
 
 //--------------------------------------------------------------------------------
@@ -98,7 +98,25 @@ void GLWidget::paintGL()
   // Draw octree raster
   glBegin(GL_LINES);
 
+  glColor3f(1, 0, 0);
 
+  BoundingBox bb = octree.root.bb;
+  Vector3D verts[8];
+  for (int i = 0; i < 8; i++)
+  {
+	  double x = i & 4 ? bb.Halfsize.X : -bb.Halfsize.X;
+	  double y = i & 2 ? bb.Halfsize.X : -bb.Halfsize.X;
+	  double z = i & 1 ? bb.Halfsize.X : -bb.Halfsize.X;
+
+	  verts[i] = bb.Center + Vector3D(x, y, z);
+  }
+
+  for (int i = 0; i < 8; i++)
+	  for (int j = 0; j < 8; j++)
+	  {
+		  glVertex3f(verts[i].X, verts[i].Y, verts[i].Z);
+		  glVertex3f(verts[j].X, verts[j].Y, verts[j].Z);
+	  }
 
   glEnd();
 }
@@ -106,7 +124,7 @@ void GLWidget::paintGL()
 //--------------------------------------------------------------------------------
 void GLWidget::keyPressEvent(QKeyEvent* event)
 {
-  float step = 0.1;
+  float step = 0.1f;
   bool changed = false;
 
   if (event->key() == Qt::Key_W)        // Forward

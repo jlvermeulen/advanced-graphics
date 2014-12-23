@@ -4,6 +4,7 @@
 #include <Camera.h>
 #include <Triangle.h>
 #include <Vertex.h>
+#include <Octree.h>
 
 #include <QGLWidget>
 
@@ -34,4 +35,5 @@ private:
   Camera camera_;
   QPoint lastPos;
   std::deque<Triangle> triangles;
+  Octree octree;
 };
