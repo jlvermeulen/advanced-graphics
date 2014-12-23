@@ -7,7 +7,7 @@
 
 //--------------------------------------------------------------------------------
 Camera::Camera() :
-  eye_(Vector3D(0, 0, 20)),
+  eye_(Vector3D(0, 0, 5)),
   focus_(Vector3D::Forward),
   right_(Vector3D::Right),
   up_(Vector3D::Up)

@@ -41,13 +41,13 @@ void GLWidget::initializeGL()
   
   glClearColor(0.0, 0.0, 0.0, 0.0);
 
-  //glEnable(GL_DEPTH_TEST);
-  //glEnable(GL_CULL_FACE);
-  //glShadeModel(GL_SMOOTH);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glShadeModel(GL_SMOOTH);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
-  //glEnable(GL_MULTISAMPLE);
-
+  glEnable(GL_MULTISAMPLE);
+  
   const GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
   glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 }
@@ -59,7 +59,7 @@ void GLWidget::resizeGL(int width, int height)
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glPerspective(40.0, (double) width / (double) height, 0.5, 40.0);
+  glPerspective(40.0, (double) width / (double) height, 0.5, 20.0);
 
   glMatrixMode(GL_MODELVIEW);
 }
@@ -105,7 +105,7 @@ void GLWidget::paintGL()
 //--------------------------------------------------------------------------------
 void GLWidget::keyPressEvent(QKeyEvent* event)
 {
-  float step = 0.25;
+  float step = 0.1;
   bool changed = false;
 
   if (event->key() == Qt::Key_W)        // Forward
