@@ -3,6 +3,7 @@
 #include <glWidget.h>
 
 #include <fstream>
+#include <gl/GLU.h>
 #include <math.h>
 #include <ObjReader.h>
 #include <QKeyEvent>
@@ -54,12 +55,12 @@ void GLWidget::initializeGL()
 //--------------------------------------------------------------------------------
 void GLWidget::resizeGL(const int& w, const int& h)
 {
-  glViewport(0, 0, (GLint) w, (GLint) h);
-
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glPerspective(40.0, (double) w / (double) h, 0.5, 20.0);
+
   glMatrixMode(GL_MODELVIEW);
+  glViewport(0, 0, (GLint) w, (GLint) h);
 }
 
 //--------------------------------------------------------------------------------
@@ -67,15 +68,16 @@ void GLWidget::paintGL()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  Vector3D position = camera_.getPosition();
-  Vector3D rotation = camera_.getRotation();
+  Vector3D eye = camera_.getEye();
+  Vector3D focus = camera_.getFocus();
+  Vector3D viewPoint = eye + focus;
+  Vector3D up = camera_.getUp();
 
   // Camera position
   glLoadIdentity();
-  glRotatef(-rotation.X, 1.0, 0.0, 0.0);
-  glRotatef(-rotation.Y, 0.0, 1.0, 0.0);
-  glRotatef(-rotation.Z, 0.0, 0.0, 1.0);
-  glTranslatef(-position.X, -position.Y, -position.Z);
+  gluLookAt(eye.X, eye.Y, eye.Z,
+            viewPoint.X, viewPoint.Y, viewPoint.Z,
+            up.X, up.Y, up.Z);
 
   // Draw triangles
   glBegin(GL_TRIANGLES);
@@ -90,6 +92,15 @@ void GLWidget::paintGL()
   }
 
   glEnd();
+
+  // Draw octree raster
+  glBegin(GL_LINES);
+
+
+
+  glEnd();
+
+  glFlush();
 }
 
 //--------------------------------------------------------------------------------
@@ -106,7 +117,7 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
   else if (event->key() == Qt::Key_A)   // Left
   {
     changed = true;
-    camera_.MoveSideways(-step);
+    camera_.MoveRight(-step);
   }
   else if (event->key() == Qt::Key_S)   // Backward
   {
@@ -116,17 +127,17 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
   else if (event->key() == Qt::Key_D)   // Right
   {
     changed = true;
-    camera_.MoveSideways(step);
+    camera_.MoveRight(step);
   }
   else if (event->key() == Qt::Key_Z)   // Up
   {
     changed = true;
-    camera_.Move(Vector3D::Up);
+    camera_.MoveUpward(step);
   }
   else if (event->key() == Qt::Key_X)   // Down
   {
     changed = true;
-    camera_.Move(-Vector3D::Up);
+    camera_.MoveUpward(-step);
   }
 
   if (changed)

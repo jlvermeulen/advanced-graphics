@@ -10,22 +10,22 @@ public:
 
 public:
   void MoveForward(const float& distance);
-  void MoveSideways(const float& distance);
-  void Move(const Vector3D& direction);
+  void MoveRight(const float& distance);
+  void MoveUpward(const float& distance);
   void RotateX(float angle);
   void RotateY(float angle);
   void RotateZ(float angle);
 
-  Vector3D getPosition() const { return eye_; }
-  Vector3D getRotation() const { return Vector3D(rotX_, rotY_, rotZ_); }
-  const Vector3D& getViewDirection();
+
+  Vector3D getEye() const { return eye_; }
+  Vector3D getFocus() const { return focus_; }
+  Vector3D getUp() const { return up_;  }
 
 private:
-  bool changed_;
-
   Vector3D eye_;
   Vector3D focus_;
-  Vector3D view_;
+  Vector3D right_;
+  Vector3D up_;
 
   float rotX_;
   float rotY_;
