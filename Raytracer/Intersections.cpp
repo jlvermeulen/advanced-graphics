@@ -6,23 +6,25 @@
 
 bool Intersects(const Ray& ray, const BoundingBox& bb, double& t)
 {
-	double tx1 = (bb.Center.X - bb.Halfsize.X - ray.Origin.X) * ray.InverseDirection.X;
-	double tx2 = (bb.Center.X + bb.Halfsize.X - ray.Origin.X) * ray.InverseDirection.X;
+	Vector3D lb = bb.Center - bb.Halfsize - ray.Origin, rt = bb.Center + bb.Halfsize - ray.Origin;
 
-	double tmin = std::min(tx1, tx2);
-	double tmax = std::max(tx1, tx2);
+	double t1 = lb.X * ray.InverseDirection.X;
+	double t2 = rt.X * ray.InverseDirection.X;
 
-	double ty1 = (bb.Center.Y - bb.Halfsize.Y - ray.Origin.Y) * ray.InverseDirection.Y;
-	double ty2 = (bb.Center.Y + bb.Halfsize.Y - ray.Origin.Y) * ray.InverseDirection.Y;
+	double tmin = std::min(t1, t2);
+	double tmax = std::max(t1, t2);
 
-	tmin = std::max(tmin, std::min(ty1, ty2));
-	tmax = std::min(tmax, std::max(ty1, ty2));
+	t1 = lb.Y * ray.InverseDirection.Y;
+	t2 = rt.Y * ray.InverseDirection.Y;
 
-	double tz1 = (bb.Center.Z - bb.Halfsize.Z - ray.Origin.Z) * ray.InverseDirection.Z;
-	double tz2 = (bb.Center.Z + bb.Halfsize.Z - ray.Origin.Z) * ray.InverseDirection.Z;
+	tmin = std::max(tmin, std::min(t1, t2));
+	tmax = std::min(tmax, std::max(t1, t2));
 
-	tmin = std::max(tmin, std::min(tz1, tz2));
-	tmax = std::min(tmax, std::max(tz1, tz2));
+	t1 = lb.Z * ray.InverseDirection.Z;
+	t2 = rt.Z * ray.InverseDirection.Z;
+
+	tmin = std::max(tmin, std::min(t1, t2));
+	tmax = std::min(tmax, std::max(t1, t2));
 
 	if (tmax >= 0 && tmax >= tmin)
 	{

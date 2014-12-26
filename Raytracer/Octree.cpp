@@ -1,5 +1,6 @@
 #include "Octree.h"
 #include "Intersections.h"
+#include <limits>
 
 OctreeNode::OctreeNode() { }
 OctreeNode::OctreeNode(const std::deque<Triangle>& triangles, const BoundingBox& bb, unsigned int minTriangles, unsigned int maxDepth)
@@ -32,33 +33,34 @@ OctreeNode::OctreeNode(const std::deque<Triangle>& triangles, const BoundingBox&
 
 bool OctreeNode::Query(const Ray& ray, Triangle& triangle, double& t) const
 {
-	double tMin;
-	if (!Intersects(ray, bb, tMin))
+	double tBox = std::numeric_limits<double>::min();
+	if (!Intersects(ray, bb, tBox) || tBox > t)
 		return false;
 
 	bool hit = false;
-	const Triangle* tri = nullptr;
 	for(std::deque<Triangle>::const_iterator it = triangles.begin(); it != triangles.end(); ++it)
 	{
 		double tCurr = 0;
-		if (Intersects(ray, *it, tCurr) && tCurr < tMin)
+		if (Intersects(ray, *it, tCurr) && tCurr < t)
 		{
-			tMin = tCurr;
-			tri = &*it;
+			t = tCurr;
+			triangle = *it;
 			hit = true;
 		}
 	}
 
 	if (!children.empty())
 		for (int i = 0; i < 8; i++)
-			hit &= children[i].Query(ray, triangle, tMin);
+			hit |= children[i].Query(ray, triangle, t);
 
-	triangle = *tri;
-	t = tMin;
 	return hit;
 }
 
 Octree::Octree() { }
 Octree::Octree(const std::deque<Triangle>& triangles, int minTriangles, int maxDepth) : root(triangles, BoundingBox::FromTriangles(triangles), minTriangles, maxDepth) { }
 
-bool Octree::Query(const Ray& ray, Triangle& triangle, double& t) const { return root.Query(ray, triangle, t); }
+bool Octree::Query(const Ray& ray, Triangle& triangle, double& t) const
+{
+	t = std::numeric_limits<double>::max();
+	return root.Query(ray, triangle, t);
+}

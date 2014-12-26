@@ -38,4 +38,6 @@ private:
   QPoint lastPos;
   std::deque<Triangle> triangles;
   Octree octree;
+  Ray debugRay;
+  bool rayOn;
 };

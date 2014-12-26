@@ -10,12 +10,14 @@
 #include <QMouseEvent>
 #include <Vector3D.h>
 #include <queue>
+#include <Intersections.h>
 
 //--------------------------------------------------------------------------------
 GLWidget::GLWidget(QWidget* parent)
   : QGLWidget(parent),
     lastPos()
 {
+	rayOn = false;
 }
 
 //--------------------------------------------------------------------------------
@@ -104,7 +106,7 @@ void GLWidget::paintGL()
   glDisable(GL_LIGHTING);
   glBegin(GL_LINES);
 
-  glColor3f(1, 0, 0);
+  /*glColor3f(0, 1, 1);
 
   std::queue<OctreeNode> q;
   q.push(octree.root);
@@ -140,7 +142,37 @@ void GLWidget::paintGL()
 
 	  for (OctreeNode& n : node.children)
 		  q.push(n);
+  }*/
+
+  if (!rayOn)
+  {
+	  glEnd();
+	  return;
   }
+
+  // draw ray
+  Triangle tri;
+  double t;
+  bool hit = octree.Query(debugRay, tri, t);
+
+  if (hit)
+  {
+	  Vector3D point = debugRay.Origin + t * debugRay.Direction;
+	  glColor3f(1, 0, 0);
+	  double eps = 0.0025;
+	  for (int i = 0; i < 8; i++)
+	  {
+		  double x = i & 1 ? eps : -eps;
+		  double y = i & 2 ? eps : -eps;
+		  double z = i & 4 ? eps : -eps;
+		  drawLine(point, Vector3D(point.X + x, point.Y + y, point.Z + z));
+	  }
+	  glColor3f(0, 1, 0);
+  }
+  else
+	  glColor3f(1, 0, 0);
+
+  drawLine(debugRay.Origin, debugRay.Origin + 10 * debugRay.Direction);
 
   glEnd();
 }
@@ -180,6 +212,12 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
   {
     changed = true;
     camera_.MoveUpward(-step);
+  }
+  else if (event->key() == Qt::Key_C)
+  {
+	  changed = true;
+	  debugRay = Ray(camera_.getEye(), camera_.getFocus(), ColorD(1.0, 1.0, 1.0));
+	  rayOn = !rayOn;
   }
   else
   {
