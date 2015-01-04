@@ -68,14 +68,14 @@ bool GLWidget::renderScene(uchar* imageData)
 
   for (int x = 0; x < resolution_.x(); ++x)
   {
-    direction.X += (x - resolution_.x() / 2.0) / smallerDim;
+    direction.X = camera_.getFocus().X + (x - resolution_.x() / 2.0) / smallerDim;
 
     for (int y = 0; y < resolution_.y(); ++y)
     {
       //if (progressDialog.wasCanceled())
       //  return false;
 
-      direction.Y += (resolution_.y() / 2.0 - y) / smallerDim;
+      direction.Y = camera_.getFocus().Y + (resolution_.y() / 2.0 - y) / smallerDim;
 
       ColorD intensity(1.0, 1.0, 1.0);
       Ray cameraRay(camera_.getEye(), direction, intensity);
