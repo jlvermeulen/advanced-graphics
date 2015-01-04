@@ -28,8 +28,6 @@ void RenderViewer::saveRender()
   ui->imageViewer->pixmap()->save(&file, "PNG");
 
   file.close();
-
-
 }
 
 //--------------------------------------------------------------------------------

@@ -18,6 +18,7 @@ GLWidget::GLWidget(QWidget* parent)
   : QGLWidget(parent),
     boundingBoxVisible_(false),
     cameraRayVisible_(false),
+    recursionDepth(5),
     resolution_(QPoint(1980, 1080)),
     useOctree_(false),
     minTriangles_(0),
@@ -25,6 +26,9 @@ GLWidget::GLWidget(QWidget* parent)
     stepSize_(0.1f),
     lastPos()
 {
+  // Add lights
+  lights.push_back(Light(Vector3D(0.5, 5.0, 7.0), ColorD(1.0, 1.0, 1.0)));
+  lights.push_back(Light(Vector3D(0.5, -5.0, 4.0), ColorD(1.0, 0.0, 0.0)));
 }
 
 //--------------------------------------------------------------------------------
@@ -41,44 +45,52 @@ void GLWidget::loadScene(QString& fileName)
 
   ObjReader reader;
   triangles = reader.parseFile(fileName.toUtf8().data());
-
-  if (useOctree_)
-    octree = Octree(triangles, 100, 5);
 }
 
 //--------------------------------------------------------------------------------
-bool GLWidget::renderScene(uchar* imageData) const
+bool GLWidget::renderScene(uchar* imageData)
 {
+  // Progress dialog slows it down enormously, so left it out..
   // Show rendering progress
-  //int numIterations = resolution_.x() * resolution_.y() * 3;  // Width * Height * Color Channels
+  //int numIterations = resolution_.x() * resolution_.y();
 
   //QProgressDialog progressDialog("Rendering in progress...", "Cancel", 0, numIterations, parentWidget());
   //progressDialog.setWindowModality(Qt::WindowModal);
 
-  QColor temp;
-  Vector3D color = Vector3D();
-
   //int i = 0;
 
-  for (int y = 0; y < resolution_.y(); ++y)
-  {
+  if (useOctree_)
+    octree = Octree(triangles, minTriangles_, maxDepth_);
 
-    for (int x = 0; x < resolution_.x(); ++x)
+  int smallerDim = ((resolution_.x() < resolution_.y()) ? resolution_.x() : resolution_.y());
+
+  Vector3D direction = camera_.getFocus();
+
+  for (int x = 0; x < resolution_.x(); ++x)
+  {
+    direction.X += (x - resolution_.x() / 2.0) / smallerDim;
+
+    for (int y = 0; y < resolution_.y(); ++y)
     {
+      //if (progressDialog.wasCanceled())
+      //  return false;
+
+      direction.Y += (resolution_.y() / 2.0 - y) / smallerDim;
+
+      ColorD intensity(1.0, 1.0, 1.0);
+      Ray cameraRay(camera_.getEye(), direction, intensity);
+
+      ColorD color = traceRay(cameraRay, 1, recursionDepth);
+
       int offset = (y * resolution_.x() + x) * 4;
 
-      // For each color channel in reversed order (i.e. blue-green-red)
-      for (int c = 0; c < 3; ++c)
-      {
-        //if (progressDialog.wasCanceled())
-        //  return false;
-        imageData[offset + c] = raytrace(x, y, c);
-
-        //progressDialog.setValue(++i);
-      }
-
-      // Alpha channel
+      // For each color channel in reversed order (i.e. blue-green-red-alpha)
+      imageData[offset]     = (uchar) (color.B * 255.0);
+      imageData[offset + 1] = (uchar) (color.G * 255.0);
+      imageData[offset + 2] = (uchar) (color.R * 255.0);
       imageData[offset + 3] = 255;
+
+      //progressDialog.setValue(++i);
     }
   }
 
@@ -381,9 +393,92 @@ void GLWidget::drawModel()
 }
 
 //--------------------------------------------------------------------------------
-uchar GLWidget::raytrace(int x, int y, int channel) const
+ColorD GLWidget::traceRay(Ray ray, double refractiveIndex, int recursionDepth) const
 {
+  Triangle hitTriangle;
+  double hitTime;
+
+  if (octree.Query(ray, hitTriangle, hitTime))
+  {
+    return radiance(Intersection(ray.Origin, ray.Direction, hitTime, hitTriangle), ray, refractiveIndex, --recursionDepth);
+  }
+  else
+  {
+    // Background is black
+    return ray.Color * ColorD();
+  }
 
 
-  return 0; // between 0 and 255
+  return ColorD(); // between 0 and 255
+}
+
+//--------------------------------------------------------------------------------
+ColorD GLWidget::radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const
+{
+  ColorD total;
+
+  if (recursionDepth > 0 && ray.Color.IsSignificant())
+  {
+    double opacity = 1.0;
+    double transparency = 1.0 - opacity;
+
+    // Diffuse
+    if (opacity > 0.0)
+      total += opacity * intersection.hit.surfaceColor(intersection.hitPoint) * ray.Color * calculateDiffuse(intersection);
+
+    // Reflection
+    if (transparency > 0.0)
+      total += calculateRefraction();
+
+    // Refraction
+  }
+
+  return total;
+}
+
+//--------------------------------------------------------------------------------
+ColorD GLWidget::calculateDiffuse(const Intersection& intersection) const
+{
+  ColorD total;
+
+  for (auto it = lights.cbegin(); it != lights.cend(); ++it)
+  {
+    const Light& source = *it;
+
+    Ray toSource(intersection.hitPoint, source.position - intersection.hitPoint, ColorD());
+
+    Triangle blockingTriangle;
+    double blockingTime;
+
+    // No triangles occluding the light source
+    if (!octree.Query(toSource, blockingTriangle, blockingTime))
+    {
+      double incidence = Vector3D::Dot(intersection.hit.surfaceNormal(intersection.hitPoint), Vector3D::Normalise(toSource.Direction));
+
+      if (incidence > 0.0)
+      {
+        double intensity = incidence / toSource.Direction.LengthSquared();
+
+        total += intensity * source.color;
+      }
+    }
+  }
+
+  return total;
+}
+
+//--------------------------------------------------------------------------------
+ColorD GLWidget::calculateReflection() const
+{
+  ColorD total;
+
+  return total;
+}
+
+//--------------------------------------------------------------------------------
+ColorD GLWidget::calculateRefraction() const
+{
+  ColorD total;
+
+  return total;
 }

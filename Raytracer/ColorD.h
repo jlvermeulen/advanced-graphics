@@ -1,5 +1,7 @@
 #pragma once
 
+#define MIN_INTENSITY 0.001
+
 class ColorD
 {
 public:
@@ -7,7 +9,14 @@ public:
 
 	ColorD();
 	ColorD(double r, double g, double b);
-	ColorD(unsigned char r, unsigned char g, unsigned char b);
+  ColorD(unsigned char r, unsigned char g, unsigned char b);
+
+  inline bool ColorD::IsSignificant() const
+  {
+    return (R >= MIN_INTENSITY ||
+            G >= MIN_INTENSITY ||
+            B >= MIN_INTENSITY);
+  }
 
 	void Clip();
 

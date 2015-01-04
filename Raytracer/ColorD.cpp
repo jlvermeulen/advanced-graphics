@@ -6,9 +6,9 @@ ColorD::ColorD(double r, double g, double b) : R(r), G(g), B(b) { }
 
 ColorD::ColorD(unsigned char r, unsigned char g, unsigned char b)
 {
-	R = (double)r / 255;
-	G = (double)g / 255;
-	B = (double)b / 255;
+  R = (double) r / 255;
+  G = (double) g / 255;
+  B = (double) b / 255;
 }
 
 void ColorD::Clip()

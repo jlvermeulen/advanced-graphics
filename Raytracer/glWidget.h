@@ -31,7 +31,7 @@ public:
   void setMaxDepth(int maxDepth) { maxDepth_ = maxDepth; }
 
   void loadScene(QString& fileName);
-  bool renderScene(uchar* imageData) const;
+  bool renderScene(uchar* imageData);
 
 public slots:
   void setBoundingBoxVisible(bool visible);
@@ -50,19 +50,50 @@ protected:
   void mouseMoveEvent(QMouseEvent* event);
 
 private:
+  struct Intersection
+  {
+    Intersection(const Vector3D& position_, const Vector3D& direction_, double time_, const Triangle& hit_) :
+      hitPoint(position_ + time_ * direction_),
+      hit(hit_)
+    {
+    }
+
+    Vector3D hitPoint;
+    Triangle hit;
+  };
+
+  struct Light
+  {
+    Light(const Vector3D& position_, const ColorD& color_) :
+      position(position_),
+      color(color_)
+    {
+
+    };
+
+    Vector3D position;
+    ColorD color;
+  };
   void drawBoundingBoxes() const;
   void drawCameraRay() const;
   void drawLine(const Vector3D& v1, const Vector3D& v2) const;
   void drawModel();
 
-  uchar raytrace(int x, int y, int channel) const;
+  ColorD radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const;
+  ColorD traceRay(Ray ray, double refractiveIndex, int recursionDepth) const;
+
+  ColorD calculateDiffuse(const Intersection& intersection) const;
+  ColorD calculateReflection() const;
+  ColorD calculateRefraction() const;
 
   // Rendering
   std::deque<Triangle> triangles;
+  std::vector<Light> lights;
   Camera camera_;
   Ray debugRay_;
   bool boundingBoxVisible_;
   bool cameraRayVisible_;
+  int recursionDepth;
   QPoint resolution_;
 
   // Octree

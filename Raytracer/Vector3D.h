@@ -13,6 +13,7 @@ public:
 	Vector3D(const double vec[]);
 
 	double Length();
+  double LengthSquared();
 
 	double Dot(const Vector3D& other) const;
 	static double Dot(const Vector3D& lhs, const Vector3D& rhs);
