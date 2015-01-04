@@ -59,7 +59,22 @@
     </property>
     <addaction name="openAction"/>
    </widget>
+   <widget class="QMenu" name="menuRaytracer">
+    <property name="title">
+     <string>Raytracer</string>
+    </property>
+    <addaction name="renderAction"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="boundingBoxAction"/>
+    <addaction name="cameraRayAction"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuRaytracer"/>
+   <addaction name="menuView"/>
   </widget>
   <action name="openAction">
    <property name="text">
@@ -67,6 +82,36 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="renderAction">
+   <property name="text">
+    <string>&amp;Render...</string>
+   </property>
+   <property name="shortcut">
+    <string>R</string>
+   </property>
+  </action>
+  <action name="cameraRayAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Camera Ray</string>
+   </property>
+   <property name="shortcut">
+    <string>C</string>
+   </property>
+  </action>
+  <action name="boundingBoxAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Bounding Box</string>
+   </property>
+   <property name="shortcut">
+    <string>B</string>
    </property>
   </action>
  </widget>
@@ -77,6 +122,10 @@
    <extends>QWidget</extends>
    <header>glWidget.h</header>
    <container>1</container>
+   <slots>
+    <slot>setBoundingBoxVisible(bool)</slot>
+    <slot>setCameraRayVisible(bool)</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -97,8 +146,57 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>boundingBoxAction</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setBoundingBoxVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>310</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cameraRayAction</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>glWidget</receiver>
+   <slot>setCameraRayVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>310</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>renderAction</sender>
+   <signal>triggered()</signal>
+   <receiver>Window</receiver>
+   <slot>openRenderDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openFileDialog()</slot>
+  <slot>openRenderDialog()</slot>
  </slots>
 </ui>

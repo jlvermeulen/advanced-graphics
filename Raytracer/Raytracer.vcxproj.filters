@@ -110,6 +110,24 @@
     <ClCompile Include="window.cpp">
       <Filter>Source Files\Interface</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_renderDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_renderDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="renderDialog.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="renderViewer.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_renderViewer.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_renderViewer.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_window.h">
@@ -145,6 +163,12 @@
     <ClInclude Include="Triangle.h">
       <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_renderDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_renderViewer.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="window.ui">
@@ -155,6 +179,18 @@
     </CustomBuild>
     <CustomBuild Include="window.h">
       <Filter>Header Files\Interface</Filter>
+    </CustomBuild>
+    <CustomBuild Include="renderDialog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="renderDialog.h">
+      <Filter>Header Files\Interface</Filter>
+    </CustomBuild>
+    <CustomBuild Include="renderViewer.h">
+      <Filter>Header Files\Interface</Filter>
+    </CustomBuild>
+    <CustomBuild Include="renderViewer.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
