@@ -102,6 +102,9 @@ void ObjReader::parseFace(IIterator& it)
 
     vertex.Normal = normals.at(parseInteger(++vIt) - 1);
 
+    // TODO: Take material color
+    vertex.Color = ColorD(1.0, 1.0, 1.0);
+
     vertices[i] = vertex;
     ++it;
   }

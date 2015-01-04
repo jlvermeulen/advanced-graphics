@@ -407,9 +407,6 @@ ColorD GLWidget::traceRay(Ray ray, double refractiveIndex, int recursionDepth) c
     // Background is black
     return ray.Color * ColorD();
   }
-
-
-  return ColorD(); // between 0 and 255
 }
 
 //--------------------------------------------------------------------------------
@@ -424,11 +421,15 @@ ColorD GLWidget::radiance(const Intersection& intersection, Ray ray, double refr
 
     // Diffuse
     if (opacity > 0.0)
-      total += opacity * intersection.hit.surfaceColor(intersection.hitPoint) * ray.Color * calculateDiffuse(intersection);
+    {
+      ColorD surfaceColor = intersection.hit.surfaceColor(intersection.hitPoint);
+      total += opacity * surfaceColor * ray.Color * calculateDiffuse(intersection);
+    }
 
     // Reflection
     if (transparency > 0.0)
-      total += calculateRefraction();
+    {
+    }
 
     // Refraction
   }
