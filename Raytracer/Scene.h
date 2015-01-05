@@ -85,6 +85,7 @@ public:
   ~Scene();
 
   bool Render(unsigned char* imageData, bool useOctree, int minTriangles, int maxDepth);
+  void LoadDefaultScene();
 
 private:
   ColorD radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const;

@@ -1,6 +1,7 @@
 #include "Scene.h"
 
 #include <Intersections.h>
+#include <ObjReader.h>
 
 #define MAX_RECURSION_DEPTH 5
 
@@ -208,4 +209,33 @@ ColorD Scene::calculateRefraction() const
   ColorD total;
 
   return total;
+}
+
+//--------------------------------------------------------------------------------
+void Scene::LoadDefaultScene()
+{
+	ObjReader reader;
+	objects.clear();
+
+	Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
+	for (int i = 0; i < obj.triangles.size(); i++)
+		for (int j = 0; j < 3; j++)
+		{
+			obj.triangles[i].Vertices[j].Position /= 3;
+			obj.triangles[i].Vertices[j].Position.X -= 0.5;
+			obj.triangles[i].Vertices[j].Position.Z += 0.125;
+		}
+	objects.push_back(obj);
+
+	obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
+	for (int i = 0; i < obj.triangles.size(); i++)
+		for (int j = 0; j < 3; j++)
+		{
+			obj.triangles[i].Vertices[j].Position /= 3;
+			obj.triangles[i].Vertices[j].Position.X += 0.5;
+			obj.triangles[i].Vertices[j].Position.Z -= 0.125;
+		}
+	objects.push_back(obj);
+
+	camera = Camera(Vector3D(0, 0.5, -2.5), Vector3D::Normalise(Vector3D(0, -0.25, 1)), Vector3D(0, 1, 0));
 }

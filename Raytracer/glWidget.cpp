@@ -136,40 +136,25 @@ void GLWidget::paintGL()
 //--------------------------------------------------------------------------------
 void GLWidget::keyPressEvent(QKeyEvent* event)
 {
-  bool changed = false;
+  bool changed = true;
 
   if (event->key() == Qt::Key_W)        // Forward
-  {
-    changed = true;
     scene.camera.MoveForward(stepSize_);
-  }
   else if (event->key() == Qt::Key_A)   // Left
-  {
-    changed = true;
     scene.camera.MoveRight(-stepSize_);
-  }
   else if (event->key() == Qt::Key_S)   // Backward
-  {
-    changed = true;
     scene.camera.MoveForward(-stepSize_);
-  }
   else if (event->key() == Qt::Key_D)   // Right
-  {
-    changed = true;
     scene.camera.MoveRight(stepSize_);
-  }
   else if (event->key() == Qt::Key_X)   // Up
-  {
-    changed = true;
     scene.camera.MoveUpward(stepSize_);
-  }
   else if (event->key() == Qt::Key_Z)   // Down
-  {
-    changed = true;
     scene.camera.MoveUpward(-stepSize_);
-  }
+  else if (event->key() == Qt::Key_P)
+    scene.LoadDefaultScene();
   else
   {
+    changed = false;
     QGLWidget::keyPressEvent(event);
   }
 
