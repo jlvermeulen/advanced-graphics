@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <string>
+#include <sstream>
 
 //--------------------------------------------------------------------------------
 ObjReader::ObjReader() :
@@ -144,7 +145,7 @@ void ObjReader::parseTexCoords(IIterator& it)
 
   texCoord.X = parseDouble(it);
   texCoord.Y = parseDouble(++it);
-  texCoord.Z = parseDouble(++it);
+  texCoord.Z = 0;
 
   texCoords.push_back(texCoord);
 }
@@ -164,7 +165,11 @@ void ObjReader::parseVertex(IIterator& it)
 //--------------------------------------------------------------------------------
 double ObjReader::parseDouble(const IIterator& it) const
 {
-  return atof((*it).c_str());
+  std::string s = it->c_str();
+  std::istringstream os(s);
+  double d;
+  os >> d;
+  return d;
 }
 
 //--------------------------------------------------------------------------------
