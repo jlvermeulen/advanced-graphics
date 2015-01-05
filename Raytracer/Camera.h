@@ -6,6 +6,7 @@ class Camera
 {
 public:
   Camera();
+  Camera(Vector3D eye, Vector3D focus, Vector3D up, int width = 1280, int height = 720, float fovY = 40.0);
   ~Camera();
 
 public:
@@ -16,10 +17,14 @@ public:
   void RotateY(float angle);
   void RotateZ(float angle);
 
+  Vector3D Eye() const { return eye_; }
+  Vector3D Focus() const { return focus_; }
+  Vector3D Up() const { return up_;  }
+  float FovY() const { return fovY_; }
 
-  Vector3D getEye() const { return eye_; }
-  Vector3D getFocus() const { return focus_; }
-  Vector3D getUp() const { return up_;  }
+public:
+  int Width;
+  int Height;
 
 private:
   Vector3D eye_;
@@ -30,4 +35,6 @@ private:
   float rotX_;
   float rotY_;
   float rotZ_;
+  
+  float fovY_;
 };

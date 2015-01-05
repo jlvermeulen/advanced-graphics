@@ -18,8 +18,8 @@ public:
   ~GLWidget();
 
 public:
-  QPoint getResolution() const { return resolution_;  }
-  void setResolution(QPoint resolution) { resolution_ = resolution; }
+  QPoint getResolution() const { return QPoint(camera_.Width, camera_.Height);  }
+  void setResolution(QPoint resolution){ camera_.Width = resolution.x(); camera_.Height = resolution.y(); }
 
   bool getUseOctree() const { return useOctree_;  }
   void setUseOctree(bool use) { useOctree_ = use; }
@@ -94,7 +94,6 @@ private:
   bool boundingBoxVisible_;
   bool cameraRayVisible_;
   int recursionDepth;
-  QPoint resolution_;
 
   // Octree
   Octree octree;

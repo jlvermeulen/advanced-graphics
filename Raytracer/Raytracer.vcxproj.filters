@@ -92,16 +92,10 @@
     <ClCompile Include="Matrix3x3D.cpp">
       <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
-    <ClCompile Include="Matrix4x4D.cpp">
-      <Filter>Source Files\Raytracer</Filter>
-    </ClCompile>
     <ClCompile Include="Octree.cpp">
       <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
     <ClCompile Include="Vector3D.cpp">
-      <Filter>Source Files\Raytracer</Filter>
-    </ClCompile>
-    <ClCompile Include="Vector4D.cpp">
       <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
     <ClCompile Include="ObjReader.cpp">
@@ -128,6 +122,9 @@
     <ClCompile Include="Release\moc_renderViewer.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files\Raytracer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_window.h">
@@ -143,9 +140,6 @@
       <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
     <ClInclude Include="Intersections.h">
-      <Filter>Header Files\Raytracer</Filter>
-    </ClInclude>
-    <ClInclude Include="Matrix4x4D.h">
       <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
     <ClInclude Include="Matrix3x3D.h">
@@ -168,6 +162,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_renderViewer.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -195,9 +192,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vector3D.h">
-      <Filter>Header Files\Raytracer</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector4D.h">
       <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.h">

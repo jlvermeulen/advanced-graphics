@@ -7,12 +7,27 @@
 
 //--------------------------------------------------------------------------------
 Camera::Camera() :
-  eye_(Vector3D(0, 0, 5)),
+  eye_(Vector3D(0, 0, 3)),
   focus_(Vector3D::Forward),
   right_(Vector3D::Right),
-  up_(Vector3D::Up)
+  up_(Vector3D::Up),
+  Width(1280),
+  Height(720),
+  fovY_(40)
 {
 
+}
+
+//--------------------------------------------------------------------------------
+Camera::Camera(Vector3D eye, Vector3D focus, Vector3D up, int width, int height, float fovY) :
+  eye_(eye),
+  focus_(focus),
+  up_(up),
+  Width(width),
+  Height(height),
+  fovY_(fovY)
+{
+  right_ = Vector3D::Cross(focus_, up_);
 }
 
 //--------------------------------------------------------------------------------

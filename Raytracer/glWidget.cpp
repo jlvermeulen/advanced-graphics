@@ -19,7 +19,6 @@ GLWidget::GLWidget(QWidget* parent)
     boundingBoxVisible_(false),
     cameraRayVisible_(false),
     recursionDepth(5),
-    resolution_(QPoint(1980, 1080)),
     useOctree_(false),
     minTriangles_(0),
     maxDepth_(0),
@@ -52,7 +51,7 @@ bool GLWidget::renderScene(uchar* imageData)
 {
   // Progress dialog slows it down enormously, so left it out..
   // Show rendering progress
-  //int numIterations = resolution_.x() * resolution_.y();
+  //int numIterations = camera_.Width * camera_.Height;
 
   //QProgressDialog progressDialog("Rendering in progress...", "Cancel", 0, numIterations, parentWidget());
   //progressDialog.setWindowModality(Qt::WindowModal);
@@ -62,30 +61,30 @@ bool GLWidget::renderScene(uchar* imageData)
   if (useOctree_)
     octree = Octree(triangles, minTriangles_, maxDepth_);
 
-  int smallerDim = ((resolution_.x() < resolution_.y()) ? resolution_.x() : resolution_.y());
+  int smallerDim = ((camera_.Width < camera_.Height) ? camera_.Width : camera_.Height);
 
-  Vector3D direction = camera_.getFocus();
+  Vector3D direction = camera_.Focus();
 
-  for (int x = 0; x < resolution_.x(); ++x)
+  for (int x = 0; x < camera_.Width; ++x)
   {
-    direction.X = camera_.getFocus().X + (x - resolution_.x() / 2.0) / smallerDim;
+    direction.X = camera_.Focus().X + (x - camera_.Width / 2.0) / smallerDim;
 
-    for (int y = 0; y < resolution_.y(); ++y)
+    for (int y = 0; y < camera_.Height; ++y)
     {
       //if (progressDialog.wasCanceled())
       //  return false;
 
-      direction.Y = camera_.getFocus().Y + (resolution_.y() / 2.0 - y) / smallerDim;
+      direction.Y = camera_.Focus().Y + (camera_.Height / 2.0 - y) / smallerDim;
 
       ColorD intensity(1.0, 1.0, 1.0);
-      Ray cameraRay(camera_.getEye(), direction, intensity);
+      Ray cameraRay(camera_.Eye(), direction, intensity);
 
       ColorD color = traceRay(cameraRay, 1, recursionDepth);
       color.R = std::min(1.0, color.R);
       color.G = std::min(1.0, color.G);
       color.B = std::min(1.0, color.B);
 
-      int offset = (y * resolution_.x() + x) * 4;
+      int offset = (y * camera_.Width + x) * 4;
 
       // For each color channel in reversed order (i.e. blue-green-red-alpha)
       imageData[offset]     = (uchar) (color.B * 255.0);
@@ -113,7 +112,7 @@ void GLWidget::setBoundingBoxVisible(bool visible)
 void GLWidget::setCameraRayVisible(bool visible)
 {
   cameraRayVisible_ = visible;
-  debugRay_ = Ray(camera_.getEye(), camera_.getFocus(), ColorD(1.0, 1.0, 1.0));
+  debugRay_ = Ray(camera_.Eye(), camera_.Focus(), ColorD(1.0, 1.0, 1.0));
   updateGL();
 }
 
@@ -142,7 +141,7 @@ void GLWidget::resizeGL(int width, int height)
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glPerspective(40.0, (double) width / (double) height, 0.1, 20.0);
+  glPerspective(camera_.FovY(), (double) width / (double) height, 0.1, 20.0);
 
   glMatrixMode(GL_MODELVIEW);
 }
@@ -156,16 +155,13 @@ void GLWidget::paintGL()
   glEnable(GL_LIGHTING);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  Vector3D eye = camera_.getEye();
-  Vector3D focus = camera_.getFocus();
-  Vector3D viewPoint = eye + focus;
-  Vector3D up = camera_.getUp();
+  Vector3D viewPoint = camera_.Eye() + camera_.Focus();
 
   // Camera position
   glLoadIdentity();
-  gluLookAt(eye.X, eye.Y, eye.Z,
+  gluLookAt(camera_.Eye().X, camera_.Eye().Y, camera_.Eye().Z,
             viewPoint.X, viewPoint.Y, viewPoint.Z,
-            up.X, up.Y, up.Z);
+            camera_.Up().X, camera_.Up().Y, camera_.Up().Z);
 
   drawModel();
 

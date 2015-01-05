@@ -284,7 +284,6 @@
     <ClCompile Include="Intersections.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Matrix3x3D.cpp" />
-    <ClCompile Include="Matrix4x4D.cpp" />
     <ClCompile Include="ObjReader.cpp" />
     <ClCompile Include="Octree.cpp" />
     <ClCompile Include="Release\moc_glWidget.cpp">
@@ -305,9 +304,9 @@
     </ClCompile>
     <ClCompile Include="renderDialog.cpp" />
     <ClCompile Include="renderViewer.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Vector3D.cpp" />
     <ClCompile Include="glWidget.cpp" />
-    <ClCompile Include="Vector4D.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -319,7 +318,6 @@
     <ClInclude Include="GeneratedFiles\ui_window.h" />
     <ClInclude Include="Intersections.h" />
     <ClInclude Include="Matrix3x3D.h" />
-    <ClInclude Include="Matrix4x4D.h" />
     <ClInclude Include="ObjReader.h" />
     <ClInclude Include="Octree.h" />
     <ClInclude Include="Ray.h" />
@@ -359,9 +357,9 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -DQT_DLL "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I." "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles"</Command>
     </CustomBuild>
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vector3D.h" />
-    <ClInclude Include="Vector4D.h" />
     <ClInclude Include="Vertex.h" />
     <CustomBuild Include="glWidget.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
