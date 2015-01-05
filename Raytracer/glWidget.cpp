@@ -11,23 +11,19 @@
 #include <QProgressDialog>
 #include <Vector3D.h>
 #include <queue>
-#include <Intersections.h>
 
 //--------------------------------------------------------------------------------
 GLWidget::GLWidget(QWidget* parent)
   : QGLWidget(parent),
     boundingBoxVisible_(false),
     cameraRayVisible_(false),
-    recursionDepth(5),
     useOctree_(false),
     minTriangles_(0),
     maxDepth_(0),
     stepSize_(0.1f),
-    lastPos()
+    lastPos(),
+    scene()
 {
-  // Add lights
-  lights.push_back(Light(Vector3D(0.5, 5.0, 7.0), ColorD(1.0, 1.0, 1.0)));
-  lights.push_back(Light(Vector3D(0.5, -5.0, 4.0), ColorD(1.0, 0.0, 0.0)));
 }
 
 //--------------------------------------------------------------------------------
@@ -40,65 +36,30 @@ GLWidget::~GLWidget()
 void GLWidget::loadScene(QString& fileName)
 {
   // Remove possible old data
-  triangles.clear();
+  scene.objects.clear();
 
   ObjReader reader;
-  triangles = reader.parseFile(fileName.toUtf8().data());
+
+  std::deque<Triangle>& triangles = reader.parseFile(fileName.toUtf8().data());
+  Material standard(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0);
+
+  scene.objects.push_back(Object(triangles, standard));
 }
 
 //--------------------------------------------------------------------------------
 bool GLWidget::renderScene(uchar* imageData)
 {
+  scene.Render(imageData, useOctree_, minTriangles_, maxDepth_);
+
+  return true;
+
   // Progress dialog slows it down enormously, so left it out..
   // Show rendering progress
-  //int numIterations = camera_.Width * camera_.Height;
+  //int numIterations = scene.camera.Width * scene.camera.Height;
 
   //QProgressDialog progressDialog("Rendering in progress...", "Cancel", 0, numIterations, parentWidget());
   //progressDialog.setWindowModality(Qt::WindowModal);
-
-  //int i = 0;
-
-  if (useOctree_)
-    octree = Octree(triangles, minTriangles_, maxDepth_);
-
-  int smallerDim = ((camera_.Width < camera_.Height) ? camera_.Width : camera_.Height);
-
-  Vector3D direction = camera_.Focus();
-
-  for (int x = 0; x < camera_.Width; ++x)
-  {
-    direction.X = camera_.Focus().X + (x - camera_.Width / 2.0) / smallerDim;
-
-    for (int y = 0; y < camera_.Height; ++y)
-    {
-      //if (progressDialog.wasCanceled())
-      //  return false;
-
-      direction.Y = camera_.Focus().Y + (camera_.Height / 2.0 - y) / smallerDim;
-
-      ColorD intensity(1.0, 1.0, 1.0);
-      Ray cameraRay(camera_.Eye(), direction, intensity);
-
-      ColorD color = 10 * traceRay(cameraRay, 1, recursionDepth);
-      color.R = std::min(1.0, color.R);
-      color.G = std::min(1.0, color.G);
-      color.B = std::min(1.0, color.B);
-
-      int offset = (y * camera_.Width + x) * 4;
-
-      // For each color channel in reversed order (i.e. blue-green-red-alpha)
-      imageData[offset]     = (uchar) (color.B * 255.0);
-      imageData[offset + 1] = (uchar) (color.G * 255.0);
-      imageData[offset + 2] = (uchar) (color.R * 255.0);
-      imageData[offset + 3] = 255;
-
-      //progressDialog.setValue(++i);
-    }
-  }
-
   //progressDialog.close();
-
-  return true;
 }
 
 //--------------------------------------------------------------------------------
@@ -112,7 +73,7 @@ void GLWidget::setBoundingBoxVisible(bool visible)
 void GLWidget::setCameraRayVisible(bool visible)
 {
   cameraRayVisible_ = visible;
-  debugRay_ = Ray(camera_.Eye(), camera_.Focus(), ColorD(1.0, 1.0, 1.0));
+  debugRay_ = Ray(scene.camera.Eye(), scene.camera.Focus(), ColorD(1.0, 1.0, 1.0));
   updateGL();
 }
 
@@ -141,7 +102,7 @@ void GLWidget::resizeGL(int width, int height)
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glPerspective(camera_.FovY(), (double) width / (double) height, 0.1, 20.0);
+  glPerspective(scene.camera.FovY(), (double) width / (double) height, 0.1, 20.0);
 
   glMatrixMode(GL_MODELVIEW);
 }
@@ -149,19 +110,16 @@ void GLWidget::resizeGL(int width, int height)
 //--------------------------------------------------------------------------------
 void GLWidget::paintGL()
 {
-	if (triangles.empty())
-		return;
-
   glEnable(GL_LIGHTING);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  Vector3D viewPoint = camera_.Eye() + camera_.Focus();
+  Vector3D viewPoint = scene.camera.Eye() + scene.camera.Focus();
 
   // Camera position
   glLoadIdentity();
-  gluLookAt(camera_.Eye().X, camera_.Eye().Y, camera_.Eye().Z,
+  gluLookAt(scene.camera.Eye().X, scene.camera.Eye().Y, scene.camera.Eye().Z,
             viewPoint.X, viewPoint.Y, viewPoint.Z,
-            camera_.Up().X, camera_.Up().Y, camera_.Up().Z);
+            scene.camera.Up().X, scene.camera.Up().Y, scene.camera.Up().Z);
 
   drawModel();
 
@@ -183,32 +141,32 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
   if (event->key() == Qt::Key_W)        // Forward
   {
     changed = true;
-    camera_.MoveForward(stepSize_);
+    scene.camera.MoveForward(stepSize_);
   }
   else if (event->key() == Qt::Key_A)   // Left
   {
     changed = true;
-    camera_.MoveRight(-stepSize_);
+    scene.camera.MoveRight(-stepSize_);
   }
   else if (event->key() == Qt::Key_S)   // Backward
   {
     changed = true;
-    camera_.MoveForward(-stepSize_);
+    scene.camera.MoveForward(-stepSize_);
   }
   else if (event->key() == Qt::Key_D)   // Right
   {
     changed = true;
-    camera_.MoveRight(stepSize_);
+    scene.camera.MoveRight(stepSize_);
   }
   else if (event->key() == Qt::Key_X)   // Up
   {
     changed = true;
-    camera_.MoveUpward(stepSize_);
+    scene.camera.MoveUpward(stepSize_);
   }
   else if (event->key() == Qt::Key_Z)   // Down
   {
     changed = true;
-    camera_.MoveUpward(-stepSize_);
+    scene.camera.MoveUpward(-stepSize_);
   }
   else
   {
@@ -235,8 +193,8 @@ void GLWidget::mouseMoveEvent(QMouseEvent* event)
     int dx = pos.x() - lastPos.x();
     int dy = pos.y() - lastPos.y();
 
-    camera_.RotateY(0.1 * dx);         // Horizontal
-    camera_.RotateX(0.1 * dy);         // Vertical
+    scene.camera.RotateY(0.1 * dx);         // Horizontal
+    scene.camera.RotateX(0.1 * dy);         // Vertical
 
     updateGL();
 
@@ -261,76 +219,54 @@ void GLWidget::glPerspective(double fovY, double aspect, double zNear, double zF
 void GLWidget::drawBoundingBoxes() const
 {
   glEnableClientState(GL_VERTEX_ARRAY);
-  //glBegin(GL_LINES);
 
-  // Initialize queue
-  std::queue<OctreeNode> q;
-  q.push(octree.root);
-
-  glColor3f(0, 1, 1);
-
-  GLubyte indices[] = { // 24 indices
-    0, 1, 0, 2,
-    0, 4, 1, 3,
-    1, 5, 2, 3,
-    2, 6, 3, 7,
-    4, 5, 4, 6,
-    5, 7, 6, 7
-  };
-
-  while (!q.empty())
+  for (const Object& obj : scene.objects)
   {
-    OctreeNode node = q.front();
-    q.pop();
+    // Initialize queue
+    std::queue<OctreeNode> q;
+    q.push(obj.octree.root);
 
-    BoundingBox bb = node.bb;
-    //Vector3D verts[8];
+    glColor3f(0, 1, 1);
 
-    //for (int i = 0; i < 8; i++)
-    //{
-    //  double x = i & 4 ? bb.Halfsize.X : -bb.Halfsize.X;
-    //  double y = i & 2 ? bb.Halfsize.Y : -bb.Halfsize.Y;
-    //  double z = i & 1 ? bb.Halfsize.Z : -bb.Halfsize.Z;
+    GLubyte indices[] = { // 24 indices
+      0, 1, 0, 2,
+      0, 4, 1, 3,
+      1, 5, 2, 3,
+      2, 6, 3, 7,
+      4, 5, 4, 6,
+      5, 7, 6, 7
+    };
 
-    //  verts[i] = bb.Center + Vector3D(x, y, z);
-    //}
-
-    //drawLine(verts[0], verts[1]);
-    //drawLine(verts[0], verts[2]);
-    //drawLine(verts[0], verts[4]);
-    //drawLine(verts[1], verts[3]);
-    //drawLine(verts[1], verts[5]);
-    //drawLine(verts[2], verts[3]);
-    //drawLine(verts[2], verts[6]);
-    //drawLine(verts[3], verts[7]);
-    //drawLine(verts[4], verts[5]);
-    //drawLine(verts[4], verts[6]);
-    //drawLine(verts[5], verts[7]);
-    //drawLine(verts[6], verts[7]);
-
-    GLfloat vertices[24]; // 8 times 3 coordinates
-
-    for (int i = 0; i < 8; i++)
+    while (!q.empty())
     {
-      float x = i & 4 ? bb.Halfsize.X : -bb.Halfsize.X;
-      float y = i & 2 ? bb.Halfsize.Y : -bb.Halfsize.Y;
-      float z = i & 1 ? bb.Halfsize.Z : -bb.Halfsize.Z;
+      OctreeNode node = q.front();
+      q.pop();
 
-      vertices[i * 3] = bb.Center.X + x;
-      vertices[i * 3 + 1] = bb.Center.Y + y;
-      vertices[i * 3 + 2] = bb.Center.Z + z;
+      BoundingBox bb = node.bb;
+
+      GLfloat vertices[24]; // 8 times 3 coordinates
+
+      for (int i = 0; i < 8; i++)
+      {
+        float x = i & 4 ? bb.Halfsize.X : -bb.Halfsize.X;
+        float y = i & 2 ? bb.Halfsize.Y : -bb.Halfsize.Y;
+        float z = i & 1 ? bb.Halfsize.Z : -bb.Halfsize.Z;
+
+        vertices[i * 3] = bb.Center.X + x;
+        vertices[i * 3 + 1] = bb.Center.Y + y;
+        vertices[i * 3 + 2] = bb.Center.Z + z;
+      }
+
+      glVertexPointer(3, GL_FLOAT, 0, vertices);
+
+      glDrawElements(GL_LINES, 24, GL_UNSIGNED_BYTE, indices);
+
+      for (OctreeNode& n : node.children)
+        q.push(n);
     }
-
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-
-    glDrawElements(GL_LINES, 24, GL_UNSIGNED_BYTE, indices);
-
-    for (OctreeNode& n : node.children)
-      q.push(n);
   }
 
   glDisableClientState(GL_VERTEX_ARRAY);
-  //glEnd();
 }
 
 //--------------------------------------------------------------------------------
@@ -338,13 +274,26 @@ void GLWidget::drawCameraRay() const
 {
   glBegin(GL_LINES);
 
+  Triangle minTri;
+  double minTime = std::numeric_limits<double>::max();
+
   Triangle tri;
   double time;
-  bool hit = octree.Query(debugRay_, tri, time);
+  bool hit = false;
+
+  for (const Object& obj : scene.objects)
+  {
+    if (obj.octree.Query(debugRay_, tri, time) && time < minTime)
+    {
+      hit = true;
+      minTri = tri;
+      minTime = time;
+    }
+  }
 
   if (hit)
   {
-    Vector3D point = debugRay_.Origin + time * debugRay_.Direction;
+    Vector3D point = debugRay_.Origin + minTime * debugRay_.Direction;
     glColor3f(1, 0, 0);
     double eps = 0.0025;
     for (int i = 0; i < 8; i++)
@@ -378,122 +327,18 @@ void GLWidget::drawModel()
 {
   glBegin(GL_TRIANGLES);
 
-  for (Triangle& triangle : triangles)
+  for (const Object& obj : scene.objects)
   {
-    for (Vertex& vertex : triangle.Vertices)
+    for (const Triangle& triangle : obj.triangles)
     {
-      glColor3f(vertex.Color.R, vertex.Color.G, vertex.Color.B);
-      glNormal3f(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
-      glVertex3f(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
-    }
-  }
-
-  glEnd();
-}
-
-//--------------------------------------------------------------------------------
-ColorD GLWidget::traceRay(Ray ray, double refractiveIndex, int recursionDepth) const
-{
-  Triangle hitTriangle;
-  double hitTime;
-
-  if (!useOctree_)
-  {
-	  hitTime = std::numeric_limits<double>::max();
-	  bool hit = false;
-	  for (const Triangle& tri : triangles)
-	  {
-		  double t = std::numeric_limits<double>::max();
-		  if (Intersects(ray, tri, t) && t < hitTime)
-		  {
-			  hitTime = t;
-			  hitTriangle = tri;
-			  hit = true;
-		  }
-	  }
-
-	  if (hit)
-		  return radiance(Intersection(ray.Origin, ray.Direction, hitTime, hitTriangle), ray, refractiveIndex, --recursionDepth);
-	  else
-		  return ray.Color * ColorD();
-  }
-  else if (octree.Query(ray, hitTriangle, hitTime))
-    return radiance(Intersection(ray.Origin, ray.Direction, hitTime, hitTriangle), ray, refractiveIndex, --recursionDepth);
-  else // Background is black
-    return ray.Color * ColorD();
-}
-
-//--------------------------------------------------------------------------------
-ColorD GLWidget::radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const
-{
-  ColorD total;
-
-  if (recursionDepth > 0 && ray.Color.IsSignificant())
-  {
-    double opacity = 1.0;
-    double transparency = 1.0 - opacity;
-
-    // Diffuse
-    if (opacity > 0.0)
-    {
-      ColorD surfaceColor = intersection.hit.surfaceColor(intersection.hitPoint);
-      total += opacity * surfaceColor * ray.Color * calculateDiffuse(intersection);
-    }
-
-    // Reflection
-    if (transparency > 0.0)
-    {
-    }
-
-    // Refraction
-  }
-
-  return total;
-}
-
-//--------------------------------------------------------------------------------
-ColorD GLWidget::calculateDiffuse(const Intersection& intersection) const
-{
-  ColorD total;
-
-  for (auto it = lights.cbegin(); it != lights.cend(); ++it)
-  {
-    const Light& source = *it;
-
-    Ray toSource(intersection.hitPoint, source.position - intersection.hitPoint, ColorD());
-
-    Triangle blockingTriangle;
-    double blockingTime;
-
-    // No triangles occluding the light source
-    if (!octree.Query(toSource, blockingTriangle, blockingTime))
-    {
-      double incidence = Vector3D::Dot(intersection.hit.surfaceNormal(intersection.hitPoint), Vector3D::Normalise(toSource.Direction));
-
-      if (incidence > 0.0)
+      for (const Vertex& vertex : triangle.Vertices)
       {
-        double intensity = incidence / toSource.Direction.LengthSquared();
-
-        total += intensity * source.color;
+        glColor3f(vertex.Color.R, vertex.Color.G, vertex.Color.B);
+        glNormal3f(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
+        glVertex3f(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
       }
     }
   }
 
-  return total;
-}
-
-//--------------------------------------------------------------------------------
-ColorD GLWidget::calculateReflection() const
-{
-  ColorD total;
-
-  return total;
-}
-
-//--------------------------------------------------------------------------------
-ColorD GLWidget::calculateRefraction() const
-{
-  ColorD total;
-
-  return total;
+  glEnd();
 }
