@@ -24,23 +24,34 @@ public:
 		Vertices[2] = v[2];
 	}
 
-  ColorD surfaceColor(Vector3D point) const
-  {
-    double d0 = (Vertices[0].Position - point).Length();
-    double d1 = (Vertices[1].Position - point).Length();
-    double d2 = (Vertices[2].Position - point).Length();
+	Vector3D Interpolate(Vector3D point) const
+	{
+		Vector3D p1 = Vertices[0].Position - point;
+		Vector3D p2 = Vertices[1].Position - point;
+		Vector3D p3 = Vertices[2].Position - point;
 
-    return (d0 * Vertices[0].Color + d1 * Vertices[1].Color + d2 * Vertices[2].Color) / (d0 + d1 + d2);
-  }
+		double a = Vector3D::Cross(Vertices[0].Position - Vertices[1].Position, Vertices[0].Position - Vertices[2].Position).Length();
+		double aInv = 1 / a;
+		double a1 = Vector3D::Cross(p2, p3).Length() * aInv;
+		double a2 = Vector3D::Cross(p3, p1).Length() * aInv;
+		double a3 = Vector3D::Cross(p1, p2).Length() * aInv;
+
+		return Vector3D(a1, a2, a3);
+	}
+
+	ColorD surfaceColor(Vector3D point) const
+	{
+		Vector3D factors = Interpolate(point);
+
+		return factors.X * Vertices[0].Color + factors.Y * Vertices[1].Color + factors.Z * Vertices[2].Color;
+	}
   
-  Vector3D surfaceNormal(Vector3D point) const
-  {
-    double d0 = (Vertices[0].Position - point).Length();
-    double d1 = (Vertices[1].Position - point).Length();
-    double d2 = (Vertices[2].Position - point).Length();
+	Vector3D surfaceNormal(Vector3D point) const
+	{
+		Vector3D factors = Interpolate(point);
 
-    return (d0 * Vertices[0].Normal + d1 * Vertices[1].Normal + d2 * Vertices[2].Normal) / (d0 + d1 + d2);
-  }
+		return factors.X * Vertices[0].Normal + factors.Y * Vertices[1].Normal + factors.Z * Vertices[2].Normal;
+	}
 
 private:
 };
