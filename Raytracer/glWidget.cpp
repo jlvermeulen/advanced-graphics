@@ -80,7 +80,7 @@ bool GLWidget::renderScene(uchar* imageData)
       ColorD intensity(1.0, 1.0, 1.0);
       Ray cameraRay(camera_.getEye(), direction, intensity);
 
-      ColorD color = traceRay(cameraRay, 1, recursionDepth);
+      ColorD color = 10 * traceRay(cameraRay, 1, recursionDepth);
       color.R = std::min(1.0, color.R);
       color.G = std::min(1.0, color.G);
       color.B = std::min(1.0, color.B);
@@ -401,15 +401,30 @@ ColorD GLWidget::traceRay(Ray ray, double refractiveIndex, int recursionDepth) c
   Triangle hitTriangle;
   double hitTime;
 
-  if (octree.Query(ray, hitTriangle, hitTime))
+  if (!useOctree_)
   {
+	  hitTime = std::numeric_limits<double>::max();
+	  bool hit = false;
+	  for (const Triangle& tri : triangles)
+	  {
+		  double t = std::numeric_limits<double>::max();
+		  if (Intersects(ray, tri, t) && t < hitTime)
+		  {
+			  hitTime = t;
+			  hitTriangle = tri;
+			  hit = true;
+		  }
+	  }
+
+	  if (hit)
+		  return radiance(Intersection(ray.Origin, ray.Direction, hitTime, hitTriangle), ray, refractiveIndex, --recursionDepth);
+	  else
+		  return ray.Color * ColorD();
+  }
+  else if (octree.Query(ray, hitTriangle, hitTime))
     return radiance(Intersection(ray.Origin, ray.Direction, hitTime, hitTriangle), ray, refractiveIndex, --recursionDepth);
-  }
-  else
-  {
-    // Background is black
+  else // Background is black
     return ray.Color * ColorD();
-  }
 }
 
 //--------------------------------------------------------------------------------
