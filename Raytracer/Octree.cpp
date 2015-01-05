@@ -3,11 +3,8 @@
 #include <limits>
 
 OctreeNode::OctreeNode() { }
-OctreeNode::OctreeNode(const std::deque<Triangle>& triangles, const BoundingBox& bb, unsigned int minTriangles, unsigned int maxDepth)
+OctreeNode::OctreeNode(const std::deque<Triangle>& triangles, const BoundingBox& bb, unsigned int minTriangles, unsigned int maxDepth) : bb(bb), children(std::vector<OctreeNode>())
 {
-	this->bb = bb;
-	this->children = std::vector<OctreeNode>();
-
 	if (triangles.size() <= minTriangles || maxDepth == 0)
 	{
 		this->triangles = triangles;

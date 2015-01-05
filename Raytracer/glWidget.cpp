@@ -81,6 +81,9 @@ bool GLWidget::renderScene(uchar* imageData)
       Ray cameraRay(camera_.getEye(), direction, intensity);
 
       ColorD color = traceRay(cameraRay, 1, recursionDepth);
+      color.R = std::min(1.0, color.R);
+      color.G = std::min(1.0, color.G);
+      color.B = std::min(1.0, color.B);
 
       int offset = (y * resolution_.x() + x) * 4;
 
