@@ -11,9 +11,21 @@
 Scene::Scene() :
   useOctree_(false)
 {
-  // Add lights
-  //lights.push_back(Light(Vector3D(0.5, 5.0, 7.0), ColorD(10.0, 10.0, 10.0)));
-  //lights.push_back(Light(Vector3D(0.5, -5.0, 4.0), ColorD(10.0, 0.0, 0.0)));
+	// checkerboard
+	Vertex v1(Vector3D(-100, -0.5, -100), Vector3D(0, 1, 0), ColorD(), Vector3D());
+	Vertex v2(Vector3D(100, -0.5, -100), Vector3D(0, 1, 0), ColorD(), Vector3D());
+	Vertex v3(Vector3D(-100, -0.5, 100), Vector3D(0, 1, 0), ColorD(), Vector3D());
+	Vertex v4(Vector3D(100, -0.5, 100), Vector3D(0, 1, 0), ColorD(), Vector3D());
+
+	std::deque<Triangle> tris;
+	tris.push_back(Triangle(v1, v3, v2));
+	tris.push_back(Triangle(v4, v2, v3));
+
+	checkerboard = Object(tris, Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
+
+	// Add lights
+	//lights.push_back(Light(Vector3D(0.5, 5.0, 7.0), ColorD(10.0, 10.0, 10.0)));
+	//lights.push_back(Light(Vector3D(0.5, -5.0, 4.0), ColorD(10.0, 0.0, 0.0)));
 }
 
 Scene::~Scene()
@@ -111,6 +123,21 @@ ColorD Scene::traceRay(Ray ray, double refractiveIndex, int recursionDepth) cons
         }
       }
     }
+  }
+
+  // checkerboard
+  for (const Triangle& tri : checkerboard.triangles)
+  {
+	double t = std::numeric_limits<double>::max();
+
+	if (Intersects(ray, tri, t) && t < hitTime)
+	{
+		Vector3D point = ray.Origin + t * ray.Direction;
+		double intpart;
+		bool xOdd = point.X > 0 && modf(point.X, &intpart) < 0.5 || modf(point.X, &intpart) < -0.5;
+		bool zOdd = point.Z > 0 && modf(point.Z, &intpart) < 0.5 || modf(point.Z, &intpart) < -0.5;
+		return ray.Color * (xOdd && zOdd || !xOdd && !zOdd ? ColorD(0.0, 0.0, 0.0) : ColorD(1.0, 1.0, 1.0));
+	}
   }
 
   if (hit)

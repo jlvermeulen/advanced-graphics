@@ -61,6 +61,8 @@ struct Light
 
 struct Object
 {
+  Object() : material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0) { }
+
   Object(const std::deque<Triangle>& triangles, Material material) :
     triangles(triangles),
     material(material)
@@ -100,6 +102,7 @@ public:
   std::vector<Object> objects;
   std::vector<Light> lights;
   std::deque<Ray> cameraRays;
+  Object checkerboard;
 
 private:
   bool useOctree_;
