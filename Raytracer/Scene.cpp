@@ -22,10 +22,6 @@ Scene::Scene() :
 	tris.push_back(Triangle(v4, v2, v3));
 
 	checkerboard = Object(tris, Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
-
-	// Add lights
-	//lights.push_back(Light(Vector3D(0.5, 5.0, 7.0), ColorD(10.0, 10.0, 10.0)));
-	//lights.push_back(Light(Vector3D(0.5, -5.0, 4.0), ColorD(10.0, 0.0, 0.0)));
 }
 
 Scene::~Scene()
@@ -152,30 +148,38 @@ ColorD Scene::traceRay(Ray ray, double refractiveIndex, int recursionDepth) cons
 //--------------------------------------------------------------------------------
 ColorD Scene::radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const
 {
-  ColorD total;
-
   if (recursionDepth > 0 && ray.Color.IsSignificant())
   {
     double transparency = intersection.hitMaterial.transparency;
     double opacity = 1.0 - transparency;
 
     // Diffuse
-    if (opacity > 0.0)
+    if (intersection.hitMaterial.reflType == ReflectionType::diffuse)
     {
-      ColorD surfaceColor = intersection.hit.surfaceColor(intersection.hitPoint);
-      total += opacity * surfaceColor * ray.Color * calculateDiffuse(intersection);
+      if (opacity > 0.0)
+      {
+        ColorD surfaceColor = intersection.hit.surfaceColor(intersection.hitPoint);
+        return opacity * surfaceColor * ray.Color * calculateDiffuse(intersection);
+      }
     }
 
     // Refraction
-    if (transparency > 0.0)
+    if (intersection.hitMaterial.reflType == ReflectionType::refractive)
     {
-      total += calculateRefraction(intersection, ray, refractiveIndex, recursionDepth);
+      if (transparency > 0.0)
+      {
+        return transparency * calculateRefraction(intersection, ray, refractiveIndex, recursionDepth);
+      }
     }
 
     // Reflection
+    if (intersection.hitMaterial.reflType == ReflectionType::specular)
+    {
+      return opacity * calculateReflection(intersection, ray, refractiveIndex, recursionDepth);
+    }
   }
 
-  return total;
+  return ColorD();
 }
 
 //--------------------------------------------------------------------------------
@@ -284,7 +288,7 @@ void Scene::LoadDefaultScene()
   }
 	objects.push_back(obj);
 
-	obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 0.5, 0.5));
+	obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::specular, ColorD(), ColorD(), 0.5, 0.5));
   for (int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
