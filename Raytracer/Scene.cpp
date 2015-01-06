@@ -34,14 +34,13 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
     }
   }
 
-  double tanHalfFovY = camera.ZNear() * tan(0.5 * camera.FovY());
+  double tanHalfFovY = tan(camera.FovY() / 360 * M_PI);
   double tanHalfFovX = tanHalfFovY * camera.Width / camera.Height;
 
   double left = -tanHalfFovX;
   double right = tanHalfFovX;
   double top = tanHalfFovY;
   double bottom = -tanHalfFovY;
-
 
   // Calculate pixel rays
   for (int x = 0; x < camera.Width; ++x)
