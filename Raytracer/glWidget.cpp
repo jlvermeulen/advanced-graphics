@@ -47,14 +47,14 @@ void GLWidget::loadScene(QString& fileName)
 }
 
 //--------------------------------------------------------------------------------
-QTime GLWidget::renderScene(uchar* imageData)
+int GLWidget::renderScene(uchar* imageData)
 {
   QTime timer;
   timer.start();
 
   scene.Render(imageData, useOctree_, minTriangles_, maxDepth_);
 
-  return timer;
+  return timer.elapsed();
 
   // Progress dialog slows it down enormously, so left it out..
   // Show rendering progress

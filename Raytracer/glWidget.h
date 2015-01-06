@@ -33,7 +33,7 @@ public:
   void setMaxDepth(int maxDepth) { maxDepth_ = maxDepth; }
 
   void loadScene(QString& fileName);
-  QTime renderScene(uchar* imageData);
+  int renderScene(uchar* imageData);
 
 public slots:
   void setBoundingBoxVisible(bool visible);
@@ -45,6 +45,8 @@ protected:
   void initializeGL();
   void resizeGL(int width, int height);
   void paintGL();
+
+
 
   void keyPressEvent(QKeyEvent* event);
 

@@ -57,7 +57,7 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
 
       cameraRays.push_back(cameraRay);
 
-      ColorD color = 10 * traceRay(cameraRay, 1.0, MAX_RECURSION_DEPTH);
+      ColorD color = traceRay(cameraRay, 1.0, MAX_RECURSION_DEPTH);
     
       // clamp color value between 0 and 1
       color.R = std::max(0.0, std::min(1.0, color.R));

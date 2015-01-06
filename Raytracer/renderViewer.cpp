@@ -36,7 +36,12 @@ void RenderViewer::setImage(QImage image)
 }
 
 //--------------------------------------------------------------------------------
-void RenderViewer::setElaspedTime(QTime time)
+void RenderViewer::setElaspedTime(int elapsedTime)
 {
-  ui->elapsedTimeValue->setText(time.toString("m:s.zzz"));
+  QString time = QString("%1:%2.%3")
+    .arg(elapsedTime / 60000, 2, 10, QChar('0'))
+    .arg((elapsedTime % 60000) / 1000, 2, 10, QChar('0'))
+    .arg(elapsedTime % 1000, 3, 10, QChar('0'));
+
+  ui->elapsedTimeValue->setText(time);
 }

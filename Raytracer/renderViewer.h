@@ -18,7 +18,7 @@ public:
 
 public:
   void setImage(QImage image);
-  void setElaspedTime(QTime time);
+  void setElaspedTime(int elapsedTime);
 
 public slots:
   void saveRender();

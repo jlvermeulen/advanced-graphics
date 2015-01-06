@@ -2,7 +2,6 @@
 #include "ui_window.h"
 
 #include <QFileDialog>
-#include <QTime>
 
 #include "renderDialog.h"
 #include "renderViewer.h"
@@ -51,7 +50,7 @@ void Window::openRenderDialog()
     getGLWidget()->setMaxDepth(renderDialog.getMaxDepth());
 
     uchar* imageData = new uchar[resolution.x() * resolution.y() * 4];    // Width * Height * Color Channels
-    QTime elapsedTime = getGLWidget()->renderScene(imageData);
+    int elapsedTime = getGLWidget()->renderScene(imageData);
 
     QImage image(imageData, resolution.x(), resolution.y(), QImage::Format_RGB32);
 
