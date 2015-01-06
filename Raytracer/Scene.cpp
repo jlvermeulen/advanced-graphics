@@ -225,35 +225,35 @@ void Scene::LoadDefaultScene()
 {
 	ObjReader reader;
 	objects.clear();
-  lights.clear();
+	lights.clear();
 
 	Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
-  for (int i = 0; i < obj.triangles.size(); ++i)
-  {
-    for (int j = 0; j < 3; j++)
-    {
-      obj.triangles[i].Vertices[j].Position /= 3;
-      obj.triangles[i].Vertices[j].Position.X -= 0.5;
-      obj.triangles[i].Vertices[j].Position.Z += 0.125;
-    }
-  }
+	for (int i = 0; i < obj.triangles.size(); ++i)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			obj.triangles[i].Vertices[j].Position /= 3;
+			obj.triangles[i].Vertices[j].Position.X -= 0.5;
+			obj.triangles[i].Vertices[j].Position.Z += 0.125;
+		}
+	}
 	objects.push_back(obj);
 
 	obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
-  for (int i = 0; i < obj.triangles.size(); ++i)
-  {
-    for (int j = 0; j < 3; j++)
-    {
-      obj.triangles[i].Vertices[j].Position /= 3;
-      obj.triangles[i].Vertices[j].Position.X += 0.5;
-      obj.triangles[i].Vertices[j].Position.Z -= 0.125;
-    }
-  }
+	for (int i = 0; i < obj.triangles.size(); ++i)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			obj.triangles[i].Vertices[j].Position /= 3;
+			obj.triangles[i].Vertices[j].Position.X += 0.5;
+			obj.triangles[i].Vertices[j].Position.Z -= 0.125;
+		}
+	}
 	objects.push_back(obj);
 
-  // Add lights
-  lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(10.0, 10.0, 10.0)));
-  lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(10.0, 10.0, 10.0)));
+	// Add lights
+	lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(10.0, 10.0, 10.0)));
+	lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(10.0, 10.0, 10.0)));
 
 	camera = Camera(Vector3D(0, 0.5, -2.5), Vector3D::Normalise(Vector3D(0, -0.25, 1)), Vector3D(0, 1, 0));
 }

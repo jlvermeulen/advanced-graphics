@@ -18,8 +18,8 @@ GLWidget::GLWidget(QWidget* parent)
     boundingBoxVisible_(false),
     cameraRayVisible_(false),
     useOctree_(true),
-    minTriangles_(100),
-    maxDepth_(5),
+    minTriangles_(10),
+    maxDepth_(10),
     stepSize_(0.1f),
     lastPos(),
     scene()

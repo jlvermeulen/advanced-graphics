@@ -20,6 +20,7 @@ ObjReader::~ObjReader()
 //--------------------------------------------------------------------------------
 std::deque<Triangle> ObjReader::parseFile(const char* fileName)
 {
+  reset();
   // Open file stream
   std::ifstream fin;
   fin.open(fileName);
@@ -203,6 +204,7 @@ void ObjReader::reset()
   normals.clear();
   positions.clear();
   texCoords.clear();
+  triangles.clear();
 
   combined_ = false;
 }
