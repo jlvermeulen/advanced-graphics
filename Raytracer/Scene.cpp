@@ -54,11 +54,11 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
       break;
 
     case RayDistributionType::jitteredStratification:
-      jitteredStratificationRayTrace(imageData, numberOfRays, stratificationSize);
+      jitteredStratificationRayTrace(imageData, stratificationSize);
       break;
 
     case RayDistributionType::stratification:
-      stratificationRayTrace(imageData, numberOfRays, stratificationSize);
+      stratificationRayTrace(imageData, stratificationSize);
       break;
 
     case RayDistributionType::uniform:
@@ -141,6 +141,7 @@ void Scene::gaussianRayTrace(uchar* imageData, int numberOfRays, double sigma)
 
         double a = left + (right - left) * (x + rX) / camera.Width;
         double b = top + (bottom - top) * (y + rY) / camera.Height;
+
         Vector3D direction = camera.Focus() + a * camera.Right() + b * camera.Up();
 
         ColorD intensity(1.0, 1.0, 1.0);
@@ -169,12 +170,68 @@ void Scene::gaussianRayTrace(uchar* imageData, int numberOfRays, double sigma)
 }
 
 //--------------------------------------------------------------------------------
-void Scene::jitteredStratificationRayTrace(uchar* imageData, int numberOfRays, int size)
+void Scene::jitteredStratificationRayTrace(uchar* imageData, int size)
 {
+  double tanHalfFovY = tan(camera.FovY() / 360 * M_PI);
+  double tanHalfFovX = tanHalfFovY * camera.Width / camera.Height;
+
+  double left = -tanHalfFovX;
+  double right = tanHalfFovX;
+  double top = tanHalfFovY;
+  double bottom = -tanHalfFovY;
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<double> dis(0, 1);
+
+  // Calculate pixel rays
+  for (int x = 0; x < camera.Width; ++x)
+  {
+    for (int y = 0; y < camera.Height; ++y)
+    {
+      ColorD color;
+
+      for (int u = 0; u < size; ++u)
+      {
+        double rU = dis(gen);
+        double mU = (u + rU) / size;
+        double a = left + (right - left) * (x + mU) / camera.Width;
+
+        for (int v = 0; v < size; ++v)
+        {
+          double rV = dis(gen);
+          double mV = (v + rV) / size;
+          double b = top + (bottom - top) * (y + mV) / camera.Height;
+
+          Vector3D direction = camera.Focus() + a * camera.Right() + b * camera.Up();
+
+          ColorD intensity(1.0, 1.0, 1.0);
+          Ray cameraRay(camera.Eye(), direction, intensity);
+
+          color += traceRay(cameraRay, 1.0, MAX_RECURSION_DEPTH);
+        }
+      }
+
+      color /= size * size;
+
+      // clamp color value between 0 and 1
+      color.R = std::max(0.0, std::min(1.0, color.R));
+      color.G = std::max(0.0, std::min(1.0, color.G));
+      color.B = std::max(0.0, std::min(1.0, color.B));
+
+      int offset = (y * camera.Width + x) * 4;
+
+      // For each color channel in reversed order (i.e. blue-green-red-alpha)
+      imageData[offset] = (uchar) (color.B * 255.0);
+      imageData[offset + 1] = (uchar) (color.G * 255.0);
+      imageData[offset + 2] = (uchar) (color.R * 255.0);
+      imageData[offset + 3] = 255;
+    }
+  }
 }
 
 //--------------------------------------------------------------------------------
-void Scene::stratificationRayTrace(uchar* imageData, int numberOfRays, int size)
+void Scene::stratificationRayTrace(uchar* imageData, int size)
 {
   double tanHalfFovY = tan(camera.FovY() / 360 * M_PI);
   double tanHalfFovX = tanHalfFovY * camera.Width / camera.Height;
@@ -194,14 +251,13 @@ void Scene::stratificationRayTrace(uchar* imageData, int numberOfRays, int size)
       for (int u = 0; u < size; ++u)
       {
         double mU = (u + 0.5) / size;
-
         double a = left + (right - left) * (x + mU) / camera.Width;
 
-        for (int v = 0; u < size; ++v)
+        for (int v = 0; v < size; ++v)
         {
           double mV = (v + 0.5) / size;
-
           double b = top + (bottom - top) * (y + mV) / camera.Height;
+
           Vector3D direction = camera.Focus() + a * camera.Right() + b * camera.Up();
 
           ColorD intensity(1.0, 1.0, 1.0);
@@ -258,6 +314,7 @@ void Scene::uniformRayTrace(uchar* imageData, int numberOfRays)
 
         double a = left + (right - left) * (x + rX) / camera.Width;
         double b = top + (bottom - top) * (y + rY) / camera.Height;
+
         Vector3D direction = camera.Focus() + a * camera.Right() + b * camera.Up();
 
         ColorD intensity(1.0, 1.0, 1.0);

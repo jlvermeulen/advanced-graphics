@@ -115,8 +115,8 @@ private:
 
   void normalRayTrace(uchar* imageData);
   void gaussianRayTrace(uchar* imageData, int numberOfRays, double sigma);
-  void jitteredStratificationRayTrace(uchar* imageData, int numberOfRays, int size);
-  void stratificationRayTrace(uchar* imageData, int numberOfRays, int size);
+  void jitteredStratificationRayTrace(uchar* imageData, int size);
+  void stratificationRayTrace(uchar* imageData, int size);
   void uniformRayTrace(uchar* imageData, int numberOfRays);
 
   double gaussianWeight(double x, double y, double sigma) const;
