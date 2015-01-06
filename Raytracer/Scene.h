@@ -99,6 +99,7 @@ public:
   Camera camera;
   std::vector<Object> objects;
   std::vector<Light> lights;
+  std::deque<Ray> cameraRays;
 
 private:
   bool useOctree_;

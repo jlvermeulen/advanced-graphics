@@ -1,9 +1,12 @@
+#define _USE_MATH_DEFINES
+#define MAX_RECURSION_DEPTH 5
+
 #include "Scene.h"
 
 #include <Intersections.h>
+#include <math.h>
 #include <ObjReader.h>
 
-#define MAX_RECURSION_DEPTH 5
 
 Scene::Scene() :
   useOctree_(false)
@@ -31,21 +34,27 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
     }
   }
 
+  double tanHalfFovY = camera.ZNear() * tan(0.5 * camera.FovY());
+  double tanHalfFovX = tanHalfFovY * camera.Width / camera.Height;
+
+  double left = -tanHalfFovX;
+  double right = tanHalfFovX;
+  double top = tanHalfFovY;
+  double bottom = -tanHalfFovY;
+
   // Calculate pixel rays
-  int smallerDim = ((camera.Width < camera.Height) ? camera.Width : camera.Height);
-
-  Vector3D direction = camera.Focus();
-
   for (int x = 0; x < camera.Width; ++x)
   {
-    direction.X = camera.Focus().X + (x - camera.Width / 2.0) / smallerDim;
-
+    double a = left + (right - left) * (x + 0.5) / camera.Width;
     for (int y = 0; y < camera.Height; ++y)
     {
-      direction.Y = camera.Focus().Y + (camera.Height / 2.0 - y) / smallerDim;
+      double b = top + (bottom - top) * (y + 0.5) / camera.Height;
+      Vector3D direction = camera.Focus() + a * camera.Right() + b * camera.Up();
 
       ColorD intensity(1.0, 1.0, 1.0);
       Ray cameraRay(camera.Eye(), direction, intensity);
+
+      cameraRays.push_back(cameraRay);
 
       ColorD color = 10 * traceRay(cameraRay, 1.0, MAX_RECURSION_DEPTH);
       color.R = std::min(1.0, color.R);
@@ -69,24 +78,24 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
 ColorD Scene::traceRay(Ray ray, double refractiveIndex, int recursionDepth) const
 {
   Triangle hitTriangle;
-  double hitTime;
+  double hitTime = std::numeric_limits<double>::max();
+  bool hit = false;
 
-  if (useOctree_)
+  for (const Object& obj : objects)
   {
-    for (const Object& obj : objects)
+    if (useOctree_)
     {
-      if (obj.octree.Query(ray, hitTriangle, hitTime))
+      Triangle tri;
+      double t = std::numeric_limits<double>::max();
+
+      if (obj.octree.Query(ray, tri, t) && t < hitTime)
       {
-        return radiance(Intersection(ray, hitTime, hitTriangle), ray, refractiveIndex, --recursionDepth);
+        hitTriangle = tri;
+        hitTime = t;
+        hit = true;
       }
     }
-  }
-  else
-  {
-    hitTime = std::numeric_limits<double>::max();
-    bool hit = false;
-
-    for (const Object& obj : objects)
+    else
     {
       for (const Triangle& tri : obj.triangles)
       {
@@ -100,15 +109,12 @@ ColorD Scene::traceRay(Ray ray, double refractiveIndex, int recursionDepth) cons
         }
       }
     }
-
-    if (hit)
-      return radiance(Intersection(ray, hitTime, hitTriangle), ray, refractiveIndex, --recursionDepth);
-    else
-      return ray.Color * ColorD();
   }
 
-  // Background is black
-  return ray.Color * ColorD();
+  if (hit)
+    return radiance(Intersection(ray, hitTime, hitTriangle), ray, refractiveIndex, --recursionDepth);
+  else
+    return ray.Color * ColorD();  // Background is black
 }
 
 //--------------------------------------------------------------------------------
@@ -218,7 +224,7 @@ void Scene::LoadDefaultScene()
 	objects.clear();
 
 	Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
-	for (int i = 0; i < obj.triangles.size(); i++)
+	for (int i = 0; i < obj.triangles.size(); ++i)
 		for (int j = 0; j < 3; j++)
 		{
 			obj.triangles[i].Vertices[j].Position /= 3;
@@ -228,7 +234,7 @@ void Scene::LoadDefaultScene()
 	objects.push_back(obj);
 
 	obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
-	for (int i = 0; i < obj.triangles.size(); i++)
+	for (int i = 0; i < obj.triangles.size(); ++i)
 		for (int j = 0; j < 3; j++)
 		{
 			obj.triangles[i].Vertices[j].Position /= 3;

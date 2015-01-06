@@ -10,7 +10,7 @@ RenderDialog::RenderDialog(QWidget* parent)
 
   // Fill resolution box
   ui->resolutionBox->addItem(QString("1980x1080"), QVariant(QPoint(1980, 1080)));
-  ui->resolutionBox->addItem(QString("1280x720"), QVariant(QPoint(1280, 780)));
+  ui->resolutionBox->addItem(QString("1280x720"), QVariant(QPoint(1280, 720)));
 
   // Fill data structure box
   ui->dataStructureBox->addItem(QString("List"), QVariant(false));

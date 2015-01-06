@@ -102,7 +102,7 @@ void GLWidget::resizeGL(int width, int height)
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glPerspective(scene.camera.FovY(), (double) width / (double) height, 0.1, 20.0);
+  glPerspective(scene.camera.FovY(), (double) width / (double) height, scene.camera.ZNear(), scene.camera.ZFar());
 
   glMatrixMode(GL_MODELVIEW);
 }
@@ -296,6 +296,11 @@ void GLWidget::drawCameraRay() const
   }
 
   drawLine(debugRay_.Origin, debugRay_.Origin + 10 * debugRay_.Direction);
+
+  for (const Ray& ray : scene.cameraRays)
+  {
+    drawLine(ray.Origin, ray.Origin + ray.Direction);
+  }
 
   glEnd();
 }
