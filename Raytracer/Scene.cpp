@@ -221,18 +221,16 @@ ColorD Scene::calculateReflection(const Intersection& intersection, const Ray& r
 //--------------------------------------------------------------------------------
 ColorD Scene::calculateRefraction(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const
 {
-  ColorD total;
-
   Vector3D normal = intersection.hit.surfaceNormal(intersection.hitPoint);
 
   double c = Vector3D::Dot(-normal, ray.Direction);
   double r = refractiveIndex / intersection.hitMaterial.refrIndex;
-  double rad = sqrt(1.0 - r * r * (1.0 - c * c));
+  double rad = 1.0 - r * r * (1.0 - c * c);
 
   if (rad < 0)
     return calculateReflection(intersection, ray, refractiveIndex, recursionDepth);
 
-  Vector3D refractDir = r * ray.Direction + (r * c - rad) * normal;
+  Vector3D refractDir = r * ray.Direction + (r * c - sqrt(rad)) * normal;
 
   Ray out(intersection.hitPoint, refractDir, ray.Color);
 
@@ -246,7 +244,7 @@ void Scene::LoadDefaultScene()
 	objects.clear();
   lights.clear();
 
-	Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
+	Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1.0, 0.0));
   for (int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
@@ -254,11 +252,12 @@ void Scene::LoadDefaultScene()
       obj.triangles[i].Vertices[j].Position /= 3;
       obj.triangles[i].Vertices[j].Position.X -= 0.5;
       obj.triangles[i].Vertices[j].Position.Z += 0.125;
+      obj.triangles[i].Vertices[j].Color = ColorD(1.0, 0.0, 0.0);
     }
   }
 	objects.push_back(obj);
 
-	obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
+	obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 0.5, 0.5));
   for (int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
