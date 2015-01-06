@@ -7,7 +7,7 @@ BoundingBox::BoundingBox(const Vector3D& center, const Vector3D& halfsize) : Cen
 BoundingBox BoundingBox::FromTriangles(const std::deque<Triangle>& triangles)
 {
 	Vector3D min(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
-	Vector3D max(std::numeric_limits<double>::min(), std::numeric_limits<double>::min(), std::numeric_limits<double>::min());
+	Vector3D max(-std::numeric_limits<double>::max(), -std::numeric_limits<double>::max(), -std::numeric_limits<double>::max());
 
 
 	for (std::deque<Triangle>::const_iterator it = triangles.begin(); it != triangles.end(); ++it)
