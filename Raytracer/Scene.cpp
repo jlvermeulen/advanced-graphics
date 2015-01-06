@@ -79,6 +79,7 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
 //--------------------------------------------------------------------------------
 ColorD Scene::traceRay(Ray ray, double refractiveIndex, int recursionDepth) const
 {
+  Material hitMaterial;
   Triangle hitTriangle;
   double hitTime = std::numeric_limits<double>::max();
   bool hit = false;
@@ -92,6 +93,7 @@ ColorD Scene::traceRay(Ray ray, double refractiveIndex, int recursionDepth) cons
 
       if (obj.octree.Query(ray, tri, t) && t < hitTime)
       {
+        hitMaterial = obj.material;
         hitTriangle = tri;
         hitTime = t;
         hit = true;
@@ -105,6 +107,7 @@ ColorD Scene::traceRay(Ray ray, double refractiveIndex, int recursionDepth) cons
 
         if (Intersects(ray, tri, t) && t < hitTime)
         {
+          hitMaterial = obj.material;
           hitTime = t;
           hitTriangle = tri;
           hit = true;
@@ -114,7 +117,7 @@ ColorD Scene::traceRay(Ray ray, double refractiveIndex, int recursionDepth) cons
   }
 
   if (hit)
-    return radiance(Intersection(ray, hitTime, hitTriangle), ray, refractiveIndex, --recursionDepth);
+    return radiance(Intersection(ray, hitTime, hitTriangle, hitMaterial), ray, refractiveIndex, --recursionDepth);
   else
     return ray.Color * ColorD();  // Background is black
 }
@@ -126,8 +129,8 @@ ColorD Scene::radiance(const Intersection& intersection, Ray ray, double refract
 
   if (recursionDepth > 0 && ray.Color.IsSignificant())
   {
-    double opacity = 1.0;
-    double transparency = 1.0 - opacity;
+    double transparency = intersection.hitMaterial.transparency;
+    double opacity = 1.0 - transparency;
 
     // Diffuse
     if (opacity > 0.0)
@@ -136,12 +139,13 @@ ColorD Scene::radiance(const Intersection& intersection, Ray ray, double refract
       total += opacity * surfaceColor * ray.Color * calculateDiffuse(intersection);
     }
 
-    // Reflection
+    // Refraction
     if (transparency > 0.0)
     {
+      total += calculateRefraction(intersection, ray, refractiveIndex, recursionDepth);
     }
 
-    // Refraction
+    // Reflection
   }
 
   return total;
@@ -204,19 +208,35 @@ ColorD Scene::calculateDiffuse(const Intersection& intersection) const
 }
 
 //--------------------------------------------------------------------------------
-ColorD Scene::calculateReflection() const
+ColorD Scene::calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const
 {
-  ColorD total;
+  const Vector3D& normal = intersection.hit.surfaceNormal(intersection.hitPoint);
+  Vector3D reflectDir = ray.Direction - (2 * Vector3D::Dot(ray.Direction, normal)) * normal;
 
-  return total;
+  Ray out(intersection.hitPoint, reflectDir, ray.Color);
+
+  return traceRay(out, refractiveIndex, --recursionDepth);
 }
 
 //--------------------------------------------------------------------------------
-ColorD Scene::calculateRefraction() const
+ColorD Scene::calculateRefraction(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const
 {
   ColorD total;
 
-  return total;
+  Vector3D normal = intersection.hit.surfaceNormal(intersection.hitPoint);
+
+  double c = Vector3D::Dot(-normal, ray.Direction);
+  double r = refractiveIndex / intersection.hitMaterial.refrIndex;
+  double rad = sqrt(1.0 - r * r * (1.0 - c * c));
+
+  if (rad < 0)
+    return calculateReflection(intersection, ray, refractiveIndex, recursionDepth);
+
+  Vector3D refractDir = r * ray.Direction + (r * c - rad) * normal;
+
+  Ray out(intersection.hitPoint, refractDir, ray.Color);
+
+  return traceRay(out, intersection.hitMaterial.refrIndex, --recursionDepth);
 }
 
 //--------------------------------------------------------------------------------
@@ -251,8 +271,8 @@ void Scene::LoadDefaultScene()
 	objects.push_back(obj);
 
   // Add lights
-  lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(10.0, 10.0, 10.0)));
-  lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(10.0, 10.0, 10.0)));
+  lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(15.0, 15.0, 15.0)));
+  lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(15.0, 15.0, 15.0)));
 
 	camera = Camera(Vector3D(0, 0.5, -2.5), Vector3D::Normalise(Vector3D(0, -0.25, 1)), Vector3D(0, 1, 0));
 }
