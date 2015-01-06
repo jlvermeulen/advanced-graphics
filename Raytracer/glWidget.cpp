@@ -44,6 +44,10 @@ void GLWidget::loadScene(QString& fileName)
   Material standard(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0);
 
   scene.objects.push_back(Object(triangles, standard));
+
+  // Add lights
+  scene.lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(15.0, 15.0, 15.0)));
+  scene.lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(15.0, 15.0, 15.0)));
 }
 
 //--------------------------------------------------------------------------------
