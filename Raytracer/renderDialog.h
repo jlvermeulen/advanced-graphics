@@ -27,6 +27,12 @@ public:
   int getMaxDepth() const;
   void setMaxDepth(int maxDepth);
 
+  int getRayDistribution() const;
+  void setRayDistribution(int distribution);
+
+  int getNumberOfRays() const;
+  void setNumberOfRays(int rays);
+
 private:
   Ui::RenderDialog* ui;
 };

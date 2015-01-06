@@ -17,6 +17,8 @@ GLWidget::GLWidget(QWidget* parent)
   : QGLWidget(parent),
     boundingBoxVisible_(false),
     cameraRayVisible_(false),
+    numberOfRays_(1),
+    rayDistribution_(RayDistributionType::none),
     useOctree_(true),
     minTriangles_(10),
     maxDepth_(10),
@@ -56,7 +58,7 @@ int GLWidget::renderScene(uchar* imageData)
   QTime timer;
   timer.start();
 
-  scene.Render(imageData, useOctree_, minTriangles_, maxDepth_);
+  scene.Render(imageData, useOctree_, minTriangles_, maxDepth_, rayDistribution_, numberOfRays_);
 
   return timer.elapsed();
 
@@ -307,11 +309,6 @@ void GLWidget::drawCameraRay() const
   }
 
   drawLine(debugRay_.Origin, debugRay_.Origin + 10 * debugRay_.Direction);
-
-  for (const Ray& ray : scene.cameraRays)
-  {
-    drawLine(ray.Origin, ray.Origin + ray.Direction);
-  }
 
   glEnd();
 }

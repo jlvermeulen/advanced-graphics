@@ -32,6 +32,12 @@ public:
   int getMaxDepth() const { return maxDepth_; }
   void setMaxDepth(int maxDepth) { maxDepth_ = maxDepth; }
 
+  int getRayDistribution() const { return rayDistribution_; }
+  void setRayDistribution(int distribution) { rayDistribution_ = static_cast<RayDistributionType>(distribution); }
+
+  int getNumberOfRays() const { return numberOfRays_; }
+  void setNumberOfRays(int rays) { numberOfRays_ = rays; }
+
   void loadScene(QString& fileName);
   int renderScene(uchar* imageData);
 
@@ -64,7 +70,8 @@ private:
   Ray debugRay_;
   bool boundingBoxVisible_;
   bool cameraRayVisible_;
-  int recursionDepth;
+  int numberOfRays_;
+  RayDistributionType rayDistribution_;
 
   // Octree
   bool useOctree_;

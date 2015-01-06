@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>190</width>
-    <height>290</height>
+    <height>410</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,7 +29,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>250</y>
+     <y>370</y>
      <width>151</width>
      <height>32</height>
     </rect>
@@ -161,6 +161,67 @@
    </property>
    <property name="maximum">
     <number>999999999</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="numberOfRaysLabel">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>310</y>
+     <width>141</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Number of Rays</string>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="numberOfRaysBox">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>330</y>
+     <width>141</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>999999999</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="rayDistributionLabel">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>250</y>
+     <width>141</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Ray Distribution</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="rayDistributionBox">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>270</y>
+     <width>141</width>
+     <height>22</height>
+    </rect>
    </property>
   </widget>
  </widget>

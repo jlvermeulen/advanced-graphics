@@ -29,7 +29,7 @@ Scene::~Scene()
 
 }
 
-bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDepth)
+bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDepth, RayDistributionType distribution, int numberOfRays)
 {
   useOctree_ = useOctree;
 
@@ -42,6 +42,34 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
     }
   }
 
+  switch (distribution)
+  {
+    case RayDistributionType::none:
+      normalRayTrace(imageData);
+      break;
+
+    case RayDistributionType::gaussian:
+      gaussianRayTrace(imageData, numberOfRays);
+      break;
+
+    case RayDistributionType::jitteredStratification:
+      jitteredStratificationRayTrace(imageData, numberOfRays);
+      break;
+
+    case RayDistributionType::stratification:
+      stratificationRayTrace(imageData, numberOfRays);
+      break;
+
+    case RayDistributionType::uniform:
+      uniformRayTrace(imageData, numberOfRays);
+      break;
+  }
+
+  return true;
+}
+
+Ray Scene::normalRayTrace(uchar* imageData)
+{
   double tanHalfFovY = tan(camera.FovY() / 360 * M_PI);
   double tanHalfFovX = tanHalfFovY * camera.Width / camera.Height;
 
@@ -62,10 +90,8 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
       ColorD intensity(1.0, 1.0, 1.0);
       Ray cameraRay(camera.Eye(), direction, intensity);
 
-      cameraRays.push_back(cameraRay);
-
       ColorD color = traceRay(cameraRay, 1.0, MAX_RECURSION_DEPTH);
-    
+
       // clamp color value between 0 and 1
       color.R = std::max(0.0, std::min(1.0, color.R));
       color.G = std::max(0.0, std::min(1.0, color.G));
@@ -80,8 +106,30 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
       imageData[offset + 3] = 255;
     }
   }
+}
 
-  return true;
+//--------------------------------------------------------------------------------
+Ray Scene::gaussianRayTrace(uchar* imageData, int numberOfRays)
+{
+
+}
+
+//--------------------------------------------------------------------------------
+Ray Scene::jitteredStratificationRayTrace(uchar* imageData, int numberOfRays)
+{
+
+}
+
+//--------------------------------------------------------------------------------
+Ray Scene::stratificationRayTrace(uchar* imageData, int numberOfRays)
+{
+
+}
+
+//--------------------------------------------------------------------------------
+Ray Scene::uniformRayTrace(uchar* imageData, int numberOfRays)
+{
+
 }
 
 //--------------------------------------------------------------------------------

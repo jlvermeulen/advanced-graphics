@@ -15,6 +15,13 @@ RenderDialog::RenderDialog(QWidget* parent)
   // Fill data structure box
   ui->dataStructureBox->addItem(QString("List"), QVariant(false));
   ui->dataStructureBox->addItem(QString("Octree"), QVariant(true));
+
+  // Fill ray distribution box
+  ui->rayDistributionBox->addItem(QString("None"), QVariant(0));
+  ui->rayDistributionBox->addItem(QString("Gaussian"), QVariant(1));
+  ui->rayDistributionBox->addItem(QString("Jittered Stratification"), QVariant(2));
+  ui->rayDistributionBox->addItem(QString("Stratification"), QVariant(3));
+  ui->rayDistributionBox->addItem(QString("Uniform"), QVariant(4));
 }
 
 //--------------------------------------------------------------------------------
@@ -71,4 +78,29 @@ int RenderDialog::getMaxDepth() const
 void RenderDialog::setMaxDepth(int maxDepth)
 {
   ui->octreeMaxDepthBox->setValue(maxDepth);
+}
+
+//--------------------------------------------------------------------------------
+int RenderDialog::getRayDistribution() const
+{
+  return ui->rayDistributionBox->currentData().toInt();
+}
+
+//--------------------------------------------------------------------------------
+void RenderDialog::setRayDistribution(int distribution)
+{
+  int index = ui->rayDistributionBox->findData(QVariant(distribution));
+  ui->rayDistributionBox->setCurrentIndex(index);
+}
+
+//--------------------------------------------------------------------------------
+int RenderDialog::getNumberOfRays() const
+{
+  return ui->numberOfRaysBox->value();
+}
+
+//--------------------------------------------------------------------------------
+void RenderDialog::setNumberOfRays(int rays)
+{
+  ui->numberOfRaysBox->setValue(rays);
 }

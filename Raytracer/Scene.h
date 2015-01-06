@@ -17,6 +17,15 @@ enum ReflectionType
   refractive
 };
 
+enum RayDistributionType
+{
+  none,
+  gaussian,
+  jitteredStratification,
+  stratification,
+  uniform
+};
+
 struct Material
 {
   Material() :
@@ -97,12 +106,18 @@ public:
   Scene();
   ~Scene();
 
-  bool Render(unsigned char* imageData, bool useOctree, int minTriangles, int maxDepth);
+  bool Render(unsigned char* imageData, bool useOctree, int minTriangles, int maxDepth, RayDistributionType distribution, int numberOfRays);
   void LoadDefaultScene();
 
 private:
   ColorD radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const;
   ColorD traceRay(Ray ray, double refractiveIndex, int recursionDepth) const;
+
+  Ray normalRayTrace(uchar* imageData);
+  Ray gaussianRayTrace(uchar* imageData, int numberOfRays);
+  Ray jitteredStratificationRayTrace(uchar* imageData, int numberOfRays);
+  Ray stratificationRayTrace(uchar* imageData, int numberOfRays);
+  Ray uniformRayTrace(uchar* imageData, int numberOfRays);
 
   ColorD calculateDiffuse(const Intersection& intersection) const;
   ColorD calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;
@@ -112,7 +127,6 @@ public:
   Camera camera;
   std::vector<Object> objects;
   std::vector<Light> lights;
-  std::deque<Ray> cameraRays;
   Object checkerboard;
 
 private:

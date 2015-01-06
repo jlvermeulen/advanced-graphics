@@ -39,6 +39,8 @@ void Window::openRenderDialog()
   renderDialog.setUseOctree(getGLWidget()->getUseOctree());
   renderDialog.setMinTriangles(getGLWidget()->getMinTriangles());
   renderDialog.setMaxDepth(getGLWidget()->getMaxDepth());
+  renderDialog.setRayDistribution(getGLWidget()->getRayDistribution());
+  renderDialog.setNumberOfRays(getGLWidget()->getNumberOfRays());
 
   if (renderDialog.exec())
   {
@@ -48,6 +50,8 @@ void Window::openRenderDialog()
     getGLWidget()->setUseOctree(renderDialog.getUseOctree());
     getGLWidget()->setMinTriangles(renderDialog.getMinTriangles());
     getGLWidget()->setMaxDepth(renderDialog.getMaxDepth());
+    getGLWidget()->setRayDistribution(renderDialog.getRayDistribution());
+    getGLWidget()->setNumberOfRays(renderDialog.getNumberOfRays());
 
     uchar* imageData = new uchar[resolution.x() * resolution.y() * 4];    // Width * Height * Color Channels
     int elapsedTime = getGLWidget()->renderScene(imageData);
