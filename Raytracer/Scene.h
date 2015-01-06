@@ -106,7 +106,7 @@ public:
   Scene();
   ~Scene();
 
-  bool Render(unsigned char* imageData, bool useOctree, int minTriangles, int maxDepth, RayDistributionType distribution, int numberOfRays, double sigma);
+  bool Render(unsigned char* imageData, bool useOctree, int minTriangles, int maxDepth, RayDistributionType distribution, int numberOfRays, double sigma, int stratificationSize);
   void LoadDefaultScene();
 
 private:
@@ -115,8 +115,8 @@ private:
 
   void normalRayTrace(uchar* imageData);
   void gaussianRayTrace(uchar* imageData, int numberOfRays, double sigma);
-  void jitteredStratificationRayTrace(uchar* imageData, int numberOfRays);
-  void stratificationRayTrace(uchar* imageData, int numberOfRays);
+  void jitteredStratificationRayTrace(uchar* imageData, int numberOfRays, int size);
+  void stratificationRayTrace(uchar* imageData, int numberOfRays, int size);
   void uniformRayTrace(uchar* imageData, int numberOfRays);
 
   double gaussianWeight(double x, double y, double sigma) const;

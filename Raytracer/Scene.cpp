@@ -30,7 +30,7 @@ Scene::~Scene()
 
 }
 
-bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDepth, RayDistributionType distribution, int numberOfRays, double sigma)
+bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDepth, RayDistributionType distribution, int numberOfRays, double sigma, int stratificationSize)
 {
   useOctree_ = useOctree;
 
@@ -54,11 +54,11 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
       break;
 
     case RayDistributionType::jitteredStratification:
-      jitteredStratificationRayTrace(imageData, numberOfRays);
+      jitteredStratificationRayTrace(imageData, numberOfRays, stratificationSize);
       break;
 
     case RayDistributionType::stratification:
-      stratificationRayTrace(imageData, numberOfRays);
+      stratificationRayTrace(imageData, numberOfRays, stratificationSize);
       break;
 
     case RayDistributionType::uniform:
@@ -169,15 +169,64 @@ void Scene::gaussianRayTrace(uchar* imageData, int numberOfRays, double sigma)
 }
 
 //--------------------------------------------------------------------------------
-void Scene::jitteredStratificationRayTrace(uchar* imageData, int numberOfRays)
+void Scene::jitteredStratificationRayTrace(uchar* imageData, int numberOfRays, int size)
 {
-
 }
 
 //--------------------------------------------------------------------------------
-void Scene::stratificationRayTrace(uchar* imageData, int numberOfRays)
+void Scene::stratificationRayTrace(uchar* imageData, int numberOfRays, int size)
 {
+  double tanHalfFovY = tan(camera.FovY() / 360 * M_PI);
+  double tanHalfFovX = tanHalfFovY * camera.Width / camera.Height;
 
+  double left = -tanHalfFovX;
+  double right = tanHalfFovX;
+  double top = tanHalfFovY;
+  double bottom = -tanHalfFovY;
+
+  // Calculate pixel rays
+  for (int x = 0; x < camera.Width; ++x)
+  {
+    for (int y = 0; y < camera.Height; ++y)
+    {
+      ColorD color;
+
+      for (int u = 0; u < size; ++u)
+      {
+        double mU = (u + 0.5) / size;
+
+        double a = left + (right - left) * (x + mU) / camera.Width;
+
+        for (int v = 0; u < size; ++v)
+        {
+          double mV = (v + 0.5) / size;
+
+          double b = top + (bottom - top) * (y + mV) / camera.Height;
+          Vector3D direction = camera.Focus() + a * camera.Right() + b * camera.Up();
+
+          ColorD intensity(1.0, 1.0, 1.0);
+          Ray cameraRay(camera.Eye(), direction, intensity);
+
+          color += traceRay(cameraRay, 1.0, MAX_RECURSION_DEPTH);
+        }
+      }
+
+      color /= size * size;
+
+      // clamp color value between 0 and 1
+      color.R = std::max(0.0, std::min(1.0, color.R));
+      color.G = std::max(0.0, std::min(1.0, color.G));
+      color.B = std::max(0.0, std::min(1.0, color.B));
+
+      int offset = (y * camera.Width + x) * 4;
+
+      // For each color channel in reversed order (i.e. blue-green-red-alpha)
+      imageData[offset] = (uchar) (color.B * 255.0);
+      imageData[offset + 1] = (uchar) (color.G * 255.0);
+      imageData[offset + 2] = (uchar) (color.R * 255.0);
+      imageData[offset + 3] = 255;
+    }
+  }
 }
 
 //--------------------------------------------------------------------------------

@@ -41,6 +41,9 @@ public:
   double getSigma() const { return sigma_; }
   void setSigma(double sigma) { sigma_ = sigma; }
 
+  int getStratificationSize() const { return stratificationSize_; }
+  void setStratificationSize(int size) { stratificationSize_ = size; }
+
   void loadScene(QString& fileName);
   int renderScene(uchar* imageData);
 
@@ -54,8 +57,6 @@ protected:
   void initializeGL();
   void resizeGL(int width, int height);
   void paintGL();
-
-
 
   void keyPressEvent(QKeyEvent* event);
 
@@ -76,6 +77,7 @@ private:
   int numberOfRays_;
   RayDistributionType rayDistribution_;
   double sigma_;
+  int stratificationSize_;
 
   // Octree
   bool useOctree_;

@@ -42,6 +42,7 @@ void Window::openRenderDialog()
   renderDialog.setRayDistribution(getGLWidget()->getRayDistribution());
   renderDialog.setNumberOfRays(getGLWidget()->getNumberOfRays());
   renderDialog.setSigma(getGLWidget()->getSigma());
+  renderDialog.setStratificationSize(getGLWidget()->getStratificationSize());
 
   if (renderDialog.exec())
   {
@@ -54,6 +55,7 @@ void Window::openRenderDialog()
     getGLWidget()->setRayDistribution(renderDialog.getRayDistribution());
     getGLWidget()->setNumberOfRays(renderDialog.getNumberOfRays());
     getGLWidget()->setSigma(renderDialog.getSigma());
+    getGLWidget()->setStratificationSize(renderDialog.getStratificationSize());
 
     uchar* imageData = new uchar[resolution.x() * resolution.y() * 4];    // Width * Height * Color Channels
     int elapsedTime = getGLWidget()->renderScene(imageData);

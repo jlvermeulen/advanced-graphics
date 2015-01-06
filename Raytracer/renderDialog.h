@@ -36,6 +36,9 @@ public:
   double getSigma() const;
   void setSigma(double sigma);
 
+  int getStratificationSize() const;
+  void setStratificationSize(int size);
+
 private:
   Ui::RenderDialog* ui;
 };

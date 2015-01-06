@@ -116,3 +116,15 @@ void RenderDialog::setSigma(double sigma)
 {
   ui->sigmaBox->setValue(sigma);
 }
+
+//--------------------------------------------------------------------------------
+int RenderDialog::getStratificationSize() const
+{
+  return ui->stratificationSizeBox->value();
+}
+
+//--------------------------------------------------------------------------------
+void RenderDialog::setStratificationSize(int size)
+{
+  ui->stratificationSizeBox->setValue(size);
+}
