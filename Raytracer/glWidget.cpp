@@ -95,7 +95,9 @@ void GLWidget::initializeGL()
   glEnable(GL_MULTISAMPLE);
   
   const GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
+  //const GLfloat lightDiffuse[4] = { 1.0, 1.0, 1.0, 1.0 };
   glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+  //glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
 }
 
 //--------------------------------------------------------------------------------
@@ -114,6 +116,8 @@ void GLWidget::resizeGL(int width, int height)
 void GLWidget::paintGL()
 {
   glEnable(GL_LIGHTING);
+  glEnable(GL_COLOR_MATERIAL);
+  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   Vector3D viewPoint = scene.camera.Eye() + scene.camera.Focus();

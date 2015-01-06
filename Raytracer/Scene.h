@@ -17,20 +17,17 @@ enum ReflectionType
   refractive
 };
 
-struct Intersection
+struct Material
 {
-  Intersection(const Ray& ray, double time, const Triangle& hit) :
-    hitPoint(ray.Origin + time * ray.Direction),
-    hit(hit)
+  Material() :
+    reflType(ReflectionType::diffuse),
+    color(1.0, 1.0, 1.0),
+    emission(0.0, 0.0, 0.0),
+    refrIndex(1.0),
+    transparency(0.0)
   {
   }
 
-  Vector3D hitPoint;
-  Triangle hit;
-};
-
-struct Material
-{
   Material(const ReflectionType& reflType, const ColorD& color, const ColorD& emission, float refrIndex, float transparency) :
     reflType(reflType),
     color(color),
@@ -45,6 +42,20 @@ struct Material
   ColorD emission;
   float refrIndex;
   float transparency;
+};
+
+struct Intersection
+{
+  Intersection(const Ray& ray, double time, const Triangle& hit, const Material& material) :
+    hitPoint(ray.Origin + time * ray.Direction),
+    hit(hit),
+    hitMaterial(material)
+  {
+  }
+
+  Triangle hit;
+  Material hitMaterial;
+  Vector3D hitPoint;
 };
 
 struct Light
@@ -94,8 +105,8 @@ private:
   ColorD traceRay(Ray ray, double refractiveIndex, int recursionDepth) const;
 
   ColorD calculateDiffuse(const Intersection& intersection) const;
-  ColorD calculateReflection() const;
-  ColorD calculateRefraction() const;
+  ColorD calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;
+  ColorD calculateRefraction(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;
 
 public:
   Camera camera;
