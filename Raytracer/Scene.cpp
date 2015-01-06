@@ -13,16 +13,20 @@ Scene::Scene() :
   useOctree_(false)
 {
 	// checkerboard
-	Vertex v1(Vector3D(-100, -0.5, -100), Vector3D(0, 1, 0), ColorD(), Vector3D());
-	Vertex v2(Vector3D(100, -0.5, -100), Vector3D(0, 1, 0), ColorD(), Vector3D());
-	Vertex v3(Vector3D(-100, -0.5, 100), Vector3D(0, 1, 0), ColorD(), Vector3D());
-	Vertex v4(Vector3D(100, -0.5, 100), Vector3D(0, 1, 0), ColorD(), Vector3D());
+	Vertex v1(Vector3D(-100, -0.5, -100), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D());
+	Vertex v2(Vector3D(100, -0.5, -100), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D());
+	Vertex v3(Vector3D(-100, -0.5, 100), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D());
+	Vertex v4(Vector3D(100, -0.5, 100), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D());
 
 	std::deque<Triangle> tris;
 	tris.push_back(Triangle(v1, v3, v2));
 	tris.push_back(Triangle(v4, v2, v3));
 
-	checkerboard = Object(tris, Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
+	checkerboard = Object(tris, Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1, 0));
+
+	// Add lights
+	lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(25.0, 25.0, 25.0)));
+	lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(25.0, 25.0, 25.0)));
 }
 
 Scene::~Scene()
@@ -401,7 +405,10 @@ ColorD Scene::traceRay(Ray ray, double refractiveIndex, int recursionDepth) cons
 		double intpart;
 		bool xOdd = point.X > 0 && modf(point.X, &intpart) < 0.5 || modf(point.X, &intpart) < -0.5;
 		bool zOdd = point.Z > 0 && modf(point.Z, &intpart) < 0.5 || modf(point.Z, &intpart) < -0.5;
-		return ray.Color * (xOdd && zOdd || !xOdd && !zOdd ? ColorD(0.0, 0.0, 0.0) : ColorD(1.0, 1.0, 1.0));
+		//return ray.Color * (xOdd && zOdd || !xOdd && !zOdd ? ColorD(0.0, 0.0, 0.0) : ColorD(1.0, 1.0, 1.0));
+		hitTime = t;
+		hitTriangle = tri;
+		hit = xOdd && zOdd || !xOdd && !zOdd;
 	}
   }
 
@@ -537,11 +544,11 @@ ColorD Scene::calculateRefraction(const Intersection& intersection, const Ray& r
 //--------------------------------------------------------------------------------
 void Scene::LoadDefaultScene()
 {
-	ObjReader reader;
-	objects.clear();
+  ObjReader reader;
+  objects.clear();
   lights.clear();
 
-	Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1.0, 0.0));
+  Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1.0, 0.0));
   for (int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
@@ -552,9 +559,9 @@ void Scene::LoadDefaultScene()
       obj.triangles[i].Vertices[j].Color = ColorD(1.0, 0.0, 0.0);
     }
   }
-	objects.push_back(obj);
+  objects.push_back(obj);
 
-	obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::specular, ColorD(), ColorD(), 0.5, 0.5));
+  obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::specular, ColorD(), ColorD(), 0.5, 0.5));
   for (int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
@@ -564,11 +571,12 @@ void Scene::LoadDefaultScene()
       obj.triangles[i].Vertices[j].Position.Z -= 0.125;
     }
   }
-	objects.push_back(obj);
+  objects.push_back(obj);
 
   // Add lights
-  lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(15.0, 15.0, 15.0)));
-  lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(15.0, 15.0, 15.0)));
+  lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(25.0, 25.0, 25.0)));
+  lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(25.0, 25.0, 25.0)));
 
-	camera = Camera(Vector3D(0, 15.0, -10.0), Vector3D::Normalise(Vector3D(0, -0.5, 1)), Vector3D(0, 1, 0));
+  //camera = Camera(Vector3D(0, 15.0, -10.0), Vector3D::Normalise(Vector3D(0, -0.5, 1)), Vector3D(0, 1, 0));
+  camera = Camera(Vector3D(0, 0.5, -2.5), Vector3D::Normalise(Vector3D(0, -0.25, 1)), Vector3D(0, 1, 0));
 }
