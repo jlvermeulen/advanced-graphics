@@ -68,7 +68,7 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
   return true;
 }
 
-Ray Scene::normalRayTrace(uchar* imageData)
+void Scene::normalRayTrace(uchar* imageData)
 {
   double tanHalfFovY = tan(camera.FovY() / 360 * M_PI);
   double tanHalfFovX = tanHalfFovY * camera.Width / camera.Height;
@@ -109,25 +109,25 @@ Ray Scene::normalRayTrace(uchar* imageData)
 }
 
 //--------------------------------------------------------------------------------
-Ray Scene::gaussianRayTrace(uchar* imageData, int numberOfRays)
+void Scene::gaussianRayTrace(uchar* imageData, int numberOfRays)
 {
 
 }
 
 //--------------------------------------------------------------------------------
-Ray Scene::jitteredStratificationRayTrace(uchar* imageData, int numberOfRays)
+void Scene::jitteredStratificationRayTrace(uchar* imageData, int numberOfRays)
 {
 
 }
 
 //--------------------------------------------------------------------------------
-Ray Scene::stratificationRayTrace(uchar* imageData, int numberOfRays)
+void Scene::stratificationRayTrace(uchar* imageData, int numberOfRays)
 {
 
 }
 
 //--------------------------------------------------------------------------------
-Ray Scene::uniformRayTrace(uchar* imageData, int numberOfRays)
+void Scene::uniformRayTrace(uchar* imageData, int numberOfRays)
 {
 
 }
@@ -352,5 +352,5 @@ void Scene::LoadDefaultScene()
   lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(15.0, 15.0, 15.0)));
   lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(15.0, 15.0, 15.0)));
 
-	camera = Camera(Vector3D(0, 0.5, -2.5), Vector3D::Normalise(Vector3D(0, -0.25, 1)), Vector3D(0, 1, 0));
+	camera = Camera(Vector3D(0, 15.0, -10.0), Vector3D::Normalise(Vector3D(0, -0.5, 1)), Vector3D(0, 1, 0));
 }

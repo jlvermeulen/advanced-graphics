@@ -113,11 +113,11 @@ private:
   ColorD radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const;
   ColorD traceRay(Ray ray, double refractiveIndex, int recursionDepth) const;
 
-  Ray normalRayTrace(uchar* imageData);
-  Ray gaussianRayTrace(uchar* imageData, int numberOfRays);
-  Ray jitteredStratificationRayTrace(uchar* imageData, int numberOfRays);
-  Ray stratificationRayTrace(uchar* imageData, int numberOfRays);
-  Ray uniformRayTrace(uchar* imageData, int numberOfRays);
+  void normalRayTrace(uchar* imageData);
+  void gaussianRayTrace(uchar* imageData, int numberOfRays);
+  void jitteredStratificationRayTrace(uchar* imageData, int numberOfRays);
+  void stratificationRayTrace(uchar* imageData, int numberOfRays);
+  void uniformRayTrace(uchar* imageData, int numberOfRays);
 
   ColorD calculateDiffuse(const Intersection& intersection) const;
   ColorD calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;
