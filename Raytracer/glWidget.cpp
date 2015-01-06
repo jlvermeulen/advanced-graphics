@@ -19,6 +19,7 @@ GLWidget::GLWidget(QWidget* parent)
     cameraRayVisible_(false),
     numberOfRays_(1),
     rayDistribution_(RayDistributionType::none),
+    sigma_(0.1),
     useOctree_(true),
     minTriangles_(10),
     maxDepth_(10),
@@ -58,7 +59,7 @@ int GLWidget::renderScene(uchar* imageData)
   QTime timer;
   timer.start();
 
-  scene.Render(imageData, useOctree_, minTriangles_, maxDepth_, rayDistribution_, numberOfRays_);
+  scene.Render(imageData, useOctree_, minTriangles_, maxDepth_, rayDistribution_, numberOfRays_, sigma_);
 
   return timer.elapsed();
 

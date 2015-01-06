@@ -33,6 +33,9 @@ public:
   int getNumberOfRays() const;
   void setNumberOfRays(int rays);
 
+  double getSigma() const;
+  void setSigma(double sigma);
+
 private:
   Ui::RenderDialog* ui;
 };

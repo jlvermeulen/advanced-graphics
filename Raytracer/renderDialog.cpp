@@ -104,3 +104,15 @@ void RenderDialog::setNumberOfRays(int rays)
 {
   ui->numberOfRaysBox->setValue(rays);
 }
+
+//--------------------------------------------------------------------------------
+double RenderDialog::getSigma() const
+{
+  return ui->sigmaBox->value();
+}
+
+//--------------------------------------------------------------------------------
+void RenderDialog::setSigma(double sigma)
+{
+  ui->sigmaBox->setValue(sigma);
+}

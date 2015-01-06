@@ -38,6 +38,9 @@ public:
   int getNumberOfRays() const { return numberOfRays_; }
   void setNumberOfRays(int rays) { numberOfRays_ = rays; }
 
+  double getSigma() const { return sigma_; }
+  void setSigma(double sigma) { sigma_ = sigma; }
+
   void loadScene(QString& fileName);
   int renderScene(uchar* imageData);
 
@@ -72,6 +75,7 @@ private:
   bool cameraRayVisible_;
   int numberOfRays_;
   RayDistributionType rayDistribution_;
+  double sigma_;
 
   // Octree
   bool useOctree_;

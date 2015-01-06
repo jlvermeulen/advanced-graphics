@@ -41,6 +41,7 @@ void Window::openRenderDialog()
   renderDialog.setMaxDepth(getGLWidget()->getMaxDepth());
   renderDialog.setRayDistribution(getGLWidget()->getRayDistribution());
   renderDialog.setNumberOfRays(getGLWidget()->getNumberOfRays());
+  renderDialog.setSigma(getGLWidget()->getSigma());
 
   if (renderDialog.exec())
   {
@@ -52,6 +53,7 @@ void Window::openRenderDialog()
     getGLWidget()->setMaxDepth(renderDialog.getMaxDepth());
     getGLWidget()->setRayDistribution(renderDialog.getRayDistribution());
     getGLWidget()->setNumberOfRays(renderDialog.getNumberOfRays());
+    getGLWidget()->setSigma(renderDialog.getSigma());
 
     uchar* imageData = new uchar[resolution.x() * resolution.y() * 4];    // Width * Height * Color Channels
     int elapsedTime = getGLWidget()->renderScene(imageData);

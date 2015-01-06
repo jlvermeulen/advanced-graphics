@@ -106,7 +106,7 @@ public:
   Scene();
   ~Scene();
 
-  bool Render(unsigned char* imageData, bool useOctree, int minTriangles, int maxDepth, RayDistributionType distribution, int numberOfRays);
+  bool Render(unsigned char* imageData, bool useOctree, int minTriangles, int maxDepth, RayDistributionType distribution, int numberOfRays, double sigma);
   void LoadDefaultScene();
 
 private:
@@ -114,10 +114,12 @@ private:
   ColorD traceRay(Ray ray, double refractiveIndex, int recursionDepth) const;
 
   void normalRayTrace(uchar* imageData);
-  void gaussianRayTrace(uchar* imageData, int numberOfRays);
+  void gaussianRayTrace(uchar* imageData, int numberOfRays, double sigma);
   void jitteredStratificationRayTrace(uchar* imageData, int numberOfRays);
   void stratificationRayTrace(uchar* imageData, int numberOfRays);
   void uniformRayTrace(uchar* imageData, int numberOfRays);
+
+  double gaussianWeight(double x, double y, double sigma) const;
 
   ColorD calculateDiffuse(const Intersection& intersection) const;
   ColorD calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;
