@@ -12,8 +12,8 @@ Scene::Scene() :
   useOctree_(false)
 {
   // Add lights
-  lights.push_back(Light(Vector3D(0.5, 5.0, 7.0), ColorD(10.0, 10.0, 10.0)));
-  lights.push_back(Light(Vector3D(0.5, -5.0, 4.0), ColorD(10.0, 0.0, 0.0)));
+  //lights.push_back(Light(Vector3D(0.5, 5.0, 7.0), ColorD(10.0, 10.0, 10.0)));
+  //lights.push_back(Light(Vector3D(0.5, -5.0, 4.0), ColorD(10.0, 0.0, 0.0)));
 }
 
 Scene::~Scene()
@@ -42,6 +42,7 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
   double top = tanHalfFovY;
   double bottom = -tanHalfFovY;
 
+
   // Calculate pixel rays
   for (int x = 0; x < camera.Width; ++x)
   {
@@ -57,9 +58,11 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
       cameraRays.push_back(cameraRay);
 
       ColorD color = 10 * traceRay(cameraRay, 1.0, MAX_RECURSION_DEPTH);
-      color.R = std::min(1.0, color.R);
-      color.G = std::min(1.0, color.G);
-      color.B = std::min(1.0, color.B);
+    
+      // clamp color value between 0 and 1
+      color.R = std::max(0.0, std::min(1.0, color.R));
+      color.G = std::max(0.0, std::min(1.0, color.G));
+      color.B = std::max(0.0, std::min(1.0, color.B));
 
       int offset = (y * camera.Width + x) * 4;
 
@@ -222,26 +225,35 @@ void Scene::LoadDefaultScene()
 {
 	ObjReader reader;
 	objects.clear();
+  lights.clear();
 
 	Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
-	for (int i = 0; i < obj.triangles.size(); ++i)
-		for (int j = 0; j < 3; j++)
-		{
-			obj.triangles[i].Vertices[j].Position /= 3;
-			obj.triangles[i].Vertices[j].Position.X -= 0.5;
-			obj.triangles[i].Vertices[j].Position.Z += 0.125;
-		}
+  for (int i = 0; i < obj.triangles.size(); ++i)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      obj.triangles[i].Vertices[j].Position /= 3;
+      obj.triangles[i].Vertices[j].Position.X -= 0.5;
+      obj.triangles[i].Vertices[j].Position.Z += 0.125;
+    }
+  }
 	objects.push_back(obj);
 
 	obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0));
-	for (int i = 0; i < obj.triangles.size(); ++i)
-		for (int j = 0; j < 3; j++)
-		{
-			obj.triangles[i].Vertices[j].Position /= 3;
-			obj.triangles[i].Vertices[j].Position.X += 0.5;
-			obj.triangles[i].Vertices[j].Position.Z -= 0.125;
-		}
+  for (int i = 0; i < obj.triangles.size(); ++i)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      obj.triangles[i].Vertices[j].Position /= 3;
+      obj.triangles[i].Vertices[j].Position.X += 0.5;
+      obj.triangles[i].Vertices[j].Position.Z -= 0.125;
+    }
+  }
 	objects.push_back(obj);
+
+  // Add lights
+  lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(10.0, 10.0, 10.0)));
+  lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(10.0, 10.0, 10.0)));
 
 	camera = Camera(Vector3D(0, 0.5, -2.5), Vector3D::Normalise(Vector3D(0, -0.25, 1)), Vector3D(0, 1, 0));
 }

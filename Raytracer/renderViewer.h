@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QDialog>
+#include <QTime>
+
 
 namespace Ui {
   class RenderViewer;
@@ -16,6 +18,7 @@ public:
 
 public:
   void setImage(QImage image);
+  void setElaspedTime(QTime time);
 
 public slots:
   void saveRender();

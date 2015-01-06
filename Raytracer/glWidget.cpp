@@ -17,9 +17,9 @@ GLWidget::GLWidget(QWidget* parent)
   : QGLWidget(parent),
     boundingBoxVisible_(false),
     cameraRayVisible_(false),
-    useOctree_(false),
-    minTriangles_(0),
-    maxDepth_(0),
+    useOctree_(true),
+    minTriangles_(100),
+    maxDepth_(5),
     stepSize_(0.1f),
     lastPos(),
     scene()
@@ -47,11 +47,14 @@ void GLWidget::loadScene(QString& fileName)
 }
 
 //--------------------------------------------------------------------------------
-bool GLWidget::renderScene(uchar* imageData)
+QTime GLWidget::renderScene(uchar* imageData)
 {
+  QTime timer;
+  timer.start();
+
   scene.Render(imageData, useOctree_, minTriangles_, maxDepth_);
 
-  return true;
+  return timer;
 
   // Progress dialog slows it down enormously, so left it out..
   // Show rendering progress

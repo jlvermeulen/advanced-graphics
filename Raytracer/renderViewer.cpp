@@ -2,7 +2,6 @@
 #include "ui_renderViewer.h"
 
 #include <QFileDialog>
-
 //--------------------------------------------------------------------------------
 RenderViewer::RenderViewer(QWidget* parent)
   : QDialog(parent),
@@ -34,4 +33,10 @@ void RenderViewer::saveRender()
 void RenderViewer::setImage(QImage image)
 {
   ui->imageViewer->setPixmap(QPixmap::fromImage(image));
+}
+
+//--------------------------------------------------------------------------------
+void RenderViewer::setElaspedTime(QTime time)
+{
+  ui->elapsedTimeValue->setText(time.toString("m:s.zzz"));
 }

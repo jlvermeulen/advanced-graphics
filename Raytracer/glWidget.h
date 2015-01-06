@@ -2,6 +2,7 @@
 
 #include <deque>
 #include <QGLWidget>
+#include <QTime>
 
 #include "Camera.h"
 #include "Triangle.h"
@@ -32,7 +33,7 @@ public:
   void setMaxDepth(int maxDepth) { maxDepth_ = maxDepth; }
 
   void loadScene(QString& fileName);
-  bool renderScene(uchar* imageData);
+  QTime renderScene(uchar* imageData);
 
 public slots:
   void setBoundingBoxVisible(bool visible);
