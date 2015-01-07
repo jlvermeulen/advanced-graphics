@@ -6,9 +6,9 @@
 #include "Octree.h"
 #include "Triangle.h"
 #include <vector>
+#include <utility>
 
 typedef unsigned char uchar;
-
 
 enum ReflectionType
 {
@@ -106,20 +106,16 @@ public:
   Scene();
   ~Scene();
 
-  bool Render(unsigned char* imageData, bool useOctree, int minTriangles, int maxDepth, RayDistributionType distribution, int numberOfRays, double sigma, int stratificationSize);
+  bool Render(unsigned char* imageData, bool useOctree, int minTriangles, int maxDepth, int samplesPerPixel, double sigma);
   void LoadDefaultScene();
 
 private:
   ColorD radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const;
   ColorD traceRay(Ray ray, double refractiveIndex, int recursionDepth) const;
 
-  void normalRayTrace(uchar* imageData);
-  void gaussianRayTrace(uchar* imageData, int numberOfRays, double sigma);
-  void jitteredStratificationRayTrace(uchar* imageData, int size);
-  void stratificationRayTrace(uchar* imageData, int size);
-  void uniformRayTrace(uchar* imageData, int numberOfRays);
+  void tracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma);
 
-  double gaussianWeight(double x, double y, double sigma) const;
+  double gaussianWeight(double dx, double dy, double sigma) const;
 
   ColorD calculateDiffuse(const Intersection& intersection) const;
   ColorD calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;

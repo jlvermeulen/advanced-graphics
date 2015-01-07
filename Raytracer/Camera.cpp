@@ -13,9 +13,9 @@ Camera::Camera() :
   up_(Vector3D::Up),
   Width(1280),
   Height(720),
-  fovY_(40),
-  zNear_(0.1),
-  zFar_(20.0)
+  fovY_(40.0f),
+  zNear_(0.1f),
+  zFar_(20.0f)
 {
 
 }

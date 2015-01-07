@@ -60,7 +60,7 @@ int GLWidget::renderScene(uchar* imageData)
   QTime timer;
   timer.start();
 
-  scene.Render(imageData, useOctree_, minTriangles_, maxDepth_, rayDistribution_, numberOfRays_, sigma_, stratificationSize_);
+  scene.Render(imageData, useOctree_, minTriangles_, maxDepth_, numberOfRays_, sigma_);
 
   return timer.elapsed();
 
