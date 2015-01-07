@@ -90,49 +90,45 @@ void Scene::tracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
 	std::uniform_real_distribution<double> dis(0, 1);
 
 	// Calculate pixel rays
-	#pragma omp parallel for
-	for (int x = 0; x < camera.Width; ++x)
-		for (int y = 0; y < camera.Height; ++y)
-		{
-			for (int r = 0; r < samplesPerPixel; ++r)
+	for (int a = 0; a < 3; a++) // prevent concurrent access of same array indices
+	{
+		#pragma omp parallel for
+		for (int x = a; x < camera.Width; x += 3)
+			for (int y = 0; y < camera.Height; ++y)
 			{
-				double rX = dis(gen);
-				double rY = dis(gen);
-
-				double a = left + (right - left) * (x + rX) / camera.Width;
-				double b = top + (bottom - top) * (y + rY) / camera.Height;
-
-				Vector3D direction = camera.Focus() + a * camera.Right() + b * camera.Up();
-				Ray cameraRay(camera.Eye(), direction, ColorD(1.0, 1.0, 1.0));
-				ColorD color = traceRay(cameraRay, 1.0, MAX_RECURSION_DEPTH);
-
-				// distribute over neighbouring pixels
-				for (int i = -1; i < 2; ++i)
+				for (int r = 0; r < samplesPerPixel; ++r)
 				{
-					int xx = x + i;
-					if (xx < 0 || xx >= camera.Width)
-						continue;
+					double rX = dis(gen);
+					double rY = dis(gen);
 
-					for (int j = -1; j < 2; ++j)
+					double a = left + (right - left) * (x + rX) / camera.Width;
+					double b = top + (bottom - top) * (y + rY) / camera.Height;
+
+					Vector3D direction = camera.Focus() + a * camera.Right() + b * camera.Up();
+					Ray cameraRay(camera.Eye(), direction, ColorD(1.0, 1.0, 1.0));
+					ColorD color = traceRay(cameraRay, 1.0, MAX_RECURSION_DEPTH);
+
+					// distribute over neighbouring pixels
+					for (int i = -1; i < 2; ++i)
 					{
-						int yy = y + j;
-						if (yy < 0 || yy >= camera.Height)
-								continue;
+						int xx = x + i;
+						if (xx < 0 || xx >= camera.Width)
+							continue;
 
-						double weight = gaussianWeight(i - rX - 0.5, j - rY - 0.5, sigma);
+						for (int j = -1; j < 2; ++j)
+						{
+							int yy = y + j;
+							if (yy < 0 || yy >= camera.Height)
+									continue;
 
-						int index = yy * camera.Width + xx;
-						ColorD c = color * weight;
-						std::pair<ColorD, double>& data = pixelData[index];
+							double weight = gaussianWeight(i - rX - 0.5, j - rY - 0.5, sigma);
 
-						#pragma omp atomic
-						data.first.R += c.R;
-						#pragma omp atomic
-						data.first.G += c.G;
-						#pragma omp atomic
-						data.first.B += c.B;
-						#pragma omp atomic
-						data.second += weight;
+							int index = yy * camera.Width + xx;
+							std::pair<ColorD, double>& data = pixelData[index];
+
+							data.first += color * weight;
+							data.second += weight;
+						}
 					}
 				}
 			}
