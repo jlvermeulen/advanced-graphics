@@ -48,6 +48,7 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
 	std::pair<ColorD, double>* samples = new std::pair<ColorD, double>[camera.Width * camera.Height];
 	tracePixels(samples, samplesPerPixel, sigma);
 
+	#pragma omp parallel for
 	for (int x = 0; x < camera.Width; ++x)
 		for (int y = 0; y < camera.Height; ++y)
 		{
@@ -89,6 +90,7 @@ void Scene::tracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
 	std::uniform_real_distribution<double> dis(0, 1);
 
 	// Calculate pixel rays
+	#pragma omp parallel for
 	for (int x = 0; x < camera.Width; ++x)
 		for (int y = 0; y < camera.Height; ++y)
 		{
@@ -118,8 +120,19 @@ void Scene::tracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
 								continue;
 
 						double weight = gaussianWeight(i - rX - 0.5, j - rY - 0.5, sigma);
-						pixelData[yy * camera.Width + xx].first += color * weight;
-						pixelData[yy * camera.Width + xx].second += weight;
+
+						int index = yy * camera.Width + xx;
+						ColorD c = color * weight;
+						std::pair<ColorD, double>& data = pixelData[index];
+
+						#pragma omp atomic
+						data.first.R += c.R;
+						#pragma omp atomic
+						data.first.G += c.G;
+						#pragma omp atomic
+						data.first.B += c.B;
+						#pragma omp atomic
+						data.second += weight;
 					}
 				}
 			}
