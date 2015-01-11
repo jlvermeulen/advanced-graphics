@@ -1,12 +1,14 @@
-#include <ObjReader.h>
+#include "ObjReader.h"
+
+#include "MtlReader.h"
 
 #include <fstream>
 #include <string>
-#include <sstream>
 
 //--------------------------------------------------------------------------------
 ObjReader::ObjReader() :
-  combined_(false)
+  Reader(),
+  combined_(true)
 {
 
 }
@@ -18,9 +20,11 @@ ObjReader::~ObjReader()
 }
 
 //--------------------------------------------------------------------------------
-std::deque<Triangle> ObjReader::parseFile(const char* fileName)
+std::deque<Object> ObjReader::parseFile(const char* fileName)
 {
-  reset();
+  std::string path = std::string(fileName);
+  path = path.substr(0, path.find_last_of('\\/') + 1);
+
   // Open file stream
   std::ifstream fin;
   fin.open(fileName);
@@ -31,104 +35,116 @@ std::deque<Triangle> ObjReader::parseFile(const char* fileName)
   {
     std::vector<std::string> segments = split(line, ' ');
 
-    parseLine(segments);
+    parseLine(path, segments);
   }
 
-  return triangles;
+  return objects_;
 }
 
 //--------------------------------------------------------------------------------
-void ObjReader::parseLine(std::vector<std::string>& segments)
+void ObjReader::parseLine(const std::string& path, const std::vector<std::string>& segments)
 {
-  IIterator it = segments.begin();
-  IIterator end = segments.end();
+  CVSIterator it = segments.cbegin();
 
   // No segments at all
-  if (it == segments.end())
+  if (it == segments.cend())
     return;
 
   switch (parseType(*it))
   {
-    case objType::face:
+    case ObjType::face:
+    {
       // Last step of parsing an object
       parseFace(++it);
       combined_ = true;
       break;
+    }
 
-    case objType::library:
-      parseLibrary(++it, end);
+    case ObjType::library:
+      parseLibrary(path, ++it);
       break;
 
-    case objType::material:
-      parseMaterial(++it, end);
+    case ObjType::material:
+      parseMaterial(++it);
       break;
 
-    case objType::normal:
+    case ObjType::normal:
       parseNormal(++it);
       break;
 
-    case objType::texCoords:
+    case ObjType::texCoords:
       parseTexCoords(++it);
       break;
 
-    case objType::vertex:
+    case ObjType::vertex:
+      // First step of parsing an object
+      // Do we need a new object?
+      if (combined_)
+      {
+        reset();
+
+        // Create empty object
+        objects_.push_back(Object());
+      }
+
       parseVertex(++it);
       break;
 
-    case objType::nil:
+    case ObjType::nil:
     default:
-    {
       // Don't do anything
       break;
-    }
   }
 }
 
 //--------------------------------------------------------------------------------
-void ObjReader::parseFace(IIterator& it)
+void ObjReader::parseFace(CVSIterator& it)
 {
   Vertex vertices[3];
 
   // Only parse triangles
   for (int i = 0; i < 3; ++i)
   {
-    std::vector<std::string> indices = ObjReader::split(*it, '/');
+    std::vector<std::string> indices = split(*it, '/');
 
-    IIterator vIt = indices.begin();
+    CVSIterator vIt = indices.cbegin();
 
     Vertex vertex;
-    vertex.Position = positions.at(parseInteger(vIt) - 1);
+    vertex.Position = positions_.at(parseInteger(vIt) - 1);
 
     if (indices.size() == 3)
-      vertex.UV = texCoords.at(parseInteger(++vIt) - 1);
+      vertex.UV = texCoords_.at(parseInteger(++vIt) - 1);
 
-    vertex.Normal = normals.at(parseInteger(++vIt) - 1);
-
-    // TODO: Take material color
-    vertex.Color = ColorD(1.0, 1.0, 1.0);
+    vertex.Normal = normals_.at(parseInteger(++vIt) - 1);
 
     vertices[i] = vertex;
     ++it;
   }
 
   // Add triangle
-  triangles.push_back(Triangle(vertices));
+  objects_.back().triangles.push_back(Triangle(vertices));
 }
 
 //--------------------------------------------------------------------------------
-void ObjReader::parseLibrary(IIterator& it, const IIterator& end)
+void ObjReader::parseLibrary(const std::string& path, CVSIterator& it)
 {
-  // TODO: mtllib import
+  std::string fileName = *it;
+
+  MtlReader mtlReader;
+
+  materials_ = mtlReader.parseFile((path + fileName).c_str());
 }
 
 //--------------------------------------------------------------------------------
-void ObjReader::parseMaterial(IIterator& it, const IIterator& end)
+void ObjReader::parseMaterial(CVSIterator& it)
 {
-  // TODO: usemtl
+  std::string name = *it;
+
+  objects_.back().material = materials_.at(name);
 }
 
 //--------------------------------------------------------------------------------
-void ObjReader::parseNormal(IIterator& it)
+void ObjReader::parseNormal(CVSIterator& it)
 {
   Vector3D normal;
 
@@ -136,11 +152,11 @@ void ObjReader::parseNormal(IIterator& it)
   normal.Y = parseDouble(++it);
   normal.Z = parseDouble(++it);
 
-  normals.push_back(normal);
+  normals_.push_back(normal);
 }
 
 //--------------------------------------------------------------------------------
-void ObjReader::parseTexCoords(IIterator& it)
+void ObjReader::parseTexCoords(CVSIterator& it)
 {
   Vector3D texCoord;
 
@@ -148,11 +164,11 @@ void ObjReader::parseTexCoords(IIterator& it)
   texCoord.Y = parseDouble(++it);
   texCoord.Z = 0;
 
-  texCoords.push_back(texCoord);
+  texCoords_.push_back(texCoord);
 }
 
 //--------------------------------------------------------------------------------
-void ObjReader::parseVertex(IIterator& it)
+void ObjReader::parseVertex(CVSIterator& it)
 {
   Vector3D position;
 
@@ -160,94 +176,34 @@ void ObjReader::parseVertex(IIterator& it)
   position.Y = parseDouble(++it);
   position.Z = parseDouble(++it);
 
-  positions.push_back(position);
+  positions_.push_back(position);
 }
 
 //--------------------------------------------------------------------------------
-double ObjReader::parseDouble(const IIterator& it) const
-{
-  std::string s = it->c_str();
-  std::istringstream os(s);
-  double d;
-  os >> d;
-  return d;
-}
-
-//--------------------------------------------------------------------------------
-int ObjReader::parseInteger(const IIterator& it) const
-{
-  return atoi((*it).c_str());
-}
-
-//--------------------------------------------------------------------------------
-objType ObjReader::parseType(std::string& type)
+ObjType::ObjType ObjReader::parseType(const std::string& type) const
 {
   if (type == "v")
-    return objType::vertex;
+    return ObjType::vertex;
   else if (type == "vt")
-    return objType::texCoords;
+    return ObjType::texCoords;
   else if (type == "vn")
-    return objType::normal;
+    return ObjType::normal;
   else if (type == "f")
-    return objType::face;
+    return ObjType::face;
   else if (type == "mtllib")
-    return objType::library;
+    return ObjType::library;
   else if (type == "usemtl")
-    return objType::material;
+    return ObjType::material;
   else
-    return objType::nil;
+    return ObjType::nil;
 }
 
 //--------------------------------------------------------------------------------
 void ObjReader::reset()
 {
-  normals.clear();
-  positions.clear();
-  texCoords.clear();
-  triangles.clear();
+  normals_.clear();
+  positions_.clear();
+  texCoords_.clear();
 
   combined_ = false;
-}
-
-//--------------------------------------------------------------------------------
-std::vector<std::string> ObjReader::split(const std::string& text, char sep, bool multiple)
-{
-  std::vector<std::string> result;
-  std::string part;
-  bool set = false;
-  bool prev = false;
-
-  CIIterator it = text.cbegin();
-
-  while (it != text.cend())
-  {
-    if (*it == sep)
-    {
-      if (set || (!multiple && prev))
-      {
-        result.push_back(part);
-        part = "";
-
-        set = false;
-        prev = false;
-      }
-      else
-      {
-        prev = true;
-      }
-    }
-    else
-    {
-      set = true;
-      part += *it;
-    }
-
-    ++it;
-  }
-
-  // Add the remaining part
-  if (part.size() > 0)
-    result.push_back(part);
-
-  return result;
 }

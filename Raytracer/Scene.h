@@ -2,20 +2,16 @@
 
 #include "Camera.h"
 #include "ColorD.h"
-#include <deque>
+#include "Material.h"
+#include "Object.h"
 #include "Octree.h"
 #include "Triangle.h"
+
+#include <deque>
 #include <vector>
 #include <utility>
 
 typedef unsigned char uchar;
-
-enum ReflectionType
-{
-  diffuse,
-  specular,
-  refractive
-};
 
 enum RayDistributionType
 {
@@ -24,33 +20,6 @@ enum RayDistributionType
   jitteredStratification,
   stratification,
   uniform
-};
-
-struct Material
-{
-  Material() :
-    reflType(ReflectionType::diffuse),
-    color(1.0, 1.0, 1.0),
-    emission(0.0, 0.0, 0.0),
-    refrIndex(1.0),
-    transparency(0.0)
-  {
-  }
-
-  Material(const ReflectionType& reflType, const ColorD& color, const ColorD& emission, float refrIndex, float transparency) :
-    reflType(reflType),
-    color(color),
-    emission(emission),
-    refrIndex(refrIndex),
-    transparency(transparency)
-  {
-  }
-
-  ReflectionType reflType;
-  ColorD color;
-  ColorD emission;
-  float refrIndex;
-  float transparency;
 };
 
 struct Intersection
@@ -79,27 +48,6 @@ struct Light
   ColorD color;
 };
 
-struct Object
-{
-  Object() : material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0) { }
-
-  Object(const std::deque<Triangle>& triangles, Material material) :
-    triangles(triangles),
-    material(material)
-  {
-  }
-
-  void CreateOctree(int minTriangles, int maxDepth)
-  {
-    octree = Octree(triangles, minTriangles, maxDepth);
-  }
-
-  Octree octree;
-  Material material;
-  std::deque<Triangle> triangles;
-
-};
-
 class Scene
 {
 public:
@@ -123,7 +71,7 @@ private:
 
 public:
   Camera camera;
-  std::vector<Object> objects;
+  std::deque<Object> objects;
   std::vector<Light> lights;
   Object checkerboard;
 

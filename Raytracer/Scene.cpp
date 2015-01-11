@@ -3,9 +3,10 @@
 
 #include "Scene.h"
 
-#include <Intersections.h>
+#include "Intersections.h"
+#include "ObjReader.h"
+
 #include <math.h>
-#include <ObjReader.h>
 #include <random>
 
 
@@ -13,22 +14,22 @@ Scene::Scene() :
   useOctree_(false)
 {
 	// checkerboard
-	Vertex v1(Vector3D(-100, -0.5, -100), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D());
-	Vertex v2(Vector3D(100, -0.5, -100), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D());
-	Vertex v3(Vector3D(-100, -0.5, 100), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D());
-	Vertex v4(Vector3D(100, -0.5, 100), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D());
+	//Vertex v1(Vector3D(-100, -0.5, -100), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D());
+	//Vertex v2(Vector3D(100, -0.5, -100), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D());
+	//Vertex v3(Vector3D(-100, -0.5, 100), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D());
+	//Vertex v4(Vector3D(100, -0.5, 100), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D());
 
-	std::deque<Triangle> tris;
-	tris.push_back(Triangle(v1, v3, v2));
-	tris.push_back(Triangle(v4, v2, v3));
+	//std::deque<Triangle> tris;
+	//tris.push_back(Triangle(v1, v3, v2));
+	//tris.push_back(Triangle(v4, v2, v3));
 
-	checkerboard = Object(tris, Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1, 0));
+	//checkerboard = Object(tris, Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1, 0));
 
 	// Add lights
 	lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(25.0, 25.0, 25.0)));
 	lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(25.0, 25.0, 25.0)));
 
-	camera = Camera(Vector3D(0, 15.0, -10.0), Vector3D::Normalise(Vector3D(0, -0.5, 1)), Vector3D(0, 1, 0));
+	//camera = Camera(Vector3D(0, 15.0, -10.0), Vector3D::Normalise(Vector3D(0, -0.5, 1)), Vector3D(0, 1, 0));
 }
 
 Scene::~Scene()
@@ -43,31 +44,33 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
 	// Instantiate octrees
 	if (useOctree_)
 		for (Object& obj : objects)
-			obj.CreateOctree(minTriangles, maxDepth);
+      obj.ConstructOctree(minTriangles, maxDepth);
 
 	std::pair<ColorD, double>* samples = new std::pair<ColorD, double>[camera.Width * camera.Height];
 	tracePixels(samples, samplesPerPixel, sigma);
 
 	#pragma omp parallel for
-	for (int x = 0; x < camera.Width; ++x)
-		for (int y = 0; y < camera.Height; ++y)
-		{
-			std::pair<ColorD, double> sample = samples[y * camera.Width + x];
-			ColorD color = sample.first / sample.second;
+  for (int x = 0; x < camera.Width; ++x)
+  {
+    for (int y = 0; y < camera.Height; ++y)
+    {
+      std::pair<ColorD, double> sample = samples[y * camera.Width + x];
+      ColorD color = sample.first / sample.second;
 
-			// clamp color value between 0 and 1
-			color.R = std::max(0.0, std::min(1.0, color.R));
-			color.G = std::max(0.0, std::min(1.0, color.G));
-			color.B = std::max(0.0, std::min(1.0, color.B));
+      // clamp color value between 0 and 1
+      color.R = std::max(0.0, std::min(1.0, color.R));
+      color.G = std::max(0.0, std::min(1.0, color.G));
+      color.B = std::max(0.0, std::min(1.0, color.B));
 
-			int offset = (y * camera.Width + x) * 4;
+      int offset = (y * camera.Width + x) * 4;
 
-			// For each color channel in reversed order (i.e. blue-green-red-alpha)
-			imageData[offset] = (uchar) (color.B * 255.0);
-			imageData[offset + 1] = (uchar) (color.G * 255.0);
-			imageData[offset + 2] = (uchar) (color.R * 255.0);
-			imageData[offset + 3] = 255;
-		}
+      // For each color channel in reversed order (i.e. blue-green-red-alpha)
+      imageData[offset] = (uchar) (color.B * 255.0);
+      imageData[offset + 1] = (uchar) (color.G * 255.0);
+      imageData[offset + 2] = (uchar) (color.R * 255.0);
+      imageData[offset + 3] = 255;
+    }
+  }
 
 	delete [] samples;
 
@@ -90,48 +93,52 @@ void Scene::tracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
 	std::uniform_real_distribution<double> dis(0, 1);
 
 	// Calculate pixel rays
-	for (int a = 0; a < 3; a++) // prevent concurrent access of same array indices
+	for (int o = 0; o < 3; ++o) // prevent concurrent access of same array indices
 	{
 		#pragma omp parallel for
-		for (int x = a; x < camera.Width; x += 3)
-			for (int y = 0; y < camera.Height; ++y)
-			{
-				for (int r = 0; r < samplesPerPixel; ++r)
-				{
-					double rX = dis(gen);
-					double rY = dis(gen);
+    for (int x = o; x < camera.Width; x += 3)
+    {
+      for (int y = 0; y < camera.Height; ++y)
+      {
+        for (int r = 0; r < samplesPerPixel; ++r)
+        {
+          double rX = dis(gen);
+          double rY = dis(gen);
 
-					double a = left + (right - left) * (x + rX) / camera.Width;
-					double b = top + (bottom - top) * (y + rY) / camera.Height;
+          double a = left + (right - left) * (x + rX) / camera.Width;
+          double b = top + (bottom - top) * (y + rY) / camera.Height;
 
-					Vector3D direction = camera.Focus() + a * camera.Right() + b * camera.Up();
-					Ray cameraRay(camera.Eye(), direction, ColorD(1.0, 1.0, 1.0));
-					ColorD color = traceRay(cameraRay, 1.0, MAX_RECURSION_DEPTH);
+          Vector3D direction = camera.Focus() + a * camera.Right() + b * camera.Up();
+          Ray cameraRay(camera.Eye(), direction, ColorD(1.0, 1.0, 1.0));
+          ColorD color = traceRay(cameraRay, 1.0, MAX_RECURSION_DEPTH);
 
-					// distribute over neighbouring pixels
-					for (int i = -1; i < 2; ++i)
-					{
-						int xx = x + i;
-						if (xx < 0 || xx >= camera.Width)
-							continue;
+          // distribute over neighbouring pixels
+          for (int i = -1; i < 2; ++i)
+          {
+            int xx = x + i;
 
-						for (int j = -1; j < 2; ++j)
-						{
-							int yy = y + j;
-							if (yy < 0 || yy >= camera.Height)
-									continue;
+            if (xx < 0 || xx >= camera.Width)
+              continue;
 
-							double weight = gaussianWeight(i - rX - 0.5, j - rY - 0.5, sigma);
+            for (int j = -1; j < 2; ++j)
+            {
+              int yy = y + j;
 
-							int index = yy * camera.Width + xx;
-							std::pair<ColorD, double>& data = pixelData[index];
+              if (yy < 0 || yy >= camera.Height)
+                continue;
 
-							data.first += color * weight;
-							data.second += weight;
-						}
-					}
-				}
-			}
+              double weight = gaussianWeight(i - rX - 0.5, j - rY - 0.5, sigma);
+
+              int index = yy * camera.Width + xx;
+              std::pair<ColorD, double>& data = pixelData[index];
+
+              data.first += color * weight;
+              data.second += weight;
+            }
+          }
+        }
+      }
+    }
 	}
 }
 
@@ -182,21 +189,21 @@ ColorD Scene::traceRay(Ray ray, double refractiveIndex, int recursionDepth) cons
   }
 
   // checkerboard
-  for (const Triangle& tri : checkerboard.triangles)
-  {
-	double t = std::numeric_limits<double>::max();
+  //for (const Triangle& tri : checkerboard.triangles)
+  //{
+	 // double t = std::numeric_limits<double>::max();
 
-	if (Intersects(ray, tri, t) && t < hitTime)
-	{
-		Vector3D point = ray.Origin + t * ray.Direction;
-		double intpart;
-		bool xOdd = point.X > 0 && modf(point.X, &intpart) < 0.5 || modf(point.X, &intpart) < -0.5;
-		bool zOdd = point.Z > 0 && modf(point.Z, &intpart) < 0.5 || modf(point.Z, &intpart) < -0.5;
-		hitTime = t;
-		hitTriangle = tri;
-		hit = xOdd && zOdd || !xOdd && !zOdd;
-	}
-  }
+	 // if (Intersects(ray, tri, t) && t < hitTime)
+	 // {
+		//  Vector3D point = ray.Origin + t * ray.Direction;
+		//  double intpart;
+		//  bool xOdd = point.X > 0 && modf(point.X, &intpart) < 0.5 || modf(point.X, &intpart) < -0.5;
+		//  bool zOdd = point.Z > 0 && modf(point.Z, &intpart) < 0.5 || modf(point.Z, &intpart) < -0.5;
+		//  hitTime = t;
+		//  hitTriangle = tri;
+		//  hit = xOdd && zOdd || !xOdd && !zOdd;
+	 // }
+  //}
 
   if (hit)
     return radiance(Intersection(ray, hitTime, hitTriangle, hitMaterial), ray, refractiveIndex, --recursionDepth);
@@ -217,8 +224,7 @@ ColorD Scene::radiance(const Intersection& intersection, Ray ray, double refract
     {
       if (opacity > 0.0)
       {
-        ColorD surfaceColor = intersection.hit.surfaceColor(intersection.hitPoint);
-        return opacity * surfaceColor * ray.Color * calculateDiffuse(intersection);
+        return opacity * intersection.hitMaterial.diffuse * ray.Color * calculateDiffuse(intersection);
       }
     }
 
@@ -334,30 +340,30 @@ void Scene::LoadDefaultScene()
   objects.clear();
   lights.clear();
 
-  Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1.0, 0.0));
-  for (unsigned int i = 0; i < obj.triangles.size(); ++i)
-  {
-    for (int j = 0; j < 3; j++)
-    {
-      obj.triangles[i].Vertices[j].Position /= 3;
-      obj.triangles[i].Vertices[j].Position.X -= 0.5;
-      obj.triangles[i].Vertices[j].Position.Z += 0.125;
-      obj.triangles[i].Vertices[j].Color = ColorD(1.0, 0.0, 0.0);
-    }
-  }
-  objects.push_back(obj);
+  //Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1.0, 0.0));
+  //for (unsigned int i = 0; i < obj.triangles.size(); ++i)
+  //{
+  //  for (int j = 0; j < 3; j++)
+  //  {
+  //    obj.triangles[i].Vertices[j].Position /= 3;
+  //    obj.triangles[i].Vertices[j].Position.X -= 0.5;
+  //    obj.triangles[i].Vertices[j].Position.Z += 0.125;
+  //    obj.triangles[i].Vertices[j].Color = ColorD(1.0, 0.0, 0.0);
+  //  }
+  //}
+  //objects.push_back(obj);
 
-  obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::specular, ColorD(), ColorD(), 0.5, 0.5));
-  for (unsigned int i = 0; i < obj.triangles.size(); ++i)
-  {
-    for (int j = 0; j < 3; j++)
-    {
-      obj.triangles[i].Vertices[j].Position /= 3;
-      obj.triangles[i].Vertices[j].Position.X += 0.5;
-      obj.triangles[i].Vertices[j].Position.Z -= 0.125;
-    }
-  }
-  objects.push_back(obj);
+  //obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::specular, ColorD(), ColorD(), 0.5, 0.5));
+  //for (unsigned int i = 0; i < obj.triangles.size(); ++i)
+  //{
+  //  for (int j = 0; j < 3; j++)
+  //  {
+  //    obj.triangles[i].Vertices[j].Position /= 3;
+  //    obj.triangles[i].Vertices[j].Position.X += 0.5;
+  //    obj.triangles[i].Vertices[j].Position.Z -= 0.125;
+  //  }
+  //}
+  //objects.push_back(obj);
 
   // Add lights
   lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(25.0, 25.0, 25.0)));

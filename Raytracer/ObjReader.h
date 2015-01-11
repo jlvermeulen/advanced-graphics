@@ -1,57 +1,61 @@
 #pragma once
 
-#include <vector>
-#include <deque>
-#include <Triangle.h>
-#include <Vector3D.h>
+#include "Reader.h"
+#include "Object.h"
+#include "Triangle.h"
+#include "Vector3D.h"
 
-typedef std::_String_const_iterator<std::_String_val<std::_Simple_types<char>>> CIIterator;
-typedef std::_Vector_iterator<std::_Vector_val<std::_Simple_types<std::string>>> IIterator;
+#include <deque>
+#include <map>
+#include <vector>
+
 typedef std::vector<Vector3D> Vector3List;
 
-enum objType
+namespace ObjType
 {
-  face,
-  normal,
-  space,
-  texCoords,
-  vertex,
-  library,
-  material,
-  nil
-};
+  enum ObjType
+  {
+    face,
+    normal,
+    space,
+    texCoords,
+    vertex,
+    library,
+    material,
+    nil
+  };
+}
 
-class ObjReader
+class ObjReader : public Reader
 {
 public:
   ObjReader();
   ~ObjReader();
 
 public:
-  std::deque<Triangle> parseFile(const char* fileName);
-  void parseLine(std::vector<std::string>& segments);
+  std::deque<Object> parseFile(const char* fileName);
+  void parseLine(const std::string& path, const std::vector<std::string>& segments);
 
-  void parseLibrary(IIterator& it, const IIterator& end);
-  void parseMaterial(IIterator& it, const IIterator& end);
-  void parseFace(IIterator& it);
-  void parseNormal(IIterator& it);
-  void parseTexCoords(IIterator& it);
-  void parseVertex(IIterator& it);
+  void parseLibrary(const std::string& path, CVSIterator& it);
+  void parseMaterial(CVSIterator& it);
+  void parseFace(CVSIterator& it);
+  void parseNormal(CVSIterator& it);
+  void parseTexCoords(CVSIterator& it);
+  void parseVertex(CVSIterator& it);
 
-  double parseDouble(const IIterator& iterator) const;
-  int parseInteger(const IIterator& iterator) const;
-  objType parseType(std::string& type);
-
-  static std::vector<std::string> split(const std::string& text, char sep, bool multiple = true);
+  ObjType::ObjType parseType(const std::string& type) const;
 
 private:
+  void clearObject();
   void reset();
 
 private:
-  std::deque<Vector3D> normals;
-  std::deque<Vector3D> positions;
-  std::deque<Vector3D> texCoords;
-  std::deque<Triangle> triangles;
+  std::deque<Vector3D> normals_;
+  std::deque<Vector3D> positions_;
+  std::deque<Vector3D> texCoords_;
+
+  std::map<std::string, Material> materials_;
+  std::deque<Object> objects_;
 
   bool combined_;
 };
