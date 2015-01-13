@@ -52,7 +52,7 @@ private:
 private:
   std::deque<Vector3D> normals_;
   std::deque<Vector3D> positions_;
-  std::deque<Vector3D> texCoords_;
+  std::deque<Vector2D> texCoords_;
 
   std::map<std::string, Material> materials_;
   std::deque<Object> objects_;

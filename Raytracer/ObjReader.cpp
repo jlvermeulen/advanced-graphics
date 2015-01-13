@@ -158,11 +158,10 @@ void ObjReader::parseNormal(CVSIterator& it)
 //--------------------------------------------------------------------------------
 void ObjReader::parseTexCoords(CVSIterator& it)
 {
-  Vector3D texCoord;
+  Vector2D texCoord;
 
   texCoord.X = parseDouble(it);
   texCoord.Y = parseDouble(++it);
-  texCoord.Z = 0;
 
   texCoords_.push_back(texCoord);
 }

@@ -63,6 +63,12 @@
     <Filter Include="Source Files\Readers">
       <UniqueIdentifier>{5ac1a208-d1d7-499f-ac71-d801f8678a46}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Raytracer\Scene">
+      <UniqueIdentifier>{530b022b-7049-404e-9a00-e3c1245fff16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Raytracer\Scene">
+      <UniqueIdentifier>{7e444054-8b04-4e5c-90c4-b0db54a27c09}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Debug\moc_glWidget.cpp">
@@ -125,9 +131,6 @@
     <ClCompile Include="Release\moc_renderViewer.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Source Files\Raytracer</Filter>
-    </ClCompile>
     <ClCompile Include="MtlReader.cpp">
       <Filter>Source Files\Readers</Filter>
     </ClCompile>
@@ -136,6 +139,12 @@
     </ClCompile>
     <ClCompile Include="Reader.cpp">
       <Filter>Source Files\Readers</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files\Raytracer\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector2D.cpp">
+      <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -172,12 +181,6 @@
     <ClInclude Include="GeneratedFiles\ui_renderViewer.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Header Files\Raytracer</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>Header Files\Raytracer</Filter>
-    </ClInclude>
     <ClInclude Include="MtlReader.h">
       <Filter>Header Files\Readers</Filter>
     </ClInclude>
@@ -188,6 +191,15 @@
       <Filter>Header Files\Readers</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
+      <Filter>Header Files\Raytracer\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files\Raytracer\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Header Files\Raytracer\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2D.h">
       <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
   </ItemGroup>
