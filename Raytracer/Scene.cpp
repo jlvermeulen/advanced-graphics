@@ -22,7 +22,7 @@ Scene::Scene() :
 	tris.push_back(Triangle(v1, v3, v2));
 	tris.push_back(Triangle(v4, v2, v3));
 
-	checkerboard = Object(tris, Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1, 0));
+	//checkerboard = Object(tris, Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1, 0));
 
 	// Add lights
 	lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(25.0, 25.0, 25.0)));
@@ -156,7 +156,7 @@ ColorD Scene::traceRay(Ray ray, double refractiveIndex, int recursionDepth) cons
       Triangle tri;
       double t = std::numeric_limits<double>::max();
 
-      if (obj.octree.Query(ray, tri, t) && t < hitTime)
+      if (obj.octree->Query(ray, tri, t) && t < hitTime)
       {
         hitMaterial = obj.material;
         hitTriangle = tri;
@@ -261,7 +261,7 @@ ColorD Scene::calculateDiffuse(const Intersection& intersection) const
     {
       if (useOctree_)
       {
-        if (obj.octree.Query(toSource, blockingTriangle, blockingTime) && blockingTime < 1.0)
+        if (obj.octree->Query(toSource, blockingTriangle, blockingTime) && blockingTime < 1.0)
         {
           noOcclusion = false;
           break;
@@ -334,7 +334,7 @@ void Scene::LoadDefaultScene()
   objects.clear();
   lights.clear();
 
-  Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1.0, 0.0));
+  Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(1.0, 0, 0), ColorD(), 1.0, 0.0));
   for (unsigned int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
@@ -342,7 +342,7 @@ void Scene::LoadDefaultScene()
       obj.triangles[i].Vertices[j].Position /= 3;
       obj.triangles[i].Vertices[j].Position.X -= 0.5;
       obj.triangles[i].Vertices[j].Position.Z += 0.125;
-      obj.triangles[i].Vertices[j].Color = ColorD(1.0, 0.0, 0.0);
+      obj.triangles[i].Vertices[j].Color = obj.material.color;
     }
   }
   objects.push_back(obj);
@@ -359,10 +359,75 @@ void Scene::LoadDefaultScene()
   }
   objects.push_back(obj);
 
+  // right
+  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(1.0, 0, 0), ColorD(), 1.0, 0.0));
+  for (unsigned int i = 0; i < obj.triangles.size(); ++i)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      obj.triangles[i].Vertices[j].Position *= 5;
+      obj.triangles[i].Vertices[j].Position.X += 4;
+	  obj.triangles[i].Vertices[j].Color = obj.material.color;
+    }
+  }
+  objects.push_back(obj);
+
+  // left
+  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(0, 0, 1.0), ColorD(), 1.0, 0.0));
+  for (unsigned int i = 0; i < obj.triangles.size(); ++i)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      obj.triangles[i].Vertices[j].Position *= 5;
+      obj.triangles[i].Vertices[j].Position.X -= 4;
+	  obj.triangles[i].Vertices[j].Color = obj.material.color;
+    }
+  }
+  objects.push_back(obj);
+
+  // back
+  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0));
+  for (unsigned int i = 0; i < obj.triangles.size(); ++i)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      obj.triangles[i].Vertices[j].Position *= 5;
+      obj.triangles[i].Vertices[j].Position.Z -= 4;
+	  obj.triangles[i].Vertices[j].Color = obj.material.color;
+    }
+  }
+  objects.push_back(obj);
+
+  // top
+  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(0.0, 1.0, 0.0), ColorD(), 1.0, 0.0));
+  for (unsigned int i = 0; i < obj.triangles.size(); ++i)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      obj.triangles[i].Vertices[j].Position *= 5;
+      obj.triangles[i].Vertices[j].Position.Y += 4;
+	  obj.triangles[i].Vertices[j].Color = obj.material.color;
+    }
+  }
+  objects.push_back(obj);
+
+  // bottom
+  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0));
+  for (unsigned int i = 0; i < obj.triangles.size(); ++i)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      obj.triangles[i].Vertices[j].Position *= 5;
+      obj.triangles[i].Vertices[j].Position.Y -= 4;
+	  obj.triangles[i].Vertices[j].Color = obj.material.color;
+    }
+  }
+  objects.push_back(obj);
+
   // Add lights
-  lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(25.0, 25.0, 25.0)));
-  lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(25.0, 25.0, 25.0)));
+  lights.push_back(Light(Vector3D(-0.75, 1.25, -1.0), ColorD(5.0, 5.0, 5.0)));
+  lights.push_back(Light(Vector3D(0.75, 1.25, 1.0), ColorD(5.0, 5.0, 5.0)));
 
   //camera = Camera(Vector3D(0, 15.0, -10.0), Vector3D::Normalise(Vector3D(0, -0.5, 1)), Vector3D(0, 1, 0));
-  camera = Camera(Vector3D(0, 0.5, -2.5), Vector3D::Normalise(Vector3D(0, -0.25, 1)), Vector3D(0, 1, 0));
+  camera = Camera(Vector3D(0, 0, 4), Vector3D::Normalise(Vector3D(0, 0, -1)), Vector3D(0, 1, 0));
 }

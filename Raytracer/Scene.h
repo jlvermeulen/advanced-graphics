@@ -91,10 +91,10 @@ struct Object
 
   void CreateOctree(int minTriangles, int maxDepth)
   {
-    octree = Octree(triangles, minTriangles, maxDepth);
+    octree = new Octree(triangles, minTriangles, maxDepth);
   }
 
-  Octree octree;
+  Octree* octree;
   Material material;
   std::deque<Triangle> triangles;
 

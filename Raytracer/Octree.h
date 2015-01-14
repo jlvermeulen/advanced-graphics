@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include <deque>
 #include "Triangle.h"
 #include "BoundingBox.h"
@@ -13,12 +12,13 @@ class OctreeNode
 public:
 	OctreeNode();
 	OctreeNode(const std::deque<Triangle>& triangles, const BoundingBox& bb, unsigned int minTriangles, unsigned int maxDepth);
+	~OctreeNode();
 
 	bool Query(const Ray& ray, Triangle& triangle, double& t) const;
 
 private:
 	std::deque<Triangle> triangles;
-	std::vector<OctreeNode> children;
+	OctreeNode** children;
 	BoundingBox bb;
 };
 

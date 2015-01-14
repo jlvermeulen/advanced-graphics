@@ -223,8 +223,8 @@ void GLWidget::drawBoundingBoxes() const
   for (const Object& obj : scene.objects)
   {
     // Initialize queue
-    std::queue<OctreeNode> q;
-    q.push(obj.octree.root);
+    std::queue<OctreeNode*> q;
+    q.push(&obj.octree->root);
 
     glColor3f(0, 1, 1);
 
@@ -239,10 +239,10 @@ void GLWidget::drawBoundingBoxes() const
 
     while (!q.empty())
     {
-      OctreeNode node = q.front();
+      OctreeNode* node = q.front();
       q.pop();
 
-      BoundingBox bb = node.bb;
+      BoundingBox bb = node->bb;
 
       GLfloat vertices[24]; // 8 times 3 coordinates
 
@@ -261,8 +261,11 @@ void GLWidget::drawBoundingBoxes() const
 
       glDrawElements(GL_LINES, 24, GL_UNSIGNED_BYTE, indices);
 
-      for (OctreeNode& n : node.children)
-        q.push(n);
+	  if (node->children == nullptr)
+		  continue;
+
+      for (int i = 0; i < 8; ++i)
+        q.push(node->children[i]);
     }
   }
 
@@ -283,7 +286,7 @@ void GLWidget::drawCameraRay() const
 
   for (const Object& obj : scene.objects)
   {
-    if (obj.octree.Query(debugRay_, tri, time) && time < minTime)
+    if (obj.octree->Query(debugRay_, tri, time) && time < minTime)
     {
       hit = true;
       minTri = tri;
