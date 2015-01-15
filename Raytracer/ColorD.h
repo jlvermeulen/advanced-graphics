@@ -9,14 +9,14 @@ public:
 
 	ColorD();
 	ColorD(double r, double g, double b);
-  ColorD(unsigned char r, unsigned char g, unsigned char b);
+	ColorD(unsigned char r, unsigned char g, unsigned char b);
 
-  inline bool ColorD::IsSignificant() const
-  {
-    return (R >= MIN_INTENSITY ||
-            G >= MIN_INTENSITY ||
-            B >= MIN_INTENSITY);
-  }
+	inline bool ColorD::IsSignificant() const
+	{
+		return (R >= MIN_INTENSITY ||
+				G >= MIN_INTENSITY ||
+				B >= MIN_INTENSITY);
+	}
 
 	void Clip();
 
@@ -30,6 +30,9 @@ public:
 
 	ColorD& operator/=(const ColorD& rhs);
 	ColorD& operator/=(const double& rhs);
+
+	double& operator[](int index);
+	const double& operator[](int index) const;
 
 private:
 };

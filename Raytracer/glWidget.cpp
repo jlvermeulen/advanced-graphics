@@ -84,7 +84,7 @@ void GLWidget::setBoundingBoxVisible(bool visible)
 void GLWidget::setCameraRayVisible(bool visible)
 {
   cameraRayVisible_ = visible;
-  debugRay_ = Ray(scene.camera.Eye(), scene.camera.Focus(), ColorD(1.0, 1.0, 1.0));
+  debugRay_ = Ray(scene.camera.Eye(), scene.camera.Focus());
   updateGL();
 }
 

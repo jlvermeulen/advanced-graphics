@@ -67,3 +67,6 @@ ColorD& ColorD::operator/=(const double& rhs)
 	B /= rhs;
 	return *this;
 }
+
+double& ColorD::operator[](int index) { return index == 0 ? R : index == 1 ? G : B; }
+const double& ColorD::operator[](int index) const { return index == 0 ? R : index == 1 ? G : B; };

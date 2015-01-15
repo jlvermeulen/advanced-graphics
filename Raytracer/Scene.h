@@ -111,15 +111,15 @@ public:
 
 private:
   ColorD radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const;
-  ColorD traceRay(Ray ray, double refractiveIndex, int recursionDepth) const;
+  double traceRay(Ray ray, unsigned int channel, unsigned int recursionDepth) const;
 
-  void tracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma);
+  void tracePixels(std::pair<ColorD, ColorD>* pixelData, int samplesPerPixel, double sigma);
 
   double gaussianWeight(double dx, double dy, double sigma) const;
 
-  ColorD calculateDiffuse(const Intersection& intersection) const;
+  /*ColorD calculateDiffuse(const Intersection& intersection) const;
   ColorD calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;
-  ColorD calculateRefraction(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;
+  ColorD calculateRefraction(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;*/
 
 public:
   Camera camera;

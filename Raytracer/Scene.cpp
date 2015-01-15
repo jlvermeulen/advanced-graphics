@@ -38,27 +38,20 @@ Scene::~Scene()
 
 bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDepth, int samplesPerPixel, double sigma)
 {
-	useOctree_ = useOctree;
-
 	// Instantiate octrees
-	if (useOctree_)
-		for (Object& obj : objects)
-			obj.CreateOctree(minTriangles, maxDepth);
+	for (Object& obj : objects)
+		obj.CreateOctree(minTriangles, maxDepth);
 
-	std::pair<ColorD, double>* samples = new std::pair<ColorD, double>[camera.Width * camera.Height];
+	std::pair<ColorD, ColorD>* samples = new std::pair<ColorD, ColorD>[camera.Width * camera.Height];
 	tracePixels(samples, samplesPerPixel, sigma);
 
 	#pragma omp parallel for
 	for (int x = 0; x < camera.Width; ++x)
 		for (int y = 0; y < camera.Height; ++y)
 		{
-			std::pair<ColorD, double> sample = samples[y * camera.Width + x];
+			std::pair<ColorD, ColorD> sample = samples[y * camera.Width + x];
 			ColorD color = sample.first / sample.second;
-
-			// clamp color value between 0 and 1
-			color.R = std::max(0.0, std::min(1.0, color.R));
-			color.G = std::max(0.0, std::min(1.0, color.G));
-			color.B = std::max(0.0, std::min(1.0, color.B));
+			color.Clip();
 
 			int offset = (y * camera.Width + x) * 4;
 
@@ -75,7 +68,7 @@ bool Scene::Render(uchar* imageData, bool useOctree, int minTriangles, int maxDe
 }
 
 //--------------------------------------------------------------------------------
-void Scene::tracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma)
+void Scene::tracePixels(std::pair<ColorD, ColorD>* pixelData, int samplesPerPixel, double sigma)
 {
 	double tanHalfFovY = tan(camera.FovY() / 360 * M_PI);
 	double tanHalfFovX = tanHalfFovY * camera.Width / camera.Height;
@@ -105,29 +98,33 @@ void Scene::tracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
 					double b = top + (bottom - top) * (y + rY) / camera.Height;
 
 					Vector3D direction = camera.Focus() + a * camera.Right() + b * camera.Up();
-					Ray cameraRay(camera.Eye(), direction, ColorD(1.0, 1.0, 1.0));
-					ColorD color = traceRay(cameraRay, 1.0, MAX_RECURSION_DEPTH);
+					Ray cameraRay(camera.Eye(), direction);
 
-					// distribute over neighbouring pixels
-					for (int i = -1; i < 2; ++i)
+					for (unsigned int c = 0; c < 3; ++c)
 					{
-						int xx = x + i;
-						if (xx < 0 || xx >= camera.Width)
-							continue;
+						double value = traceRay(cameraRay, c, MAX_RECURSION_DEPTH);
 
-						for (int j = -1; j < 2; ++j)
+						// distribute over neighbouring pixels
+						for (int i = -1; i < 2; ++i)
 						{
-							int yy = y + j;
-							if (yy < 0 || yy >= camera.Height)
-									continue;
+							int xx = x + i;
+							if (xx < 0 || xx >= camera.Width)
+								continue;
 
-							double weight = gaussianWeight(i - rX - 0.5, j - rY - 0.5, sigma);
+							for (int j = -1; j < 2; ++j)
+							{
+								int yy = y + j;
+								if (yy < 0 || yy >= camera.Height)
+										continue;
 
-							int index = yy * camera.Width + xx;
-							std::pair<ColorD, double>& data = pixelData[index];
+								double weight = gaussianWeight(i - rX - 0.5, j - rY - 0.5, sigma);
 
-							data.first += color * weight;
-							data.second += weight;
+								int index = yy * camera.Width + xx;
+								std::pair<ColorD, ColorD>& data = pixelData[index];
+
+								data.first[c] += value * weight;
+								data.second[c] += weight;
+							}
 						}
 					}
 				}
@@ -142,190 +139,175 @@ double Scene::gaussianWeight(double dx, double dy, double sigma) const
 }
 
 //--------------------------------------------------------------------------------
-ColorD Scene::traceRay(Ray ray, double refractiveIndex, int recursionDepth) const
+double Scene::traceRay(Ray ray, unsigned int channel, unsigned int recursionDepth) const
 {
-  Material hitMaterial;
-  Triangle hitTriangle;
-  double hitTime = std::numeric_limits<double>::max();
-  bool hit = false;
+	Material hitMaterial;
+	Triangle hitTriangle;
+	double hitTime = std::numeric_limits<double>::max();
+	bool hit = false;
 
-  for (const Object& obj : objects)
-  {
-    if (useOctree_)
-    {
-      Triangle tri;
-      double t = std::numeric_limits<double>::max();
-
-      if (obj.octree->Query(ray, tri, t) && t < hitTime)
-      {
-        hitMaterial = obj.material;
-        hitTriangle = tri;
-        hitTime = t;
-        hit = true;
-      }
-    }
-    else
-    {
-      for (const Triangle& tri : obj.triangles)
-      {
-        double t = std::numeric_limits<double>::max();
-
-        if (Intersects(ray, tri, t) && t < hitTime)
-        {
-          hitMaterial = obj.material;
-          hitTime = t;
-          hitTriangle = tri;
-          hit = true;
-        }
-      }
-    }
-  }
-
-  // checkerboard
-  for (const Triangle& tri : checkerboard.triangles)
-  {
-	double t = std::numeric_limits<double>::max();
-
-	if (Intersects(ray, tri, t) && t < hitTime)
+	for (const Object& obj : objects)
 	{
-		Vector3D point = ray.Origin + t * ray.Direction;
-		double intpart;
-		bool xOdd = point.X > 0 && modf(point.X, &intpart) < 0.5 || modf(point.X, &intpart) < -0.5;
-		bool zOdd = point.Z > 0 && modf(point.Z, &intpart) < 0.5 || modf(point.Z, &intpart) < -0.5;
-		hitTime = t;
-		hitTriangle = tri;
-		hit = xOdd && zOdd || !xOdd && !zOdd;
+		Triangle tri;
+		double t = std::numeric_limits<double>::max();
+
+		if (obj.octree->Query(ray, tri, t) && t < hitTime)
+		{
+			hitMaterial = obj.material;
+			hitTriangle = tri;
+			hitTime = t;
+			hit = true;
+		}
 	}
-  }
 
-  if (hit)
-    return radiance(Intersection(ray, hitTime, hitTriangle, hitMaterial), ray, refractiveIndex, --recursionDepth);
-  else
-    return ray.Color * ColorD();  // Background is black
+	// checkerboard
+	/*for (const Triangle& tri : checkerboard.triangles)
+	{
+		double t = std::numeric_limits<double>::max();
+
+		if (Intersects(ray, tri, t) && t < hitTime)
+		{
+			Vector3D point = ray.Origin + t * ray.Direction;
+			double intpart;
+			bool xOdd = point.X > 0 && modf(point.X, &intpart) < 0.5 || modf(point.X, &intpart) < -0.5;
+			bool zOdd = point.Z > 0 && modf(point.Z, &intpart) < 0.5 || modf(point.Z, &intpart) < -0.5;
+			hitTime = t;
+			hitTriangle = tri;
+			hit = xOdd && zOdd || !xOdd && !zOdd;
+		}
+	}*/
+
+	if (hit)
+	{
+		// TODO: russian roulette, reflection
+		return hitMaterial.color[channel];
+	}
+	else
+		return 0;  // Background is black
 }
 
 //--------------------------------------------------------------------------------
-ColorD Scene::radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const
-{
-  if (recursionDepth > 0 && ray.Color.IsSignificant())
-  {
-    double transparency = intersection.hitMaterial.transparency;
-    double opacity = 1.0 - transparency;
-
-    // Diffuse
-    if (intersection.hitMaterial.reflType == ReflectionType::diffuse)
-    {
-      if (opacity > 0.0)
-      {
-        ColorD surfaceColor = intersection.hit.surfaceColor(intersection.hitPoint);
-        return opacity * surfaceColor * ray.Color * calculateDiffuse(intersection);
-      }
-    }
-
-    // Refraction
-    if (intersection.hitMaterial.reflType == ReflectionType::refractive)
-    {
-      if (transparency > 0.0)
-      {
-        return transparency * calculateRefraction(intersection, ray, refractiveIndex, recursionDepth);
-      }
-    }
-
-    // Reflection
-    if (intersection.hitMaterial.reflType == ReflectionType::specular)
-    {
-      return opacity * calculateReflection(intersection, ray, refractiveIndex, recursionDepth);
-    }
-  }
-
-  return ColorD();
-}
-
-//--------------------------------------------------------------------------------
-ColorD Scene::calculateDiffuse(const Intersection& intersection) const
-{
-  ColorD total;
-
-  for (const Light& source : lights)
-  {
-    Ray toSource(intersection.hitPoint, source.position - intersection.hitPoint, ColorD());
-
-    Triangle blockingTriangle;
-    double blockingTime;
-
-    // Check for occluding object triangles
-    // between the hitPoint and the light source
-    bool noOcclusion = true;
-
-    for (const Object& obj : objects)
-    {
-      if (useOctree_)
-      {
-        if (obj.octree->Query(toSource, blockingTriangle, blockingTime) && blockingTime < 1.0)
-        {
-          noOcclusion = false;
-          break;
-        }
-      }
-      else
-      {
-        for (const Triangle& tri : obj.triangles)
-        {
-          if (Intersects(toSource, tri, blockingTime) && blockingTime < 1.0)
-          {
-            noOcclusion = false;
-            break;
-          }
-        }
-      }
-    }
-
-    // No triangles occluding the light source
-    if (noOcclusion)
-    {
-      double incidence = Vector3D::Dot(intersection.hit.surfaceNormal(intersection.hitPoint), Vector3D::Normalise(toSource.Direction));
-
-      if (incidence > 0.0)
-      {
-        double intensity = incidence / toSource.Direction.LengthSquared();
-
-        total += intensity * source.color;
-      }
-    }
-  }
-
-  return total;
-}
+//ColorD Scene::radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const
+//{
+//  if (recursionDepth > 0 && ray.Color.IsSignificant())
+//  {
+//    double transparency = intersection.hitMaterial.transparency;
+//    double opacity = 1.0 - transparency;
+//
+//    // Diffuse
+//    if (intersection.hitMaterial.reflType == ReflectionType::diffuse)
+//    {
+//      if (opacity > 0.0)
+//      {
+//        ColorD surfaceColor = intersection.hit.surfaceColor(intersection.hitPoint);
+//        return opacity * surfaceColor * ray.Color * calculateDiffuse(intersection);
+//      }
+//    }
+//
+//    // Refraction
+//    if (intersection.hitMaterial.reflType == ReflectionType::refractive)
+//    {
+//      if (transparency > 0.0)
+//      {
+//        return transparency * calculateRefraction(intersection, ray, refractiveIndex, recursionDepth);
+//      }
+//    }
+//
+//    // Reflection
+//    if (intersection.hitMaterial.reflType == ReflectionType::specular)
+//    {
+//      return opacity * calculateReflection(intersection, ray, refractiveIndex, recursionDepth);
+//    }
+//  }
+//
+//  return ColorD();
+//}
 
 //--------------------------------------------------------------------------------
-ColorD Scene::calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const
-{
-  const Vector3D& normal = intersection.hit.surfaceNormal(intersection.hitPoint);
-  Vector3D reflectDir = ray.Direction - (2 * Vector3D::Dot(ray.Direction, normal)) * normal;
-
-  Ray out(intersection.hitPoint, reflectDir, ray.Color);
-
-  return traceRay(out, refractiveIndex, --recursionDepth);
-}
+//ColorD Scene::calculateDiffuse(const Intersection& intersection) const
+//{
+//  ColorD total;
+//
+//  for (const Light& source : lights)
+//  {
+//    Ray toSource(intersection.hitPoint, source.position - intersection.hitPoint, ColorD());
+//
+//    Triangle blockingTriangle;
+//    double blockingTime;
+//
+//    // Check for occluding object triangles
+//    // between the hitPoint and the light source
+//    bool noOcclusion = true;
+//
+//    for (const Object& obj : objects)
+//    {
+//      if (useOctree_)
+//      {
+//        if (obj.octree->Query(toSource, blockingTriangle, blockingTime) && blockingTime < 1.0)
+//        {
+//          noOcclusion = false;
+//          break;
+//        }
+//      }
+//      else
+//      {
+//        for (const Triangle& tri : obj.triangles)
+//        {
+//          if (Intersects(toSource, tri, blockingTime) && blockingTime < 1.0)
+//          {
+//            noOcclusion = false;
+//            break;
+//          }
+//        }
+//      }
+//    }
+//
+//    // No triangles occluding the light source
+//    if (noOcclusion)
+//    {
+//      double incidence = Vector3D::Dot(intersection.hit.surfaceNormal(intersection.hitPoint), Vector3D::Normalise(toSource.Direction));
+//
+//      if (incidence > 0.0)
+//      {
+//        double intensity = incidence / toSource.Direction.LengthSquared();
+//
+//        total += intensity * source.color;
+//      }
+//    }
+//  }
+//
+//  return total;
+//}
 
 //--------------------------------------------------------------------------------
-ColorD Scene::calculateRefraction(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const
-{
-  Vector3D normal = intersection.hit.surfaceNormal(intersection.hitPoint);
+//ColorD Scene::calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const
+//{
+//  const Vector3D& normal = intersection.hit.surfaceNormal(intersection.hitPoint);
+//  Vector3D reflectDir = ray.Direction - (2 * Vector3D::Dot(ray.Direction, normal)) * normal;
+//
+//  Ray out(intersection.hitPoint, reflectDir, ray.Color);
+//
+//  return traceRay(out, refractiveIndex, --recursionDepth);
+//}
 
-  double c = Vector3D::Dot(-normal, ray.Direction);
-  double r = refractiveIndex / intersection.hitMaterial.refrIndex;
-  double rad = 1.0 - r * r * (1.0 - c * c);
-
-  if (rad < 0)
-    return calculateReflection(intersection, ray, refractiveIndex, recursionDepth);
-
-  Vector3D refractDir = r * ray.Direction + (r * c - sqrt(rad)) * normal;
-
-  Ray out(intersection.hitPoint, refractDir, ray.Color);
-
-  return traceRay(out, intersection.hitMaterial.refrIndex, --recursionDepth);
-}
+//--------------------------------------------------------------------------------
+//ColorD Scene::calculateRefraction(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const
+//{
+//  Vector3D normal = intersection.hit.surfaceNormal(intersection.hitPoint);
+//
+//  double c = Vector3D::Dot(-normal, ray.Direction);
+//  double r = refractiveIndex / intersection.hitMaterial.refrIndex;
+//  double rad = 1.0 - r * r * (1.0 - c * c);
+//
+//  if (rad < 0)
+//    return calculateReflection(intersection, ray, refractiveIndex, recursionDepth);
+//
+//  Vector3D refractDir = r * ray.Direction + (r * c - sqrt(rad)) * normal;
+//
+//  Ray out(intersection.hitPoint, refractDir, ray.Color);
+//
+//  return traceRay(out, intersection.hitMaterial.refrIndex, --recursionDepth);
+//}
 
 //--------------------------------------------------------------------------------
 void Scene::LoadDefaultScene()
@@ -355,6 +337,7 @@ void Scene::LoadDefaultScene()
       obj.triangles[i].Vertices[j].Position /= 3;
       obj.triangles[i].Vertices[j].Position.X += 0.5;
       obj.triangles[i].Vertices[j].Position.Z -= 0.125;
+	  obj.triangles[i].Vertices[j].Color = obj.material.color;
     }
   }
   objects.push_back(obj);
@@ -386,7 +369,7 @@ void Scene::LoadDefaultScene()
   objects.push_back(obj);
 
   // back
-  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0));
+  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0));
   for (unsigned int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
@@ -412,7 +395,7 @@ void Scene::LoadDefaultScene()
   objects.push_back(obj);
 
   // bottom
-  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0));
+  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 0.0), ColorD(), 1.0, 0.0));
   for (unsigned int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
