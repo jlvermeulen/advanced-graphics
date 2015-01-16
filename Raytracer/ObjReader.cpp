@@ -22,6 +22,9 @@ ObjReader::~ObjReader()
 //--------------------------------------------------------------------------------
 std::deque<Object> ObjReader::parseFile(const char* fileName)
 {
+  // Out with the old
+  reset();
+  
   std::string path = std::string(fileName);
   path = path.substr(0, path.find_last_of('\\/') + 1);
 
@@ -77,14 +80,13 @@ void ObjReader::parseLine(const std::string& path, const std::vector<std::string
       break;
 
     case ObjType::vertex:
-      // First step of parsing an object
       // Do we need a new object?
       if (combined_)
       {
-        reset();
-
         // Create empty object
         objects_.push_back(Object());
+
+        combined_ = false;
       }
 
       parseVertex(++it);
@@ -203,6 +205,4 @@ void ObjReader::reset()
   normals_.clear();
   positions_.clear();
   texCoords_.clear();
-
-  combined_ = false;
 }
