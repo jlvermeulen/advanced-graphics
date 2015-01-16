@@ -340,30 +340,38 @@ void Scene::LoadDefaultScene()
   objects.clear();
   lights.clear();
 
-  //Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(), ColorD(), 1.0, 0.0));
-  //for (unsigned int i = 0; i < obj.triangles.size(); ++i)
-  //{
-  //  for (int j = 0; j < 3; j++)
-  //  {
-  //    obj.triangles[i].Vertices[j].Position /= 3;
-  //    obj.triangles[i].Vertices[j].Position.X -= 0.5;
-  //    obj.triangles[i].Vertices[j].Position.Z += 0.125;
-  //    obj.triangles[i].Vertices[j].Color = ColorD(1.0, 0.0, 0.0);
-  //  }
-  //}
-  //objects.push_back(obj);
+  // Example: Two spheres
 
-  //obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::specular, ColorD(), ColorD(), 0.5, 0.5));
-  //for (unsigned int i = 0; i < obj.triangles.size(); ++i)
-  //{
-  //  for (int j = 0; j < 3; j++)
-  //  {
-  //    obj.triangles[i].Vertices[j].Position /= 3;
-  //    obj.triangles[i].Vertices[j].Position.X += 0.5;
-  //    obj.triangles[i].Vertices[j].Position.Z -= 0.125;
-  //  }
-  //}
-  //objects.push_back(obj);
+  // Parse first object
+  reader.parseFile("sphere.obj");
+
+  // Parse second object
+  // and retrieve both
+  objects = reader.parseFile("sphere.obj");
+
+  unsigned int nTriangles = objects[0].triangles.size();
+
+  for (unsigned int i = 0; i < nTriangles; ++i)
+  {
+    for (unsigned int j = 0; j < 3; ++j)
+    {
+      objects[0].triangles[i].Vertices[j].Position /= 3;
+      objects[0].triangles[i].Vertices[j].Position.X -= 0.5;
+      objects[0].triangles[i].Vertices[j].Position.Z += 0.125;
+    }
+  }
+
+  nTriangles = objects[1].triangles.size();
+
+  for (unsigned int i = 0; i < nTriangles; ++i)
+  {
+    for (unsigned int j = 0; j < 3; ++j)
+    {
+      objects[1].triangles[i].Vertices[j].Position /= 3;
+      objects[1].triangles[i].Vertices[j].Position.X += 0.5;
+      objects[1].triangles[i].Vertices[j].Position.Z -= 0.125;
+    }
+  }
 
   // Add lights
   lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(25.0, 25.0, 25.0)));
