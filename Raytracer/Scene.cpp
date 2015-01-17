@@ -80,8 +80,6 @@ void Scene::tracePixels(std::pair<ColorD, ColorD>* pixelData, int samplesPerPixe
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<double> dist(0, 1);
 
-	traceRay(Ray(Vector3D(0, 0, 4.5), Vector3D::Normalise(Vector3D(0.10733086382807211, 0.071806387421114948, -1.0000000000000000))), 0, dist, gen);
-
 	// Calculate pixel rays
 	for (int a = 0; a < 3; a++) // prevent concurrent access of same array indices
 	{
