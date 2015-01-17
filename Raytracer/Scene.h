@@ -78,7 +78,19 @@ struct Light
   Vector3D position;
   ColorD color;
 };
+struct Lightarea
+{
+	Lightarea(const Triangle& triangle, const ColorD& color, const float& emission) :
+		triangle(triangle),
+		color(color),
+		emission(emission)
+	{
+	}
 
+	Triangle triangle;
+	ColorD color;
+	float emission;
+};
 struct Object
 {
   Object() : material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0) { }
@@ -120,12 +132,14 @@ private:
   /*ColorD calculateDiffuse(const Intersection& intersection) const;
   ColorD calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;
   ColorD calculateRefraction(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;*/
+  Ray SampleLight(std::vector<Lightarea> lightsources, Vector3D hitPoint) const;
 
 public:
   Camera camera;
   std::vector<Object> objects;
   std::vector<Light> lights;
   Object checkerboard;
+  std::vector<Lightarea> lightareas;
 
 private:
   bool useOctree_;

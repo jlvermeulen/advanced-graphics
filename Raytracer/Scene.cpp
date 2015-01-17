@@ -145,7 +145,6 @@ double Scene::traceRay(Ray ray, unsigned int channel, unsigned int recursionDept
 	Triangle hitTriangle;
 	double hitTime = std::numeric_limits<double>::max();
 	bool hit = false;
-
 	for (const Object& obj : objects)
 	{
 		Triangle tri;
@@ -310,6 +309,64 @@ double Scene::traceRay(Ray ray, unsigned int channel, unsigned int recursionDept
 //}
 
 //--------------------------------------------------------------------------------
+Ray Scene::SampleLight(std::vector<Lightarea> lightsources, Vector3D hitPoint) const
+{
+	Triangle triangle;
+	float emission;
+	const int n = lightsources.size();
+	std::vector<float> flux;
+	float totalflux = 0;
+	// loop over all lightsources
+	for (int l = 0; l < lightsources.size(); l++)
+	{
+		triangle = lightsources[l].triangle;
+		emission = lightsources[l].emission;
+		Vector3D outgoingRay = hitPoint - triangle.center();
+		float distance = outgoingRay.Length();
+		Vector3D normal = triangle.surfaceNormal(triangle.center());
+		normal.Normalise();
+		outgoingRay.Normalise();
+		
+		flux.push_back(triangle.area() * emission * std::abs(Vector3D::Dot(outgoingRay, normal)) / distance);
+		totalflux += flux[l];
+	}
+	// devide all flux values by the total flux gives the probabilities
+	for (int l = 0; l < lightsources.size(); l++)
+		flux[l] /= totalflux;
+
+	// get the light using the probabilities and a random float between 0 and 1
+	float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+	int light = -1;
+	for (int l = 0; l < lightsources.size(); l++)
+	{
+		if (flux[l] >= r)
+		{
+			light = l;
+			break;
+		}
+		else
+			r -= flux[l];
+	}
+	// ensure that we have a light selected (might not be because of float roundings)
+	if (light == -1) light = lightsources.size() - 1;
+
+	// create random point withing the lightsource and return ray towards it.
+	float u = 1;
+	float v = 1;
+	while (u + v > 1)
+	{
+		u = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		v = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+	}
+	triangle = lightsources[light].triangle;
+	Vector3D v1 = triangle.Vertices[1].Position - triangle.Vertices[0].Position;
+	Vector3D v2 = triangle.Vertices[2].Position - triangle.Vertices[0].Position;
+	return Ray(hitPoint, (v1*u + v2*v) - hitPoint);
+
+
+}
+
+//--------------------------------------------------------------------------------
 void Scene::LoadDefaultScene()
 {
   ObjReader reader;
@@ -410,6 +467,18 @@ void Scene::LoadDefaultScene()
   // Add lights
   lights.push_back(Light(Vector3D(-0.75, 1.25, -1.0), ColorD(5.0, 5.0, 5.0)));
   lights.push_back(Light(Vector3D(0.75, 1.25, 1.0), ColorD(5.0, 5.0, 5.0)));
+
+  // Add lightAreas
+ /* Vertex v1 = Vertex(Vector3D(-0.6, 1.25, 1.0), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0));
+  Vertex v2 = Vertex(Vector3D(-0.8, 1.25, 1.0), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0));
+  Vertex v3 = Vertex(Vector3D(-0.7, 1.25, 1.1), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0));
+  Triangle t1 = Triangle(v1, v2, v3);
+  Vertex v12 = Vertex(Vector3D(0.6, 1.25, 1.0), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0));
+  Vertex v22 = Vertex(Vector3D(0.8, 1.25, 1.0), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0));
+  Vertex v32 = Vertex(Vector3D(0.7, 1.25, 1.1), Vector3D(0, 1, 0), ColorD(1.0, 1.0, 1.0), Vector3D(0, 0, 0));
+  Triangle t2 = Triangle(v12, v22, v32);
+  lightareas.push_back(Lightarea(t1, ColorD(1.0, 1.0, 1.0), 10));
+  lightareas.push_back(Lightarea(t2, ColorD(1.0, 1.0, 1.0), 10));*/
 
   //camera = Camera(Vector3D(0, 15.0, -10.0), Vector3D::Normalise(Vector3D(0, -0.5, 1)), Vector3D(0, 1, 0));
   camera = Camera(Vector3D(0, 0, 4), Vector3D::Normalise(Vector3D(0, 0, -1)), Vector3D(0, 1, 0));
