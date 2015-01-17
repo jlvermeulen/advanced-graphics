@@ -6,8 +6,6 @@
 #include <Intersections.h>
 #include <math.h>
 #include <ObjReader.h>
-#include <random>
-
 
 Scene::Scene() :
   useOctree_(false)
@@ -80,29 +78,31 @@ void Scene::tracePixels(std::pair<ColorD, ColorD>* pixelData, int samplesPerPixe
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<double> dis(0, 1);
+	std::uniform_real_distribution<double> dist(0, 1);
+
+	traceRay(Ray(Vector3D(0, 0, 4.5), Vector3D::Normalise(Vector3D(0.10733086382807211, 0.071806387421114948, -1.0000000000000000))), 0, dist, gen);
 
 	// Calculate pixel rays
 	for (int a = 0; a < 3; a++) // prevent concurrent access of same array indices
 	{
-		#pragma omp parallel for
+		#pragma omp parallel for schedule(dynamic)
 		for (int x = a; x < camera.Width; x += 3)
 			for (int y = 0; y < camera.Height; ++y)
 			{
 				for (int r = 0; r < samplesPerPixel; ++r)
 				{
-					double rX = dis(gen);
-					double rY = dis(gen);
+					double rX = dist(gen);
+					double rY = dist(gen);
 
 					double a = left + (right - left) * (x + rX) / camera.Width;
 					double b = top + (bottom - top) * (y + rY) / camera.Height;
 
-					Vector3D direction = camera.Focus() + a * camera.Right() + b * camera.Up();
+					Vector3D direction = Vector3D::Normalise(camera.Focus() + a * camera.Right() + b * camera.Up());
 					Ray cameraRay(camera.Eye(), direction);
 
 					for (unsigned int c = 0; c < 3; ++c)
 					{
-						double value = traceRay(cameraRay, c, MAX_RECURSION_DEPTH);
+						double value = traceRay(cameraRay, c, dist, gen);
 
 						// distribute over neighbouring pixels
 						for (int i = -1; i < 2; ++i)
@@ -139,7 +139,7 @@ double Scene::gaussianWeight(double dx, double dy, double sigma) const
 }
 
 //--------------------------------------------------------------------------------
-double Scene::traceRay(Ray ray, unsigned int channel, unsigned int recursionDepth) const
+double Scene::traceRay(const Ray& ray, unsigned int channel, const std::uniform_real_distribution<double>& dist, std::mt19937& gen) const
 {
 	Material hitMaterial;
 	Triangle hitTriangle;
@@ -178,8 +178,33 @@ double Scene::traceRay(Ray ray, unsigned int channel, unsigned int recursionDept
 
 	if (hit)
 	{
-		// TODO: russian roulette, reflection
-		return hitMaterial.color[channel];
+		if (hitMaterial.emission.IsSignificant()) // hit a light source
+			return hitMaterial.emission[channel];
+
+		if (dist(gen) > hitMaterial.color[channel]) // russian roulette
+			return 0;
+
+		const Vector3D& hitPoint = ray.Origin + hitTime * ray.Direction;
+		const Vector3D& normal = hitTriangle.surfaceNormal(hitPoint);
+
+		if (ray.Direction.Dot(normal) > 0) // hit from behind
+			return 0;
+
+		if (hitMaterial.reflType == ReflectionType::specular)
+			return traceRay(Ray(hitPoint, Vector3D::Normalise(Vector3D::Reflect(ray.Direction, normal))), channel, dist, gen); // perfect reflection
+		else if (hitMaterial.reflType == ReflectionType::diffuse)
+		{
+			double u = dist(gen) * 2 - 1, theta = dist(gen) * M_PI * 2, x = sqrt(1 - u * u); // sample unit sphere
+			Vector3D hemi(x * cos(theta), x * sin(theta), u);
+			if (hemi.Dot(normal) < 0) // flip if "behind" normal
+				hemi *= -1;
+
+			return traceRay(Ray(hitPoint, hemi), channel, dist, gen);
+		}
+		else if (hitMaterial.reflType == ReflectionType::refractive)
+			return traceRay(Ray(hitPoint, Vector3D::Normalise(Vector3D::Refract(ray.Direction, normal, 1.0, hitMaterial.refrIndex))), channel, dist, gen);
+		else
+			return 0;
 	}
 	else
 		return 0;  // Background is black
@@ -373,7 +398,8 @@ void Scene::LoadDefaultScene()
   objects.clear();
   lights.clear();
 
-  Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(1.0, 0, 0), ColorD(), 1.0, 0.0));
+  // left sphere
+  Object obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::diffuse, ColorD(1.0, 0.5, 0.0), ColorD(), 1.5, 0.0));
   for (unsigned int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
@@ -386,7 +412,8 @@ void Scene::LoadDefaultScene()
   }
   objects.push_back(obj);
 
-  obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::specular, ColorD(), ColorD(), 0.5, 0.5));
+  // right sphere
+  obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::specular, ColorD(1.0, 1.0, 1.0), ColorD(), 0.5, 0.5));
   for (unsigned int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
@@ -399,8 +426,22 @@ void Scene::LoadDefaultScene()
   }
   objects.push_back(obj);
 
+  // light
+  obj = Object(reader.parseFile("sphere.obj"), Material(ReflectionType::specular, ColorD(1.0, 1.0, 1.0), ColorD(25.0, 25.0, 25.0), 0.5, 0.5));
+  for (unsigned int i = 0; i < obj.triangles.size(); ++i)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      obj.triangles[i].Vertices[j].Position /= 1.5;
+	  obj.triangles[i].Vertices[j].Position.Y /= 12;
+      obj.triangles[i].Vertices[j].Position.Y += 1.5;
+	  obj.triangles[i].Vertices[j].Color = obj.material.color;
+    }
+  }
+  objects.push_back(obj);
+
   // right
-  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(1.0, 0, 0), ColorD(), 1.0, 0.0));
+  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(0.5, 0, 0), ColorD(), 1.0, 0.0));
   for (unsigned int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
@@ -413,7 +454,7 @@ void Scene::LoadDefaultScene()
   objects.push_back(obj);
 
   // left
-  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(0, 0, 1.0), ColorD(), 1.0, 0.0));
+  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(0, 0, 0.5), ColorD(), 1.0, 0.0));
   for (unsigned int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
@@ -426,7 +467,7 @@ void Scene::LoadDefaultScene()
   objects.push_back(obj);
 
   // back
-  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0));
+  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0));
   for (unsigned int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
@@ -439,7 +480,7 @@ void Scene::LoadDefaultScene()
   objects.push_back(obj);
 
   // top
-  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(0.0, 1.0, 0.0), ColorD(), 1.0, 0.0));
+  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(0.0, 0.5, 0.0), ColorD(), 1.0, 0.0));
   for (unsigned int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
@@ -452,7 +493,7 @@ void Scene::LoadDefaultScene()
   objects.push_back(obj);
 
   // bottom
-  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 0.0), ColorD(), 1.0, 0.0));
+  obj = Object(reader.parseFile("cube.obj"), Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.0), ColorD(), 1.0, 0.0));
   for (unsigned int i = 0; i < obj.triangles.size(); ++i)
   {
     for (int j = 0; j < 3; j++)
@@ -481,5 +522,5 @@ void Scene::LoadDefaultScene()
   lightareas.push_back(Lightarea(t2, ColorD(1.0, 1.0, 1.0), 10));*/
 
   //camera = Camera(Vector3D(0, 15.0, -10.0), Vector3D::Normalise(Vector3D(0, -0.5, 1)), Vector3D(0, 1, 0));
-  camera = Camera(Vector3D(0, 0, 4), Vector3D::Normalise(Vector3D(0, 0, -1)), Vector3D(0, 1, 0));
+  camera = Camera(Vector3D(0, 0, 4.5), Vector3D::Normalise(Vector3D(0, 0, -1)), Vector3D(0, 1, 0));
 }

@@ -13,7 +13,7 @@ public:
 	Vector3D(const double vec[]);
 
 	double Length();
-  double LengthSquared();
+	double LengthSquared();
 
 	double Dot(const Vector3D& other) const;
 	static double Dot(const Vector3D& lhs, const Vector3D& rhs);
@@ -28,9 +28,9 @@ public:
 	Vector3D Reflected(const Vector3D& normal) const;
 	static Vector3D Reflect(Vector3D incident, const Vector3D& normal);
 
-	void Refract(const Vector3D& normal, const double& nFrom, const double& nTo);
-	Vector3D Refracted(const Vector3D& normal, const double& nFrom, const double& nTo) const;
-	static Vector3D Refract(Vector3D incident, const Vector3D& normal, const double& nFrom, const double& nTo);
+	void Refract(const Vector3D& normal, const double& n1, const double& n2);
+	Vector3D Refracted(const Vector3D& normal, const double& n1, const double& n2) const;
+	static Vector3D Refract(Vector3D incident, const Vector3D& normal, const double& n1, const double& n2);
 
 	Vector3D& operator+=(const Vector3D& rhs);
 	Vector3D& operator+=(const double& rhs);
@@ -47,9 +47,9 @@ public:
 	const double& operator[](int index) const;
 
 public:
-  static Vector3D Forward;
-  static Vector3D Right;
-  static Vector3D Up;
+	static Vector3D Forward;
+	static Vector3D Right;
+	static Vector3D Up;
 
 private:
 };

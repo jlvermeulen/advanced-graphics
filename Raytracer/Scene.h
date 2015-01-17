@@ -7,6 +7,7 @@
 #include "Triangle.h"
 #include <vector>
 #include <utility>
+#include <random>
 
 typedef unsigned char uchar;
 
@@ -123,7 +124,7 @@ public:
 
 private:
   ColorD radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const;
-  double traceRay(Ray ray, unsigned int channel, unsigned int recursionDepth) const;
+  double traceRay(const Ray& ray, unsigned int channel, const std::uniform_real_distribution<double>& dist, std::mt19937& gen) const;
 
   void tracePixels(std::pair<ColorD, ColorD>* pixelData, int samplesPerPixel, double sigma);
 
