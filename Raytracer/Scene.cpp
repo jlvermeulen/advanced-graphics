@@ -345,17 +345,19 @@ void Scene::LoadDefaultScene()
       objects[1].triangles[i].Vertices[j].Position.X += 0.5;
       objects[1].triangles[i].Vertices[j].Position.Z -= 0.125;
     }
-	obj.triangles[i].CalculateArea();
-	obj.triangles[i].CalculateCenter();
   }
 
   // Light
-  objects[2].material = Material(ReflectionType::specular, ColorD(0.0, 0.0, 0.0), ColorD(1.0, 1.0, 1.0), 0.5, 0.5);
+  objects[2].material = Material(ReflectionType::specular, ColorD(0.0, 0.0, 0.0), ColorD(0.5, 0.5, 0.5), 0.5, 0.5);
   nTriangles = objects[2].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
+  {
     for (unsigned int j = 0; j < 3; ++j)
       objects[2].triangles[i].Vertices[j].Position.Y += 1.5;
+    objects[2].triangles[i].CalculateArea();
+    objects[2].triangles[i].CalculateCenter();
+  }
 
   lights.push_back(objects[2]);
 
