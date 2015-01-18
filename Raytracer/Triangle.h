@@ -7,6 +7,8 @@ struct Triangle
 {
 public:
 	Vertex Vertices[3];
+	double Area;
+	Vector3D Center;
 
 	Triangle() { }
 
@@ -46,8 +48,8 @@ public:
 		return factors.X * Vertices[0].Normal + factors.Y * Vertices[1].Normal + factors.Z * Vertices[2].Normal;
 	}
 
-	double Area() const { return 0.5 * Vector3D::Cross(Vertices[1].Position - Vertices[0].Position, Vertices[2].Position - Vertices[0].Position).Length(); }
-	Vector3D Center() const { return (Vertices[0].Position + Vertices[1].Position + Vertices[2].Position) / 3; }
+	void CalculateArea() { Area = 0.5 * Vector3D::Cross(Vertices[1].Position - Vertices[0].Position, Vertices[2].Position - Vertices[0].Position).Length(); }
+	void CalculateCenter() { Center = (Vertices[0].Position + Vertices[1].Position + Vertices[2].Position) / 3; }
 
 private:
 };

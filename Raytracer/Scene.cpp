@@ -241,19 +241,17 @@ std::tuple<Ray, Triangle, double> Scene::SampleLight(const Vector3D& hitPoint)
 	double totalflux = 0;
 	// loop over all lightsources
 	for (const Object& o : lights)
-	{
 		for (const Triangle& t : o.triangles)
 		{
-			Vector3D outgoingRay = hitPoint - t.Center();
+			Vector3D outgoingRay = hitPoint - t.Center;
 			double distance = outgoingRay.Length();
-			Vector3D normal = t.surfaceNormal(t.Center());
+			Vector3D normal = t.surfaceNormal(t.Center);
 			outgoingRay.Normalise();
 
-			double f = t.Area() * o.material.emission.R * std::max(0.0, Vector3D::Dot(outgoingRay, normal)) / distance;
+			double f = t.Area * o.material.emission.R * std::max(0.0, Vector3D::Dot(outgoingRay, normal)) / distance;
 			flux.push_back(std::pair<double, const Triangle&>(f, t));
 			totalflux += f;
 		}
-	}
 
 	// divide all flux values by the total flux gives the probabilities
 	for (unsigned int l = 0; l < flux.size(); l++)
@@ -347,6 +345,8 @@ void Scene::LoadDefaultScene()
       objects[1].triangles[i].Vertices[j].Position.X += 0.5;
       objects[1].triangles[i].Vertices[j].Position.Z -= 0.125;
     }
+	obj.triangles[i].CalculateArea();
+	obj.triangles[i].CalculateCenter();
   }
 
   // Light
