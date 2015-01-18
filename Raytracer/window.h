@@ -2,6 +2,7 @@
 
 #include <QMainWindow>
 
+#include "cameraControls.h"
 #include "glWidget.h"
 
 namespace Ui {
@@ -16,13 +17,20 @@ public:
   explicit Window(QWidget *parent = 0);
   ~Window();
 
-public:
   GLWidget* getGLWidget() const;
 
 public slots:
+  void openCameraControls();
   void openFileDialog();
   void openRenderDialog();
 
+  void setX(double x);
+  void setY(double y);
+  void setZ(double z);
+
 private:
+  void applyChanges();
+
   Ui::Window *ui;
+  CameraControls* cameraControls;;
 };

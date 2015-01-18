@@ -187,8 +187,8 @@ void GLWidget::mouseMoveEvent(QMouseEvent* event)
   {
     QPoint pos = event->pos();
 
-    int dx = pos.x() - lastPos.x();
-    int dy = pos.y() - lastPos.y();
+    int dx = lastPos.x() - pos.x();
+    int dy = lastPos.y() - pos.y();
 
     scene.camera.RotateY(0.1 * dx);         // Horizontal
     scene.camera.RotateX(0.1 * dy);         // Vertical

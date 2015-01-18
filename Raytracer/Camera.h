@@ -1,6 +1,7 @@
 #pragma once
 
-#include <Vector3D.h>
+#include "Vector3D.h"
+#include "Quaternion.h"
 
 class Camera
 {
@@ -13,9 +14,14 @@ public:
   void MoveForward(const float& distance);
   void MoveRight(const float& distance);
   void MoveUpward(const float& distance);
+  void Rotate(const Vector3D& axis, float angle);
   void RotateX(float angle);
   void RotateY(float angle);
   void RotateZ(float angle);
+
+  void setX(double x) { eye_.X = x; }
+  void setY(double y) { eye_.Y = y; }
+  void setZ(double z) { eye_.Z = z; }
 
   Vector3D Eye() const { return eye_; }
   Vector3D Focus() const { return focus_; }
@@ -35,9 +41,7 @@ private:
   Vector3D right_;
   Vector3D up_;
 
-  float rotX_;
-  float rotY_;
-  float rotZ_;
+  Quaternion orientation_;
   
   float fovY_;
   float zNear_;

@@ -146,6 +146,18 @@
     <ClCompile Include="Vector2D.cpp">
       <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
+    <ClCompile Include="Quaternion.cpp">
+      <Filter>Source Files\Raytracer</Filter>
+    </ClCompile>
+    <ClCompile Include="cameraControls.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_cameraControls.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_cameraControls.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_window.h">
@@ -202,6 +214,12 @@
     <ClInclude Include="Vector2D.h">
       <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
+    <ClInclude Include="Quaternion.h">
+      <Filter>Header Files\Raytracer</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_cameraControls.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="window.ui">
@@ -224,6 +242,12 @@
     </CustomBuild>
     <CustomBuild Include="renderViewer.ui">
       <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="cameraControls.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="cameraControls.h">
+      <Filter>Header Files\Interface</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

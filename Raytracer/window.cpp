@@ -11,16 +11,40 @@ Window::Window(QWidget *parent)
     ui(new Ui::Window)
 {
   ui->setupUi(this);
+  cameraControls = new CameraControls(this);
 }
 
 Window::~Window()
 {
+  delete cameraControls;
   delete ui;
 }
 
 GLWidget* Window::getGLWidget() const
 {
   return ui->glWidget;
+}
+
+void Window::openCameraControls()
+{
+  cameraControls->setModal(false);
+
+  cameraControls->setX(getGLWidget()->getX());
+  cameraControls->setY(getGLWidget()->getY());
+  cameraControls->setZ(getGLWidget()->getZ());
+
+  connect(cameraControls->getXBox(), SIGNAL(valueChanged(double)),
+          this, SLOT(setX(double)));
+
+  connect(cameraControls->getYBox(), SIGNAL(valueChanged(double)),
+          this, SLOT(setY(double)));
+  
+  connect(cameraControls->getZBox(), SIGNAL(valueChanged(double)),
+          this, SLOT(setZ(double)));
+
+  cameraControls->show();
+  cameraControls->raise();
+  cameraControls->activateWindow();
 }
 
 void Window::openFileDialog()
@@ -73,4 +97,31 @@ void Window::openRenderDialog()
     // Clean up
     delete imageData;
   }
+}
+
+void Window::setX(double x)
+{
+  getGLWidget()->setX(x);
+
+  applyChanges();
+}
+
+void Window::setY(double y)
+{
+  getGLWidget()->setY(y);
+
+  applyChanges();
+}
+
+void Window::setZ(double z)
+{
+  getGLWidget()->setZ(z);
+
+  applyChanges();
+}
+
+void Window::applyChanges()
+{
+  activateWindow();
+  cameraControls->activateWindow();
 }
