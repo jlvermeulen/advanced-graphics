@@ -304,7 +304,7 @@ void Scene::LoadDefaultScene()
   reader.parseFile("../models/sphere.obj");
 
   // Parse light
-  reader.parseFile("../models/light1.obj");
+  reader.parseFile("../models/light2.obj");
 
   // Parse right
   reader.parseFile("../models/cube.obj");
@@ -322,6 +322,7 @@ void Scene::LoadDefaultScene()
   objects = reader.parseFile("../models/cube.obj");
 
   // Left sphere
+  objects[0].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.5, 0.0), ColorD(), 0.5, 0.5);
   unsigned int nTriangles = objects[0].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -335,6 +336,7 @@ void Scene::LoadDefaultScene()
   }
 
   // Right sphere
+  objects[1].material = Material(ReflectionType::specular, ColorD(0.0, 0.0, 0.0), ColorD(), 0.5, 0.5);
   nTriangles = objects[1].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
