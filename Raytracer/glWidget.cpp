@@ -44,10 +44,7 @@ void GLWidget::loadScene(QString& fileName)
 
   ObjReader reader;
 
-  std::deque<Triangle>& triangles = reader.parseFile(fileName.toUtf8().data());
-  Material standard(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0);
-
-  scene.objects.push_back(Object(triangles, standard));
+  scene.objects = reader.parseFile(fileName.toUtf8().data());
 
   // Add lights
   //scene.lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(15.0, 15.0, 15.0)));
@@ -190,8 +187,8 @@ void GLWidget::mouseMoveEvent(QMouseEvent* event)
   {
     QPoint pos = event->pos();
 
-    int dx = pos.x() - lastPos.x();
-    int dy = pos.y() - lastPos.y();
+    int dx = lastPos.x() - pos.x();
+    int dy = lastPos.y() - pos.y();
 
     scene.camera.RotateY(0.1 * dx);         // Horizontal
     scene.camera.RotateX(0.1 * dy);         // Vertical
@@ -336,7 +333,7 @@ void GLWidget::drawModel()
     {
       for (const Vertex& vertex : triangle.Vertices)
       {
-        glColor3f(vertex.Color.R, vertex.Color.G, vertex.Color.B);
+        glColor3f(obj.material.color.R, obj.material.color.G, obj.material.color.B);
         glNormal3f(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
         glVertex3f(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
       }

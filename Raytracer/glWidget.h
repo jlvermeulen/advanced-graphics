@@ -44,12 +44,22 @@ public:
   int getStratificationSize() const { return stratificationSize_; }
   void setStratificationSize(int size) { stratificationSize_ = size; }
 
+  double getX() const { return scene.camera.Eye().X; }
+  void setX(double x) { scene.camera.setX(x); }
+
+  double getY() const { return scene.camera.Eye().Y; }
+  void setY(double y) { scene.camera.setY(y); }
+
+  double getZ() const { return scene.camera.Eye().Z; }
+  void setZ(double z) { scene.camera.setZ(z); }
+
   void loadScene(QString& fileName);
   int renderScene(uchar* imageData);
 
 public slots:
   void setBoundingBoxVisible(bool visible);
   void setCameraRayVisible(bool visible);
+
 
 protected:
   void glPerspective(double fovY, double aspect, double zNear, double zFar);

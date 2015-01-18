@@ -49,7 +49,7 @@ void Camera::MoveForward(const float& distance)
 //--------------------------------------------------------------------------------
 void Camera::MoveRight(const float& distance)
 {
-  eye_ += right_ * distance;
+  eye_ += Vector3D::Cross(focus_, up_) * distance;
 }
 
 //--------------------------------------------------------------------------------
@@ -59,28 +59,50 @@ void Camera::MoveUpward(const float& distance)
 }
 
 //--------------------------------------------------------------------------------
+void Camera::Rotate(const Vector3D& axis, float angle)
+{
+  Quaternion rotation(
+    axis.X * sin(angle / 2),
+    axis.Y * sin(angle / 2),
+    axis.Z * sin(angle / 2),
+    cos(angle / 2)
+  );
+
+  Quaternion view(
+    focus_.X,
+    focus_.Y,
+    focus_.Z,
+    0
+  );
+
+  Quaternion result = (rotation * view) * Quaternion::conjugate(rotation);
+
+  focus_.X = result.X;
+  focus_.Y = result.Y;
+  focus_.Z = result.Z;
+}
+
+//--------------------------------------------------------------------------------
 void Camera::RotateX(float angle)
 {
-  rotX_ += angle;
+  Rotate(Vector3D::Cross(focus_, up_), 0.01 * angle);
 
-  focus_ = Vector3D::Normalise(focus_ * cos(angle * M_PI_180) + up_ * sin(angle * M_PI_180));
-  up_ = Vector3D::Cross(focus_, right_) * -1;
+  //focus_ = Vector3D::Normalise(focus_ * cos(angle * M_PI_180) + up_ * sin(angle * M_PI_180));
+  //up_ = Vector3D::Cross(focus_, right_) * -1;
 }
 
 //--------------------------------------------------------------------------------
 void Camera::RotateY(float angle)
 {
-  rotY_ += angle;
+  Rotate(Vector3D::Up, 0.01 * angle);
 
-  focus_ = Vector3D::Normalise(focus_ * cos(angle * M_PI_180) - right_ * sin(angle * M_PI_180));
-  right_ = Vector3D::Cross(focus_, up_);
+  //focus_ = Vector3D::Normalise(focus_ * cos(angle * M_PI_180) - right_ * sin(angle * M_PI_180));
+  //right_ = Vector3D::Cross(focus_, up_);
 }
 
 //--------------------------------------------------------------------------------
 void Camera::RotateZ(float angle)
 {
-  rotZ_ += angle;
-
-  right_ = Vector3D::Normalise(right_ * cos(angle * M_PI_180) + up_ * sin(angle * M_PI_180));
-  up_ = Vector3D::Cross(focus_, right_) * -1;
+  //right_ = Vector3D::Normalise(right_ * cos(angle * M_PI_180) + up_ * sin(angle * M_PI_180));
+  //up_ = Vector3D::Cross(focus_, right_) * -1;
 }

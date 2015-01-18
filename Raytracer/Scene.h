@@ -2,22 +2,18 @@
 
 #include "Camera.h"
 #include "ColorD.h"
-#include <deque>
+#include "Material.h"
+#include "Object.h"
 #include "Octree.h"
 #include "Triangle.h"
+
+#include <deque>
 #include <vector>
 #include <utility>
 #include <tuple>
 #include <random>
 
 typedef unsigned char uchar;
-
-enum ReflectionType
-{
-  diffuse,
-  specular,
-  refractive
-};
 
 enum RayDistributionType
 {
@@ -26,33 +22,6 @@ enum RayDistributionType
   jitteredStratification,
   stratification,
   uniform
-};
-
-struct Material
-{
-  Material() :
-    reflType(ReflectionType::diffuse),
-    color(1.0, 1.0, 1.0),
-    emission(0.0, 0.0, 0.0),
-    refrIndex(1.0),
-    transparency(0.0)
-  {
-  }
-
-  Material(const ReflectionType& reflType, const ColorD& color, const ColorD& emission, float refrIndex, float transparency) :
-    reflType(reflType),
-    color(color),
-    emission(emission),
-    refrIndex(refrIndex),
-    transparency(transparency)
-  {
-  }
-
-  ReflectionType reflType;
-  ColorD color;
-  ColorD emission;
-  float refrIndex;
-  float transparency;
 };
 
 struct Intersection
@@ -80,6 +49,7 @@ struct Light
   Vector3D position;
   ColorD color;
 };
+
 struct Lightarea
 {
 	Lightarea(const Triangle& triangle, const ColorD& color, const float& emission) :
@@ -92,26 +62,6 @@ struct Lightarea
 	Triangle triangle;
 	ColorD color;
 	float emission;
-};
-struct Object
-{
-  Object() : material(ReflectionType::diffuse, ColorD(), ColorD(), 1, 0) { }
-
-  Object(const std::deque<Triangle>& triangles, Material material) :
-    triangles(triangles),
-    material(material)
-  {
-  }
-
-  void CreateOctree(int minTriangles, int maxDepth)
-  {
-    octree = new Octree(triangles, minTriangles, maxDepth);
-  }
-
-  Octree* octree;
-  Material material;
-  std::deque<Triangle> triangles;
-
 };
 
 class Scene
@@ -141,8 +91,7 @@ private:
 
 public:
   Camera camera;
-  std::vector<Object> objects;
-  //std::vector<Light> lights;
+  std::deque<Object> objects;
   Object checkerboard;
   //std::vector<Lightarea> lightareas;
   std::deque<Object> lights;

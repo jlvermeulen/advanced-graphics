@@ -38,13 +38,6 @@ public:
 
 		return Vector3D(a1, a2, a3);
 	}
-
-	ColorD surfaceColor(Vector3D point) const
-	{
-		Vector3D factors = Interpolate(point);
-
-		return factors.X * Vertices[0].Color + factors.Y * Vertices[1].Color + factors.Z * Vertices[2].Color;
-	}
   
 	Vector3D surfaceNormal(Vector3D point) const
 	{
