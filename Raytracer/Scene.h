@@ -7,6 +7,7 @@
 #include "Triangle.h"
 #include <vector>
 #include <utility>
+#include <tuple>
 #include <random>
 
 typedef unsigned char uchar;
@@ -119,29 +120,34 @@ public:
   Scene();
   ~Scene();
 
-  bool Render(unsigned char* imageData, bool useOctree, int minTriangles, int maxDepth, int samplesPerPixel, double sigma);
+  bool Render(unsigned char* imageData, int minTriangles, int maxDepth, int samplesPerPixel, double sigma);
   void LoadDefaultScene();
 
 private:
-  ColorD radiance(const Intersection& intersection, Ray ray, double refractiveIndex, int recursionDepth) const;
-  double traceRay(const Ray& ray, unsigned int channel, const std::uniform_real_distribution<double>& dist, std::mt19937& gen) const;
+  ColorD TraceRay(const Ray& ray);
+  ColorD ComputeRadiance(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth);
+  ColorD DirectIllumination(const Vector3D& point, const Material& material);
+  ColorD IndirectIllumination(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth);
 
-  void tracePixels(std::pair<ColorD, ColorD>* pixelData, int samplesPerPixel, double sigma);
+  void TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma);
 
-  double gaussianWeight(double dx, double dy, double sigma) const;
+  double GaussianWeight(double dx, double dy, double sigma) const;
 
   /*ColorD calculateDiffuse(const Intersection& intersection) const;
   ColorD calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;
   ColorD calculateRefraction(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;*/
-  Ray SampleLight(std::vector<Lightarea> lightsources, Vector3D hitPoint) const;
+  std::tuple<Ray, Triangle, double> SampleLight(const Vector3D& hitPoint);
+  bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Material& mat) const;
 
 public:
   Camera camera;
   std::vector<Object> objects;
-  std::vector<Light> lights;
+  //std::vector<Light> lights;
   Object checkerboard;
-  std::vector<Lightarea> lightareas;
+  //std::vector<Lightarea> lightareas;
+  std::deque<Object> lights;
+  std::uniform_real_distribution<double> dist;
+  std::mt19937 gen;
 
 private:
-  bool useOctree_;
 };

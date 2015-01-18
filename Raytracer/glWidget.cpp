@@ -50,8 +50,8 @@ void GLWidget::loadScene(QString& fileName)
   scene.objects.push_back(Object(triangles, standard));
 
   // Add lights
-  scene.lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(15.0, 15.0, 15.0)));
-  scene.lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(15.0, 15.0, 15.0)));
+  //scene.lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(15.0, 15.0, 15.0)));
+  //scene.lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(15.0, 15.0, 15.0)));
 }
 
 //--------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ int GLWidget::renderScene(uchar* imageData)
   QTime timer;
   timer.start();
 
-  scene.Render(imageData, useOctree_, minTriangles_, maxDepth_, numberOfRays_, sigma_);
+  scene.Render(imageData, minTriangles_, maxDepth_, numberOfRays_, sigma_);
 
   return timer.elapsed();
 

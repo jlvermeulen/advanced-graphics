@@ -69,5 +69,5 @@ inline Vector3D operator*(const Matrix3x3D& lhs, Vector3D rhs) { return rhs *= l
 
 inline Vector3D operator/(Vector3D lhs, const double& rhs) { return lhs /= rhs; }
 
-inline bool operator==(const Vector3D& lhs, const Vector3D& rhs) { return lhs.X == rhs.X && lhs.Y == rhs.Y && rhs.Z == lhs.Z; }
+inline bool operator==(const Vector3D& lhs, const Vector3D& rhs) { return lhs.X == rhs.X && lhs.Y == rhs.Y && lhs.Z == rhs.Z; }
 inline bool operator!=(const Vector3D& lhs, const Vector3D& rhs) { return !operator==(lhs, rhs); }

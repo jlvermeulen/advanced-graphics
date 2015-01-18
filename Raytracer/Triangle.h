@@ -53,24 +53,14 @@ public:
 		return factors.X * Vertices[0].Normal + factors.Y * Vertices[1].Normal + factors.Z * Vertices[2].Normal;
 	}
 
-	float area()
-	{
-		float x1, x2, x3, y1, y2, y3, z1, z2, z3;
-		x1 = Vertices[0].Position.X;
-		x2 = Vertices[1].Position.X;
-		x3 = Vertices[2].Position.X;
-		y1 = Vertices[0].Position.Y;
-		y2 = Vertices[1].Position.Y;
-		y3 = Vertices[2].Position.Y;
-		z1 = Vertices[0].Position.Z;
-		z2 = Vertices[1].Position.Z;
-		z3 = Vertices[2].Position.Z;
-		float t1 = (x2*y3 - x3*y2);
-		float t2 = (x3*y1 - x1*y3);
-		float t3 = (x1*y2 - x2*y1);
-		return 0.5 * std::sqrtf(t1*t1 + t2*t2 + t3*t3);
-	}
+	double Area() const { return 0.5 * Vector3D::Cross(Vertices[1].Position - Vertices[0].Position, Vertices[2].Position - Vertices[0].Position).Length(); }
+	Vector3D Center() const { return (Vertices[0].Position + Vertices[1].Position + Vertices[2].Position) / 3; }
 
-	Vector3D center() { return (Vertices[0].Position + Vertices[1].Position + Vertices[2].Position) / 3; }
 private:
 };
+
+inline bool operator==(const Triangle& lhs, const Triangle& rhs) { return lhs.Vertices[0].Position == rhs.Vertices[0].Position &&
+																		  lhs.Vertices[1].Position == rhs.Vertices[1].Position &&
+																		  lhs.Vertices[2].Position == rhs.Vertices[2].Position; }
+
+inline bool operator!=(const Triangle& lhs, const Triangle& rhs) { return !operator==(lhs, rhs); }

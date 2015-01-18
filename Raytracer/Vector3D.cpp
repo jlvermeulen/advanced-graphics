@@ -16,28 +16,6 @@ Vector3D Vector3D::Cross(const Vector3D& lhs, const Vector3D& rhs) { return Vect
 void Vector3D::Normalise() { (*this) /= Length(); }
 Vector3D Vector3D::Normalise(Vector3D vector) { vector.Normalise(); return vector; }
 
-void Vector3D::Reflect(const Vector3D& normal) { (*this) += 2 * Dot(normal, -(*this)) * normal; }
-Vector3D Vector3D::Reflected(const Vector3D& normal) const { return Reflect((*this), normal); }
-Vector3D Vector3D::Reflect(Vector3D incident, const Vector3D& normal) { incident.Reflect(normal); return incident; }
-
-void Vector3D::Refract(const Vector3D& normal, const double& n1, const double& n2)
-{
-	double r, c = -Dot((*this), normal);
-	if (c > 0) // entering object
-		r = n1 / n2;
-	else // leaving object
-		r = n2 / n1;
-
-	double radicand = 1 - r * r * (1 - c * c);
-	if (radicand < 0)
-		Reflect(normal);
-
-	(*this) *= r;
-	(*this) += (r * c - sqrt(radicand)) * normal;
-}
-Vector3D Vector3D::Refracted(const Vector3D& normal, const double& n1, const double& n2) const { return Refract((*this), normal, n1, n2); }
-Vector3D Vector3D::Refract(Vector3D incident, const Vector3D& normal, const double& n1, const double& n2) { incident.Refract(normal, n1, n2); return incident; }
-
 Vector3D& Vector3D::operator+=(const Vector3D& rhs)
 {
 	X += rhs.X;
