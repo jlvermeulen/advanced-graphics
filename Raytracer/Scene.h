@@ -50,6 +50,7 @@ public:
   bool Render(unsigned char* imageData, int minTriangles, int maxDepth, int samplesPerPixel, double sigma, bool useDoF);
   void LoadDefaultScene();
   void LoadDefaultScene2();
+  void LoadDefaultScene3();
 
 private:
   ColorD TraceRay(const Ray& ray);

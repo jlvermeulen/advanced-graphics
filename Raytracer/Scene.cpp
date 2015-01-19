@@ -529,10 +529,7 @@ void Scene::LoadDefaultScene2()
 {
 	ObjReader reader;
 	objects.clear();
-	//lights.clear();
 	unsigned int nTriangles;
-
-	// Example: Two spheres
 
 	// Parse central light
 	objects = reader.parseFile("../models/cube.obj");
@@ -573,7 +570,7 @@ void Scene::LoadDefaultScene2()
 		}
 
 	// Right sphere
-	objects[2].material = Material(ReflectionType::specular, ColorD(0.1, 0.1, 0.1), ColorD(), 1.0, 1.0, 1.0);
+	objects[2].material = Material(ReflectionType::glossy, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 500.0, 1.0);
 	nTriangles = objects[2].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -584,7 +581,7 @@ void Scene::LoadDefaultScene2()
 		}
 
 	// Front sphere
-	objects[3].material = Material(ReflectionType::glossy, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 50.0, 0.0);
+	objects[3].material = Material(ReflectionType::specular, ColorD(0.1, 0.1, 0.1), ColorD(), 1.0, 1.0, 0.0);
 	nTriangles = objects[3].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -606,4 +603,120 @@ void Scene::LoadDefaultScene2()
 		}
 
 	camera = Camera(Vector3D(-2.5, 0.75, 2.5), Vector3D::Normalise(Vector3D(1, -0.3, -1)), Vector3D(0, 1, 0));
+}
+
+void Scene::LoadDefaultScene3()
+{
+	ObjReader reader;
+	objects.clear();
+
+	// Parse left box
+	reader.parseFile("../models/cube.obj");
+
+	// Parse right box
+	reader.parseFile("../models/cube.obj");
+
+	// Parse right
+	reader.parseFile("../models/cube.obj");
+
+	// Parse left
+	reader.parseFile("../models/cube.obj");
+
+	// Parse back
+	reader.parseFile("../models/cube.obj");
+
+	// Parse top
+	reader.parseFile("../models/cube.obj");
+
+	// Parse bottom
+	objects = reader.parseFile("../models/cube.obj");
+
+	// Left box
+	objects[0].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.0, 0.0), ColorD(), 1.0, 1.0, 0.0);
+	unsigned int nTriangles = objects[0].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[0].triangles[i].Vertices[j].Position.X /= 1.25;
+			objects[0].triangles[i].Vertices[j].Position.Z /= 2;
+			objects[0].triangles[i].Vertices[j].Position.X -= 0.75;
+			objects[0].triangles[i].Vertices[j].Position.Y -= 1.0;
+		}
+
+	// Right box
+	objects[1].material = Material(ReflectionType::diffuse, ColorD(0.0, 0.0, 1.0), ColorD(), 1.0, 1.0, 0.0);
+	nTriangles = objects[1].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[1].triangles[i].Vertices[j].Position.X /= 1.25;
+			objects[1].triangles[i].Vertices[j].Position.Y /= 1.5;
+			objects[1].triangles[i].Vertices[j].Position.Z /= 2;
+			objects[1].triangles[i].Vertices[j].Position.X += 0.75;
+			objects[1].triangles[i].Vertices[j].Position.Y -= 7.0 / 6.0;
+		}
+
+	// Right
+	objects[2].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 1.0, 0.0);
+	nTriangles = objects[2].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[2].triangles[i].Vertices[j].Position *= 5;
+			objects[2].triangles[i].Vertices[j].Position.X += 4;
+		}
+
+	// Left
+	objects[3].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 1.0, 0.0);
+	nTriangles = objects[3].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[3].triangles[i].Vertices[j].Position *= 5;
+			objects[3].triangles[i].Vertices[j].Position.X -= 4;
+		}
+
+	// Back
+	objects[4].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 1.0, 0.0);
+	nTriangles = objects[4].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[4].triangles[i].Vertices[j].Position *= 5;
+			objects[4].triangles[i].Vertices[j].Position.Z -= 4;
+		}
+
+	// Top
+	objects[5].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(1.0, 1.0, 1.0), 1.0, 1.0, 0.0);
+	nTriangles = objects[5].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[5].triangles[i].Vertices[j].Position *= 5;
+			objects[5].triangles[i].Vertices[j].Position.Y += 4;
+		}
+		objects[5].triangles[i].CalculateArea();
+		objects[5].triangles[i].CalculateCenter();
+	}
+	lights.push_back(objects[5]);
+
+	// Bottom
+	objects[6].material = Material(ReflectionType::diffuse, ColorD(0.75, 0.75, 0.75), ColorD(), 1.0, 1.0, 0.0);
+	nTriangles = objects[6].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[6].triangles[i].Vertices[j].Position *= 5;
+			objects[6].triangles[i].Vertices[j].Position.Y -= 4;
+		}
+
+	camera = Camera(Vector3D(0, 0.5, 3.0), Vector3D::Normalise(Vector3D(0, -0.5, -1)), Vector3D(0, 1, 0));
 }
