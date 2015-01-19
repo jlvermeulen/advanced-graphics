@@ -76,8 +76,8 @@ public:
 private:
   ColorD TraceRay(const Ray& ray);
   ColorD ComputeRadiance(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth);
-  ColorD DirectIllumination(const Vector3D& point, const Material& material);
-  ColorD IndirectIllumination(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth);
+  ColorD DirectIllumination(const Vector3D& point, const Vector3D& normal, const Material& material);
+  ColorD IndirectIllumination(Vector3D point, const Vector3D& in, const Vector3D& triangle, const Material& material, unsigned int depth);
 
   void TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma);
 
@@ -86,7 +86,7 @@ private:
   /*ColorD calculateDiffuse(const Intersection& intersection) const;
   ColorD calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;
   ColorD calculateRefraction(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;*/
-  std::tuple<Ray, Triangle, double> SampleLight(const Vector3D& hitPoint);
+  std::pair<Ray, Triangle> SampleLight(const Vector3D& hitPoint);
   bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Material& mat) const;
 
 public:
