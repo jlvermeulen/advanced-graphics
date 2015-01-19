@@ -222,7 +222,8 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
       reflDir *= -1;
 
     ray = Ray(point, reflDir);
-    value *= material.color * pow(w.Dot(reflDir), material.specularExponent) * Vector3D::Dot(normal, reflDir);
+    
+    value *= material.color;
   }
 	else if (material.reflType == ReflectionType::diffuse)
 	{
@@ -241,7 +242,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 		return ColorD();
 
 	Vector3D hitPoint = ray.Origin + hitTime * ray.Direction;
-	return ComputeRadiance(hitPoint, ray.Direction, hitTriangle, hitMaterial, depth + 1) * value / RUSSIAN_ROULETTE_PROBABILITY;
+	return value * ComputeRadiance(hitPoint, ray.Direction, hitTriangle, hitMaterial, depth + 1) / RUSSIAN_ROULETTE_PROBABILITY;
 }
 
 //--------------------------------------------------------------------------------
@@ -356,7 +357,7 @@ void Scene::LoadDefaultScene()
   objects = reader.parseFile("../models/cube.obj");
 
   // Left sphere
-  objects[0].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.5, 0.0), ColorD(), 0.5, 0.0, 0.5);
+  objects[0].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.5, 0.0), ColorD(), 0.5, 1.0, 0.5);
   unsigned int nTriangles = objects[0].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -370,7 +371,7 @@ void Scene::LoadDefaultScene()
   }
 
   // Right sphere
-  objects[1].material = Material(ReflectionType::specular, ColorD(0.5, 0.5, 0.5), ColorD(), 0.5, 100.0, 0.5);
+  objects[1].material = Material(ReflectionType::specular, ColorD(0.5, 0.5, 0.5), ColorD(), 0.5, 100000000000000.0, 0.5);
   nTriangles = objects[1].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
