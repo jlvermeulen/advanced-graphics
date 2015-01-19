@@ -161,6 +161,8 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
     scene.camera.MoveUpward(-stepSize_);
   else if (event->key() == Qt::Key_P)
     scene.LoadDefaultScene();
+  else if (event->key() == Qt::Key_O)
+    scene.LoadDefaultScene2();
   else
   {
     changed = false;

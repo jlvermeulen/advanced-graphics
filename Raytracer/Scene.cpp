@@ -157,7 +157,7 @@ ColorD Scene::TraceRay(const Ray& ray)
 ColorD Scene::ComputeRadiance(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth)
 {
 	const Vector3D& normal = triangle.surfaceNormal(point);
-	return material.emission + DirectIllumination(point, normal, material) + IndirectIllumination(point, in, normal, material, depth);
+	return material.emission * pow(abs(Vector3D::Dot(in, normal)), 1.0 / 10.0) + DirectIllumination(point, normal, material) + IndirectIllumination(point, in, normal, material, depth);
 }
 
 ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& normal, const Material& material)
@@ -183,48 +183,53 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 	Ray ray(point, in);
 
 	double c = 1 / (2 * M_PI);
-  ColorD value(c, c, c);
+	ColorD value(c, c, c);
 
-  // Sample unit sphere
-  double phi = 2.0 * M_PI * dist(gen);
-  double cosPhi = cos(phi);
-  double sinPhi = sin(phi);
+	// Sample unit sphere
+	double phi = 2.0 * M_PI * dist(gen);
+	double cosPhi = cos(phi);
+	double sinPhi = sin(phi);
 
-  double cosTheta = pow(1.0 - dist(gen), 1.0 / (1.0 + material.specularExponent));
-  double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+	double cosTheta = pow(1.0 - dist(gen), 1.0 / (1.0 + material.specularExponent));
+	double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
-  double x = sinTheta * cosPhi;
-  double y = sinTheta * sinPhi;
-  double z = cosTheta;
+	double x = sinTheta * cosPhi;
+	double y = sinTheta * sinPhi;
+	double z = cosTheta;
 
-  Vector3D hemi(x, y, z);
+	Vector3D hemi(x, y, z);
 
-  //double z = dist(gen) * 2 - 1, theta = dist(gen) * M_PI * 2, r = sqrt(1 - z * z);
+	//double z = dist(gen) * 2 - 1, theta = dist(gen) * M_PI * 2, r = sqrt(1 - z * z);
 
-  //Vector3D hemi(r * cos(theta), r * sin(theta), z);
-  //if (hemi.Dot(normal) < 0) // flip if "behind" normal
-  //  hemi *= -1;
+	//Vector3D hemi(r * cos(theta), r * sin(theta), z);
+	//if (hemi.Dot(normal) < 0) // flip if "behind" normal
+	//  hemi *= -1;
 
-  if (material.reflType == ReflectionType::specular)
-  {
-    ray.Reflect(point, normal);
+	if (material.reflType == ReflectionType::specular)
+	{
+		ray.Reflect(point, normal);
+		value = ColorD(1.0, 1.0, 1.0);
+	}
+	else if (material.reflType == ReflectionType::glossy)
+	{
+		ray.Reflect(point, normal);
 
-    Vector3D w = ray.Direction;
+		Vector3D w = ray.Direction;
 
-    Vector3D u = Vector3D::Cross(Vector3D(0.00424, 1, 0.00764), w);
-    u.Normalise();
+		Vector3D u = Vector3D::Cross(Vector3D(0.00424, 1, 0.00764), w);
+		u.Normalise();
 
-    Vector3D v = Vector3D::Cross(u, w);
+		Vector3D v = Vector3D::Cross(u, w);
 
-    Vector3D reflDir = hemi.X * u + hemi.Y * v + hemi.Z * w;
+		Vector3D reflDir = hemi.X * u + hemi.Y * v + hemi.Z * w;
 
-    if (reflDir.Dot(normal) < 0)
-      reflDir *= -1;
+		if (reflDir.Dot(normal) < 0)
+			reflDir *= -1;
 
-    ray = Ray(point, reflDir);
+		ray = Ray(point, reflDir);
     
-    value *= material.color;
-  }
+		value *= material.color;
+	}
 	else if (material.reflType == ReflectionType::diffuse)
 	{
 		ray = Ray(point, hemi);
@@ -364,28 +369,28 @@ void Scene::LoadDefaultScene()
   {
     for (unsigned int j = 0; j < 3; ++j)
     {
-      objects[0].triangles[i].Vertices[j].Position /= 3;
+      objects[0].triangles[i].Vertices[j].Position /= 2.5;
       objects[0].triangles[i].Vertices[j].Position.X -= 0.5;
       objects[0].triangles[i].Vertices[j].Position.Z += 0.125;
     }
   }
 
   // Right sphere
-  objects[1].material = Material(ReflectionType::specular, ColorD(0.5, 0.5, 0.5), ColorD(), 0.5, 100000000000000.0, 0.5);
+  objects[1].material = Material(ReflectionType::specular, ColorD(0.8, 0.8, 0.8), ColorD(), 0.5, 100.0, 0.5);
   nTriangles = objects[1].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
   {
     for (unsigned int j = 0; j < 3; ++j)
     {
-      objects[1].triangles[i].Vertices[j].Position /= 3;
+      objects[1].triangles[i].Vertices[j].Position /= 2.5;
       objects[1].triangles[i].Vertices[j].Position.X += 0.5;
       objects[1].triangles[i].Vertices[j].Position.Z -= 0.125;
     }
   }
 
   // Top Light
-  objects[2].material = Material(ReflectionType::specular, ColorD(0.0, 0.0, 0.0), ColorD(0.75, 0.75, 0.75), 0.5, 0.0, 0.5);
+  objects[2].material = Material(ReflectionType::specular, ColorD(0.5, 0.5, 0.5), ColorD(1.25, 1.25, 1.25), 0.5, 1.0, 1.0);
   nTriangles = objects[2].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -400,7 +405,7 @@ void Scene::LoadDefaultScene()
   lights.push_back(objects[2]);
 
   // Bottom Light
-  objects[3].material = Material(ReflectionType::specular, ColorD(0.0, 0.0, 0.0), ColorD(0.4, 0.4, 0.4), 0.5, 0.0, 0.5);
+  objects[3].material = Material(ReflectionType::specular, ColorD(0.5, 0.5, 0.5), ColorD(0.6, 0.6, 0.6), 0.5, 1.0, 1.0);
   nTriangles = objects[3].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -497,4 +502,87 @@ void Scene::LoadDefaultScene()
 
   //camera = Camera(Vector3D(0, 15.0, -10.0), Vector3D::Normalise(Vector3D(0, -0.5, 1)), Vector3D(0, 1, 0));
   camera = Camera(Vector3D(0, 0, 4.5), Vector3D::Normalise(Vector3D(0, 0, -1)), Vector3D(0, 1, 0));
+}
+
+void Scene::LoadDefaultScene2()
+{
+	ObjReader reader;
+	objects.clear();
+	//lights.clear();
+	unsigned int nTriangles;
+
+	// Example: Two spheres
+
+	// Parse central light
+	objects = reader.parseFile("../models/cube.obj");
+
+	// Parse left sphere
+	objects = reader.parseFile("../models/sphere.obj");
+
+	// Parse right sphere
+	objects = reader.parseFile("../models/sphere.obj");
+
+	// Parse front sphere
+	objects = reader.parseFile("../models/sphere.obj");
+
+	// Parse back sphere
+	objects = reader.parseFile("../models/sphere.obj");
+
+	// Central light
+	objects[0].material = Material(ReflectionType::specular, ColorD(0.8, 0.8, 0.8), ColorD(0.8, 0.8, 0.8), 1.0, 1000000.0, 1.0);
+	nTriangles = objects[0].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
+		objects[0].triangles[i].CalculateArea();
+		objects[0].triangles[i].CalculateCenter();
+	}
+
+	lights.push_back(objects[0]);
+
+	// Left sphere
+	objects[1].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.0, 0.0), ColorD(), 1.0, 1.0, 0.0);
+	nTriangles = objects[1].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[1].triangles[i].Vertices[j].Position /= 3;
+			objects[1].triangles[i].Vertices[j].Position.X -= 1.5;
+		}
+
+	// Right sphere
+	objects[2].material = Material(ReflectionType::specular, ColorD(0.1, 0.1, 0.1), ColorD(), 1.0, 1.0, 1.0);
+	nTriangles = objects[2].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[2].triangles[i].Vertices[j].Position /= 3;
+			objects[2].triangles[i].Vertices[j].Position.X += 1.5;
+		}
+
+	// Front sphere
+	objects[3].material = Material(ReflectionType::glossy, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 50.0, 0.0);
+	nTriangles = objects[3].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[3].triangles[i].Vertices[j].Position /= 3;
+			objects[3].triangles[i].Vertices[j].Position.Z += 1.5;
+		}
+
+	// Back sphere
+	objects[4].material = Material(ReflectionType::diffuse, ColorD(0.0, 0.0, 1.0), ColorD(), 1.0, 1.0, 0.0);
+	nTriangles = objects[4].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[4].triangles[i].Vertices[j].Position /= 3;
+			objects[4].triangles[i].Vertices[j].Position.Z -= 1.5;
+		}
+
+	camera = Camera(Vector3D(-2.5, 0.75, 2.5), Vector3D::Normalise(Vector3D(1, -0.3, -1)), Vector3D(0, 1, 0));
 }

@@ -85,24 +85,24 @@ void Camera::Rotate(const Vector3D& axis, float angle)
 //--------------------------------------------------------------------------------
 void Camera::RotateX(float angle)
 {
-  Rotate(Vector3D::Cross(focus_, up_), 0.01 * angle);
+  //Rotate(Vector3D::Cross(focus_, up_), 0.01 * angle);
 
-  //focus_ = Vector3D::Normalise(focus_ * cos(angle * M_PI_180) + up_ * sin(angle * M_PI_180));
-  //up_ = Vector3D::Cross(focus_, right_) * -1;
+  focus_ = Vector3D::Normalise(focus_ * cos(angle * M_PI_180) + up_ * sin(angle * M_PI_180));
+  up_ = Vector3D::Cross(focus_, right_) * -1;
 }
 
 //--------------------------------------------------------------------------------
 void Camera::RotateY(float angle)
 {
-  Rotate(Vector3D::Up, 0.01 * angle);
+  //Rotate(Vector3D::Up, 0.01 * angle);
 
-  //focus_ = Vector3D::Normalise(focus_ * cos(angle * M_PI_180) - right_ * sin(angle * M_PI_180));
-  //right_ = Vector3D::Cross(focus_, up_);
+  focus_ = Vector3D::Normalise(focus_ * cos(angle * M_PI_180) - right_ * sin(angle * M_PI_180));
+  right_ = Vector3D::Cross(focus_, up_);
 }
 
 //--------------------------------------------------------------------------------
 void Camera::RotateZ(float angle)
 {
-  //right_ = Vector3D::Normalise(right_ * cos(angle * M_PI_180) + up_ * sin(angle * M_PI_180));
-  //up_ = Vector3D::Cross(focus_, right_) * -1;
+  right_ = Vector3D::Normalise(right_ * cos(angle * M_PI_180) + up_ * sin(angle * M_PI_180));
+  up_ = Vector3D::Cross(focus_, right_) * -1;
 }
