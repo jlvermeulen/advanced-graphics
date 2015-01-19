@@ -140,6 +140,7 @@ double Scene::GaussianWeight(double dx, double dy, double sigma) const
   return exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
 }
 
+//--------------------------------------------------------------------------------
 ColorD Scene::TraceRay(const Ray& ray)
 {
 	Material hitMaterial;
@@ -152,6 +153,7 @@ ColorD Scene::TraceRay(const Ray& ray)
 	return ComputeRadiance(ray.Origin + hitTime * ray.Direction, ray.Direction, hitTriangle, hitMaterial, 0);
 }
 
+//--------------------------------------------------------------------------------
 ColorD Scene::ComputeRadiance(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth)
 {
 	const Vector3D& normal = triangle.surfaceNormal(point);
@@ -208,6 +210,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 	return ComputeRadiance(hitPoint, ray.Direction, hitTriangle, hitMaterial, depth + 1) * value / RUSSIAN_ROULETTE_PROBABILITY;
 }
 
+//--------------------------------------------------------------------------------
 bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Material& mat) const
 {
 	time = std::numeric_limits<double>::max();

@@ -11,17 +11,6 @@ RenderDialog::RenderDialog(QWidget* parent)
   // Fill resolution box
   ui->resolutionBox->addItem(QString("1980x1080"), QVariant(QPoint(1980, 1080)));
   ui->resolutionBox->addItem(QString("1280x720"), QVariant(QPoint(1280, 720)));
-
-  // Fill data structure box
-  ui->dataStructureBox->addItem(QString("List"), QVariant(false));
-  ui->dataStructureBox->addItem(QString("Octree"), QVariant(true));
-
-  // Fill ray distribution box
-  ui->rayDistributionBox->addItem(QString("None"), QVariant(0));
-  ui->rayDistributionBox->addItem(QString("Gaussian"), QVariant(1));
-  ui->rayDistributionBox->addItem(QString("Jittered Stratification"), QVariant(2));
-  ui->rayDistributionBox->addItem(QString("Stratification"), QVariant(3));
-  ui->rayDistributionBox->addItem(QString("Uniform"), QVariant(4));
 }
 
 //--------------------------------------------------------------------------------
@@ -41,19 +30,6 @@ void RenderDialog::setResolution(QPoint resolution)
 {
   int index = ui->resolutionBox->findData(QVariant(resolution));
   ui->resolutionBox->setCurrentIndex(index);
-}
-
-//--------------------------------------------------------------------------------
-bool RenderDialog::getUseOctree() const
-{
-  return ui->dataStructureBox->currentData().toBool();
-}
-
-//--------------------------------------------------------------------------------
-void RenderDialog::setUseOctree(bool use)
-{
-  int index = ui->dataStructureBox->findData(QVariant(use));
-  ui->dataStructureBox->setCurrentIndex(index);
 }
 
 //--------------------------------------------------------------------------------
@@ -81,19 +57,6 @@ void RenderDialog::setMaxDepth(int maxDepth)
 }
 
 //--------------------------------------------------------------------------------
-int RenderDialog::getRayDistribution() const
-{
-  return ui->rayDistributionBox->currentData().toInt();
-}
-
-//--------------------------------------------------------------------------------
-void RenderDialog::setRayDistribution(int distribution)
-{
-  int index = ui->rayDistributionBox->findData(QVariant(distribution));
-  ui->rayDistributionBox->setCurrentIndex(index);
-}
-
-//--------------------------------------------------------------------------------
 int RenderDialog::getNumberOfRays() const
 {
   return ui->numberOfRaysBox->value();
@@ -115,16 +78,4 @@ double RenderDialog::getSigma() const
 void RenderDialog::setSigma(double sigma)
 {
   ui->sigmaBox->setValue(sigma);
-}
-
-//--------------------------------------------------------------------------------
-int RenderDialog::getStratificationSize() const
-{
-  return ui->stratificationSizeBox->value();
-}
-
-//--------------------------------------------------------------------------------
-void RenderDialog::setStratificationSize(int size)
-{
-  ui->stratificationSizeBox->setValue(size);
 }

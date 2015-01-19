@@ -18,26 +18,17 @@ public:
   QPoint getResolution() const;
   void setResolution(QPoint resolution);
 
-  bool getUseOctree() const;
-  void setUseOctree(bool use);
-
   int getMinTriangles() const;
   void setMinTriangles(int minTriangles);
 
   int getMaxDepth() const;
   void setMaxDepth(int maxDepth);
 
-  int getRayDistribution() const;
-  void setRayDistribution(int distribution);
-
   int getNumberOfRays() const;
   void setNumberOfRays(int rays);
 
   double getSigma() const;
   void setSigma(double sigma);
-
-  int getStratificationSize() const;
-  void setStratificationSize(int size);
 
 private:
   Ui::RenderDialog* ui;

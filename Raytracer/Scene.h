@@ -15,15 +15,6 @@
 
 typedef unsigned char uchar;
 
-enum RayDistributionType
-{
-  none,
-  gaussian,
-  jitteredStratification,
-  stratification,
-  uniform
-};
-
 struct Intersection
 {
   Intersection(const Ray& ray, double time, const Triangle& hit, const Material& material) :
@@ -48,20 +39,6 @@ struct Light
 
   Vector3D position;
   ColorD color;
-};
-
-struct Lightarea
-{
-	Lightarea(const Triangle& triangle, const ColorD& color, const float& emission) :
-		triangle(triangle),
-		color(color),
-		emission(emission)
-	{
-	}
-
-	Triangle triangle;
-	ColorD color;
-	float emission;
 };
 
 class Scene
@@ -93,7 +70,6 @@ public:
   Camera camera;
   std::deque<Object> objects;
   Object checkerboard;
-  //std::vector<Lightarea> lightareas;
   std::deque<Object> lights;
   std::uniform_real_distribution<double> dist;
   std::mt19937 gen;
