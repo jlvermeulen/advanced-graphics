@@ -6,6 +6,7 @@ enum ReflectionType
 {
   diffuse,
   specular,
+  glossy,
   refractive
 };
 
