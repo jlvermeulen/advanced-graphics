@@ -156,33 +156,32 @@ ColorD Scene::TraceRay(const Ray& ray)
 //--------------------------------------------------------------------------------
 ColorD Scene::ComputeRadiance(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth)
 {
-  return material.emission + DirectIllumination(point, material) + IndirectIllumination(point, in, triangle, material, depth);
+	const Vector3D& normal = triangle.surfaceNormal(point);
+	return material.emission + DirectIllumination(point, normal, material) + IndirectIllumination(point, in, normal, material, depth);
 }
 
-//--------------------------------------------------------------------------------
-ColorD Scene::DirectIllumination(const Vector3D& point, const Material& material)
+ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& normal, const Material& material)
 {
-	std::tuple<Ray, Triangle, double> sample = SampleLight(point);
+	std::pair<Ray, Triangle> sample = SampleLight(point);
 
 	Material hitMaterial;
 	Triangle hitTriangle;
 	double hitTime;
 
-	if (!FirstHitInfo(std::get<0>(sample), hitTime, hitTriangle, hitMaterial) || hitTriangle != std::get<1>(sample))
+	Ray ray(sample.first.Origin + 0.005 * normal, sample.first.Direction);
+	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial) || hitTriangle != sample.second)
 		return ColorD();
 
-	return hitMaterial.emission * std::get<2>(sample) * material.color;
+	return hitMaterial.emission * material.color;
 }
 
-//--------------------------------------------------------------------------------
-ColorD Scene::IndirectIllumination(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth)
+ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vector3D& normal, const Material& material, unsigned int depth)
 {
 	if (depth > MIN_PATH_LENGTH && dist(gen) > RUSSIAN_ROULETTE_PROBABILITY)
 		return ColorD();
 
-	const Vector3D& normal = triangle.surfaceNormal(point);
-
 	Ray ray(point, in);
+
 	double c = 1 / (2 * M_PI);
   ColorD value(c, c, c);
 
@@ -228,12 +227,11 @@ ColorD Scene::IndirectIllumination(const Vector3D& point, const Vector3D& in, co
 	else if (material.reflType == ReflectionType::diffuse)
 	{
 		ray = Ray(point, hemi);
-		value *= material.color * Vector3D::Dot(normal, ray.Direction);
+		point += 0.005 * normal;
+		value *= material.color * Vector3D::Dot(normal, ray.Direction) / (2 * M_PI);
 	}
-  else if (material.reflType == ReflectionType::refractive)
-  {
-    ray.Refract(point, normal, 1.0, material.refrIndex);
-  }
+	else if (material.reflType == ReflectionType::refractive)
+		ray.Refract(point, normal, 1.0, material.refrIndex);
 
 	Material hitMaterial;
 	Triangle hitTriangle;
@@ -243,7 +241,7 @@ ColorD Scene::IndirectIllumination(const Vector3D& point, const Vector3D& in, co
 		return ColorD();
 
 	Vector3D hitPoint = ray.Origin + hitTime * ray.Direction;
-	return ComputeRadiance(hitPoint, ray.Direction, hitTriangle, hitMaterial, depth + 1) * value / (1 - RUSSIAN_ROULETTE_PROBABILITY);
+	return ComputeRadiance(hitPoint, ray.Direction, hitTriangle, hitMaterial, depth + 1) * value / RUSSIAN_ROULETTE_PROBABILITY;
 }
 
 //--------------------------------------------------------------------------------
@@ -270,7 +268,7 @@ bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Mater
 }
 
 //--------------------------------------------------------------------------------
-std::tuple<Ray, Triangle, double> Scene::SampleLight(const Vector3D& hitPoint)
+std::pair<Ray, Triangle> Scene::SampleLight(const Vector3D& hitPoint)
 {
 	std::deque<std::pair<double, const Triangle&>> flux;
 	double totalflux = 0;
@@ -318,7 +316,7 @@ std::tuple<Ray, Triangle, double> Scene::SampleLight(const Vector3D& hitPoint)
 	Vector3D v1 = pair.second.Vertices[1].Position - pair.second.Vertices[0].Position;
 	Vector3D v2 = pair.second.Vertices[2].Position - pair.second.Vertices[0].Position;
 
-	return std::make_tuple(Ray(hitPoint, Vector3D::Normalise(v1 * u + v2 * v + pair.second.Vertices[0].Position - hitPoint)), pair.second, pair.first);
+	return std::pair<Ray, Triangle>(Ray(hitPoint, Vector3D::Normalise(v1 * u + v2 * v + pair.second.Vertices[0].Position - hitPoint)), pair.second);
 }
 
 //--------------------------------------------------------------------------------
@@ -338,6 +336,9 @@ void Scene::LoadDefaultScene()
 
   // Parse light
   reader.parseFile("../models/light2.obj");
+
+  // Parse light
+  reader.parseFile("../models/light3.obj");
 
   // Parse right
   reader.parseFile("../models/cube.obj");
@@ -369,7 +370,7 @@ void Scene::LoadDefaultScene()
   }
 
   // Right sphere
-  objects[1].material = Material(ReflectionType::specular, ColorD(0.5, 0.5, 0.5), ColorD(), 0.5, 1.0, 0.5);
+  objects[1].material = Material(ReflectionType::specular, ColorD(0.5, 0.5, 0.5), ColorD(), 0.5, 100.0, 0.5);
   nTriangles = objects[1].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -382,8 +383,8 @@ void Scene::LoadDefaultScene()
     }
   }
 
-  // Light
-  objects[2].material = Material(ReflectionType::specular, ColorD(0.0, 0.0, 0.0), ColorD(0.5, 0.5, 0.5), 0.5, 0.0, 0.5);
+  // Top Light
+  objects[2].material = Material(ReflectionType::specular, ColorD(0.0, 0.0, 0.0), ColorD(0.75, 0.75, 0.75), 0.5, 0.0, 0.5);
   nTriangles = objects[2].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -397,21 +398,22 @@ void Scene::LoadDefaultScene()
 
   lights.push_back(objects[2]);
 
-  // Right
-  objects[3].material = Material(ReflectionType::diffuse, ColorD(0.9, 0, 0), ColorD(), 1.0, 0.0, 0.0);
+  // Bottom Light
+  objects[3].material = Material(ReflectionType::specular, ColorD(0.0, 0.0, 0.0), ColorD(0.4, 0.4, 0.4), 0.5, 0.0, 0.5);
   nTriangles = objects[3].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
   {
     for (unsigned int j = 0; j < 3; ++j)
-    {
-      objects[3].triangles[i].Vertices[j].Position *= 5;
-      objects[3].triangles[i].Vertices[j].Position.X += 4;
-    }
+      objects[3].triangles[i].Vertices[j].Position.Y -= 1.5;
+    objects[3].triangles[i].CalculateArea();
+    objects[3].triangles[i].CalculateCenter();
   }
 
-  // Left
-  objects[4].material = Material(ReflectionType::diffuse, ColorD(0, 0, 0.9), ColorD(), 1.0, 0.0, 0.0);
+  lights.push_back(objects[3]);
+
+  // Right
+  objects[4].material = Material(ReflectionType::diffuse, ColorD(0.9, 0, 0), ColorD(), 1.0, 0.0, 0.0);
   nTriangles = objects[4].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -419,12 +421,12 @@ void Scene::LoadDefaultScene()
     for (unsigned int j = 0; j < 3; ++j)
     {
       objects[4].triangles[i].Vertices[j].Position *= 5;
-      objects[4].triangles[i].Vertices[j].Position.X -= 4;
+      objects[4].triangles[i].Vertices[j].Position.X += 4;
     }
   }
 
-  // Back
-  objects[5].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0, 0.0);
+  // Left
+  objects[5].material = Material(ReflectionType::diffuse, ColorD(0, 0, 0.9), ColorD(), 1.0, 0.0, 0.0);
   nTriangles = objects[5].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -432,12 +434,12 @@ void Scene::LoadDefaultScene()
     for (unsigned int j = 0; j < 3; ++j)
     {
       objects[5].triangles[i].Vertices[j].Position *= 5;
-      objects[5].triangles[i].Vertices[j].Position.Z -= 4;
+      objects[5].triangles[i].Vertices[j].Position.X -= 4;
     }
   }
 
-  // Top
-  objects[6].material = Material(ReflectionType::diffuse, ColorD(0.0, 0.9, 0.0), ColorD(), 1.0, 0.0, 0.0);
+  // Back
+  objects[6].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0, 0.0);
   nTriangles = objects[6].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -445,12 +447,13 @@ void Scene::LoadDefaultScene()
     for (unsigned int j = 0; j < 3; ++j)
     {
       objects[6].triangles[i].Vertices[j].Position *= 5;
-      objects[6].triangles[i].Vertices[j].Position.Y += 4;
+      objects[6].triangles[i].Vertices[j].Position.Z -= 4;
     }
   }
 
-  // Bottom
-  objects[7].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.0), ColorD(), 1.0, 0.0, 0.0);
+
+  // Top
+  objects[7].material = Material(ReflectionType::diffuse, ColorD(0.0, 0.9, 0.0), ColorD(), 1.0, 0.0, 0.0);
   nTriangles = objects[7].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -458,7 +461,20 @@ void Scene::LoadDefaultScene()
     for (unsigned int j = 0; j < 3; ++j)
     {
       objects[7].triangles[i].Vertices[j].Position *= 5;
-      objects[7].triangles[i].Vertices[j].Position.Y -= 4;
+      objects[7].triangles[i].Vertices[j].Position.Y += 4;
+    }
+  }
+
+  // Bottom
+  objects[8].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.0), ColorD(), 1.0, 0.0, 0.0);
+  nTriangles = objects[8].triangles.size();
+
+  for (unsigned int i = 0; i < nTriangles; ++i)
+  {
+    for (unsigned int j = 0; j < 3; ++j)
+    {
+      objects[8].triangles[i].Vertices[j].Position *= 5;
+      objects[8].triangles[i].Vertices[j].Position.Y -= 4;
     }
   }
 
