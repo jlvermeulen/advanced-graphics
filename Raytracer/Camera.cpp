@@ -15,13 +15,14 @@ Camera::Camera() :
   Height(720),
   fovY_(40.0f),
   zNear_(0.1f),
-  zFar_(20.0f)
+  zFar_(20.0f),
+  FocalDistance(4.0)
 {
 
 }
 
 //--------------------------------------------------------------------------------
-Camera::Camera(Vector3D eye, Vector3D focus, Vector3D up, int width, int height, float fovY, float zNear, float zFar) :
+Camera::Camera(Vector3D eye, Vector3D focus, Vector3D up, int width, int height, float fovY, float zNear, float zFar, double focalDistance) :
   eye_(eye),
   focus_(focus),
   up_(up),
@@ -29,7 +30,8 @@ Camera::Camera(Vector3D eye, Vector3D focus, Vector3D up, int width, int height,
   Height(height),
   fovY_(fovY),
   zNear_(zNear),
-  zFar_(zFar)
+  zFar_(zFar),
+  FocalDistance(focalDistance)
 {
   right_ = Vector3D::Cross(focus_, up_);
 }

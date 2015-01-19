@@ -47,7 +47,7 @@ public:
   Scene();
   ~Scene();
 
-  bool Render(unsigned char* imageData, int minTriangles, int maxDepth, int samplesPerPixel, double sigma);
+  bool Render(unsigned char* imageData, int minTriangles, int maxDepth, int samplesPerPixel, double sigma, bool useDoF);
   void LoadDefaultScene();
 
 private:
@@ -56,7 +56,7 @@ private:
   ColorD DirectIllumination(const Vector3D& point, const Vector3D& normal, const Material& material);
   ColorD IndirectIllumination(Vector3D point, const Vector3D& in, const Vector3D& triangle, const Material& material, unsigned int depth);
 
-  void TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma);
+  void TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma, bool useDoF);
 
   double GaussianWeight(double dx, double dy, double sigma) const;
 
@@ -73,6 +73,4 @@ public:
   std::deque<Object> lights;
   std::uniform_real_distribution<double> dist;
   std::mt19937 gen;
-
-private:
 };

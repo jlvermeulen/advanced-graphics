@@ -35,6 +35,9 @@ public:
   double getSigma() const { return sigma_; }
   void setSigma(double sigma) { sigma_ = sigma; }
 
+  bool getUseDoF() const { return useDoF_; }
+  void setUseDoF(bool use) { useDoF_ = use; }
+
   double getX() const { return scene.camera.Eye().X; }
   void setX(double x) { scene.camera.setX(x); }
 
@@ -43,6 +46,9 @@ public:
 
   double getZ() const { return scene.camera.Eye().Z; }
   void setZ(double z) { scene.camera.setZ(z); }
+
+  double getFocalDistance() const { return scene.camera.FocalDistance; }
+  void setFocalDistance(double distance) { scene.camera.FocalDistance = distance; }
 
   void loadScene(QString& fileName);
   int renderScene(uchar* imageData);
@@ -77,6 +83,7 @@ private:
   bool cameraRayVisible_;
   int numberOfRays_;
   double sigma_;
+  double useDoF_;
 
   // Octree
   int minTriangles_;

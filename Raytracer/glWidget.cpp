@@ -22,6 +22,7 @@ GLWidget::GLWidget(QWidget* parent)
     minTriangles_(20),
     maxDepth_(10),
     stepSize_(0.1f),
+    useDoF_(false),
     lastPos(),
     scene()
 {
@@ -54,7 +55,7 @@ int GLWidget::renderScene(uchar* imageData)
   QTime timer;
   timer.start();
 
-  scene.Render(imageData, minTriangles_, maxDepth_, numberOfRays_, sigma_);
+  scene.Render(imageData, minTriangles_, maxDepth_, numberOfRays_, sigma_, useDoF_);
 
   return timer.elapsed();
 

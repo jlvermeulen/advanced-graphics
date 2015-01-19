@@ -30,6 +30,12 @@ public:
   double getSigma() const;
   void setSigma(double sigma);
 
+  bool getUseDoF() const;
+  void setUseDoF(bool use);
+
+  double getFocalDistance() const;
+  void setFocalDistance(double distance);
+
 private:
   Ui::RenderDialog* ui;
 };

@@ -38,14 +38,14 @@ Scene::~Scene()
 
 }
 
-bool Scene::Render(uchar* imageData, int minTriangles, int maxDepth, int samplesPerPixel, double sigma)
+bool Scene::Render(uchar* imageData, int minTriangles, int maxDepth, int samplesPerPixel, double sigma, bool useDoF)
 {
 	// Instantiate octrees
 	for (Object& obj : objects)
       obj.ConstructOctree(minTriangles, maxDepth);
 
 	std::pair<ColorD, double>* samples = new std::pair<ColorD, double>[camera.Width * camera.Height];
-	TracePixels(samples, samplesPerPixel, sigma);
+	TracePixels(samples, samplesPerPixel, sigma, useDoF);
 
 	#pragma omp parallel for
   for (int x = 0; x < camera.Width; ++x)
@@ -72,8 +72,10 @@ bool Scene::Render(uchar* imageData, int minTriangles, int maxDepth, int samples
 }
 
 //--------------------------------------------------------------------------------
-void Scene::TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma)
+void Scene::TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma, bool useDoF)
 {
+  double lensRadius = 1.0;
+
 	double tanHalfFovY = tan(camera.FovY() / 360 * M_PI);
 	double tanHalfFovX = tanHalfFovY * camera.Width / camera.Height;
 
@@ -98,8 +100,27 @@ void Scene::TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
           double a = left + (right - left) * (x + rX) / camera.Width;
           double b = top + (bottom - top) * (y + rY) / camera.Height;
 
+          Vector3D origin = camera.Eye();
           Vector3D direction = Vector3D::Normalise(camera.Focus() + a * camera.Right() + b * camera.Up());
-          Ray cameraRay(camera.Eye(), direction);
+
+          if (useDoF)
+          {
+            Vector3D focalPoint = origin + direction * camera.FocalDistance;
+
+            // Get uniformly distributed square [-1,1] x [-1,1]
+            double uX = 2.0 * dist(gen) - 1.0;
+            double uY = 2.0 * dist(gen) - 1.0;
+
+            // Get uniformly distributed circle with lens radius
+            double lX = lensRadius * uX * sqrt(1 - uY * uY / 2);
+            double lY = lensRadius * uY * sqrt(1 - uX * uX / 2);
+
+            origin += lX * camera.Right() + lY * camera.Up();
+
+            direction = Vector3D::Normalise(focalPoint - origin);
+          }
+
+          Ray cameraRay(origin, direction);
 
           //for (unsigned int c = 0; c < 3; ++c)
           {
@@ -223,7 +244,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 
     ray = Ray(point, reflDir);
     
-    value *= material.color;
+    value *= material.color * Vector3D::Dot(normal, w);
   }
 	else if (material.reflType == ReflectionType::diffuse)
 	{
@@ -371,7 +392,7 @@ void Scene::LoadDefaultScene()
   }
 
   // Right sphere
-  objects[1].material = Material(ReflectionType::specular, ColorD(0.5, 0.5, 0.5), ColorD(), 0.5, 100000000000000.0, 0.5);
+  objects[1].material = Material(ReflectionType::specular, ColorD(0.5, 0.5, 0.5), ColorD(), 0.5, 100.0, 0.5);
   nTriangles = objects[1].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)

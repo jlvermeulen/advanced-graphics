@@ -79,3 +79,27 @@ void RenderDialog::setSigma(double sigma)
 {
   ui->sigmaBox->setValue(sigma);
 }
+
+//--------------------------------------------------------------------------------
+bool RenderDialog::getUseDoF() const
+{
+  return ui->dofOnButton->isChecked();
+}
+
+//--------------------------------------------------------------------------------
+void RenderDialog::setUseDoF(bool use)
+{
+  ui->dofOnButton->setChecked(use);
+}
+
+//--------------------------------------------------------------------------------
+double RenderDialog::getFocalDistance() const
+{
+  return ui->focalBox->value();
+}
+
+//--------------------------------------------------------------------------------
+void RenderDialog::setFocalDistance(double distance)
+{
+  ui->focalBox->setValue(distance);
+}

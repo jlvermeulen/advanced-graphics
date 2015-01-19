@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>190</width>
-    <height>350</height>
+    <height>470</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>190</width>
-    <height>350</height>
+    <height>470</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>190</width>
-    <height>350</height>
+    <height>470</height>
    </size>
   </property>
   <property name="contextMenuPolicy">
@@ -41,7 +41,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>310</y>
+     <y>430</y>
      <width>151</width>
      <height>32</height>
     </rect>
@@ -202,6 +202,86 @@
     <rect>
      <x>30</x>
      <y>270</y>
+     <width>141</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="singleStep">
+    <double>0.010000000000000</double>
+   </property>
+  </widget>
+  <widget class="QLabel" name="dofLabel">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>310</y>
+     <width>141</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Depth of Field</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="dofOnButton">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>330</y>
+     <width>41</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>On</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="dofOffButton">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>330</y>
+     <width>41</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Off</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="focalLabel">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>360</y>
+     <width>141</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Focal Distance</string>
+   </property>
+  </widget>
+  <widget class="QDoubleSpinBox" name="focalBox">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>380</y>
      <width>141</width>
      <height>22</height>
     </rect>
