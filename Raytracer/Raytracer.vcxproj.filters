@@ -89,9 +89,6 @@
     <ClCompile Include="BoundingBox.cpp">
       <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files\Interface</Filter>
-    </ClCompile>
     <ClCompile Include="ColorD.cpp">
       <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
@@ -158,6 +155,9 @@
     <ClCompile Include="Release\moc_cameraControls.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\Raytracer\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_window.h">
@@ -165,9 +165,6 @@
     </ClInclude>
     <ClInclude Include="BoundingBox.h">
       <Filter>Header Files\Raytracer</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files\Interface</Filter>
     </ClInclude>
     <ClInclude Include="ColorD.h">
       <Filter>Header Files\Raytracer</Filter>
@@ -219,6 +216,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_cameraControls.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\Raytracer\Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

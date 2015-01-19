@@ -18,10 +18,7 @@ GLWidget::GLWidget(QWidget* parent)
     boundingBoxVisible_(false),
     cameraRayVisible_(false),
     numberOfRays_(1),
-    rayDistribution_(RayDistributionType::none),
     sigma_(0.1),
-    stratificationSize_(3),
-    useOctree_(true),
     minTriangles_(10),
     maxDepth_(10),
     stepSize_(0.1f),
@@ -138,7 +135,7 @@ void GLWidget::paintGL()
   // Turn off lights
   glDisable(GL_LIGHTING);
 
-  if (useOctree_ && boundingBoxVisible_)
+  if (boundingBoxVisible_)
     drawBoundingBoxes();
 
   if (cameraRayVisible_)
