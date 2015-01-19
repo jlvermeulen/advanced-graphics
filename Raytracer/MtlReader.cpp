@@ -67,6 +67,14 @@ void MtlReader::parseLine(const std::vector<std::string>& segments)
       parseName(++it);
       break;
 
+    case MtlType::refractiveIndex:
+      parseRefractiveIndex(++it);
+      break;
+
+    case MtlType::specularWeight:
+      parseSpecularWeight(++it);
+      break;
+
     case MtlType::transparency:
       parseTransparency(++it);
       break;
@@ -143,6 +151,12 @@ void MtlReader::parseRefractiveIndex(CVSIterator& it)
 }
 
 //--------------------------------------------------------------------------------
+void MtlReader::parseSpecularWeight(CVSIterator& it)
+{
+  materials_.at(current_).specularExponent = parseDouble(it);
+}
+
+//--------------------------------------------------------------------------------
 void MtlReader::parseTransparency(CVSIterator& it)
 {
   materials_.at(current_).transparency = parseDouble(it);
@@ -169,6 +183,8 @@ MtlType::MtlType MtlReader::parseType(const std::string& type) const
     return MtlType::ambient;  // Emission
   else if (type == "Kd")
     return MtlType::diffuse;  // Color
+  else if (type == "Ns")
+    return MtlType::specularWeight; // Specular Exponent
   else if (type == "Ni")
     return MtlType::refractiveIndex;
   else if (type == "d")

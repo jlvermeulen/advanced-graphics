@@ -17,6 +17,7 @@ namespace MtlType
     illumination,
     name,
     refractiveIndex,
+    specularWeight, // Specular Exponent
     transparency,
     nil
   };
@@ -38,6 +39,7 @@ private:
   void parseIllumination(CVSIterator& it);
   void parseName(CVSIterator& it);
   void parseRefractiveIndex(CVSIterator& it);
+  void parseSpecularWeight(CVSIterator& it);
   void parseTransparency(CVSIterator& it);
 
   ColorD parseColor(CVSIterator& it) const;
