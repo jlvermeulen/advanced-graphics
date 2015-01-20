@@ -42,29 +42,29 @@ bool Scene::Render(uchar* imageData, int minTriangles, int maxDepth, int samples
 {
 	// Instantiate octrees
 	for (Object& obj : objects)
-      obj.ConstructOctree(minTriangles, maxDepth);
+		obj.ConstructOctree(minTriangles, maxDepth);
 
 	std::pair<ColorD, double>* samples = new std::pair<ColorD, double>[camera.Width * camera.Height];
 	TracePixels(samples, samplesPerPixel, sigma, useDoF);
 
 	#pragma omp parallel for
-  for (int x = 0; x < camera.Width; ++x)
-  {
-    for (int y = 0; y < camera.Height; ++y)
-    {
-      std::pair<ColorD, double> sample = samples[y * camera.Width + x];
-      ColorD color = sample.first / sample.second;
-      color.Clip();
+	for (int x = 0; x < camera.Width; ++x)
+	{
+		for (int y = 0; y < camera.Height; ++y)
+		{
+			std::pair<ColorD, double> sample = samples[y * camera.Width + x];
+			ColorD color = sample.first / sample.second;
+			color.Clip();
 
-      int offset = (y * camera.Width + x) * 4;
+			int offset = (y * camera.Width + x) * 4;
 
-      // For each color channel in reversed order (i.e. blue-green-red-alpha)
-      imageData[offset] = (uchar) (color.B * 255.0);
-      imageData[offset + 1] = (uchar) (color.G * 255.0);
-      imageData[offset + 2] = (uchar) (color.R * 255.0);
-      imageData[offset + 3] = 255;
-    }
-  }
+			// For each color channel in reversed order (i.e. blue-green-red-alpha)
+			imageData[offset] = (uchar) (color.B * 255.0);
+			imageData[offset + 1] = (uchar) (color.G * 255.0);
+			imageData[offset + 2] = (uchar) (color.R * 255.0);
+			imageData[offset + 3] = 255;
+		}
+	}
 
 	delete [] samples;
 
@@ -74,7 +74,7 @@ bool Scene::Render(uchar* imageData, int minTriangles, int maxDepth, int samples
 //--------------------------------------------------------------------------------
 void Scene::TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma, bool useDoF)
 {
-  double lensRadius = 1.0;
+	double lensRadius = 1.0;
 
 	double tanHalfFovY = tan(camera.FovY() / 360 * M_PI);
 	double tanHalfFovX = tanHalfFovY * camera.Width / camera.Height;
@@ -86,73 +86,67 @@ void Scene::TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
 
 	// Calculate pixel rays
 	for (int o = 0; o < 3; ++o) // prevent concurrent access of same array indices
-	{
 		#pragma omp parallel for schedule(dynamic)
-    for (int x = o; x < camera.Width; x += 3)
-    {
-      for (int y = 0; y < camera.Height; ++y)
-      {
-        for (int r = 0; r < samplesPerPixel; ++r)
-        {
-          double rX = dist(gen);
-          double rY = dist(gen);
+		for (int x = o; x < camera.Width; x += 3)
+			for (int y = 0; y < camera.Height; ++y)
+				for (int r = 0; r < samplesPerPixel; ++r)
+				{
+					double rX = dist(gen);
+					double rY = dist(gen);
 
-          double a = left + (right - left) * (x + rX) / camera.Width;
-          double b = top + (bottom - top) * (y + rY) / camera.Height;
+					double a = left + (right - left) * (x + rX) / camera.Width;
+					double b = top + (bottom - top) * (y + rY) / camera.Height;
 
-          Vector3D origin = camera.Eye();
-          Vector3D direction = Vector3D::Normalise(camera.Focus() + a * camera.Right() + b * camera.Up());
+					Vector3D origin = camera.Eye();
+					Vector3D direction = Vector3D::Normalise(camera.Focus() + a * camera.Right() + b * camera.Up());
 
-          if (useDoF)
-          {
-            Vector3D focalPoint = origin + direction * camera.FocalDistance;
+					if (useDoF)
+					{
+						Vector3D focalPoint = origin + direction * camera.FocalDistance;
 
-            // Get uniformly distributed square [-1,1] x [-1,1]
-            double uX = 2.0 * dist(gen) - 1.0;
-            double uY = 2.0 * dist(gen) - 1.0;
+						// Get uniformly distributed square [-1,1] x [-1,1]
+						double uX = 2.0 * dist(gen) - 1.0;
+						double uY = 2.0 * dist(gen) - 1.0;
 
-            // Get uniformly distributed circle with lens radius
-            double lX = lensRadius * uX * sqrt(1 - uY * uY / 2);
-            double lY = lensRadius * uY * sqrt(1 - uX * uX / 2);
+						// Get uniformly distributed circle with lens radius
+						double lX = lensRadius * uX * sqrt(1 - uY * uY / 2);
+						double lY = lensRadius * uY * sqrt(1 - uX * uX / 2);
 
-            origin += lX * camera.Right() + lY * camera.Up();
+						origin += lX * camera.Right() + lY * camera.Up();
 
-            direction = Vector3D::Normalise(focalPoint - origin);
-          }
+						direction = Vector3D::Normalise(focalPoint - origin);
+					}
 
-          Ray cameraRay(origin, direction);
+					Ray cameraRay(origin, direction);
 
-          //for (unsigned int c = 0; c < 3; ++c)
-          {
-            ColorD value = TraceRay(cameraRay);
+					//for (unsigned int c = 0; c < 3; ++c)
+					{
+						ColorD value = TraceRay(cameraRay);
 
-            // distribute over neighbouring pixels
-            for (int i = -1; i < 2; ++i)
-            {
-              int xx = x + i;
-              if (xx < 0 || xx >= camera.Width)
-                continue;
+						// distribute over neighbouring pixels
+						for (int i = -1; i < 2; ++i)
+						{
+							int xx = x + i;
+							if (xx < 0 || xx >= camera.Width)
+							continue;
 
-              for (int j = -1; j < 2; ++j)
-              {
-                int yy = y + j;
-                if (yy < 0 || yy >= camera.Height)
-                  continue;
+							for (int j = -1; j < 2; ++j)
+							{
+								int yy = y + j;
+								if (yy < 0 || yy >= camera.Height)
+								continue;
 
-                double weight = GaussianWeight(i - rX + 0.5, j - rY + 0.5, sigma);
+								double weight = GaussianWeight(i - rX + 0.5, j - rY + 0.5, sigma);
 
-                int index = yy * camera.Width + xx;
-                std::pair<ColorD, double>& data = pixelData[index];
+								int index = yy * camera.Width + xx;
+								std::pair<ColorD, double>& data = pixelData[index];
 
-                data.first += value * weight;
-                data.second += weight;
-              }
-            }
-          }
-        }
-      }
-    }
-	}
+								data.first += value * weight;
+								data.second += weight;
+							}
+						}
+					}
+				}
 }
 
 //--------------------------------------------------------------------------------
@@ -178,7 +172,10 @@ ColorD Scene::TraceRay(const Ray& ray)
 ColorD Scene::ComputeRadiance(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth)
 {
 	const Vector3D& normal = triangle.surfaceNormal(point);
-	return material.emission * pow(abs(Vector3D::Dot(in, normal)), 1.0 / 10.0) + DirectIllumination(point, normal, material) + IndirectIllumination(point, in, normal, material, depth);
+	ColorD c = material.emission * pow(abs(Vector3D::Dot(in, normal)), 1.0 / 10.0);
+	c += DirectIllumination(point, normal, material);
+	c += IndirectIllumination(point, in, normal, material, depth);
+	return c;
 }
 
 ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& normal, const Material& material)
@@ -213,14 +210,12 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 
 	// Sample unit sphere
 	double phi = 2.0 * M_PI * dist(gen);
-	double cosPhi = cos(phi);
-	double sinPhi = sin(phi);
 
 	double cosTheta = pow(1.0 - dist(gen), 1.0 / (1.0 + material.specularExponent));
 	double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
-	double x = sinTheta * cosPhi;
-	double y = sinTheta * sinPhi;
+	double x = sinTheta * cos(phi);
+	double y = sinTheta * sin(phi);
 	double z = cosTheta;
 
 	Vector3D hemi(x, y, z);
@@ -233,7 +228,8 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 
 	if (material.reflType == ReflectionType::specular)
 	{
-		ray.Reflect(point, normal);
+		if (Vector3D::Dot(ray.Direction, normal) < 0)
+			ray.Reflect(point, normal);
 		//value = ColorD(1.0, 1.0, 1.0);
 	}
 	else if (material.reflType == ReflectionType::glossy)
@@ -249,7 +245,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 
 		Vector3D reflDir = hemi.X * u + hemi.Y * v + hemi.Z * w;
 
-		if (reflDir.Dot(normal) < 0)
+		if (Vector3D::Dot(reflDir, normal) < 0)
 			reflDir *= -1;
 
 		ray = Ray(point, reflDir);
@@ -257,7 +253,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
   }
 	else if (material.reflType == ReflectionType::diffuse)
 	{
-		double d = hemi.Dot(normal);
+		double d = Vector3D::Dot(hemi, normal);
 		if (d < 0) // flip if "behind" normal
 		{
 			hemi *= -1;
@@ -559,7 +555,7 @@ void Scene::LoadDefaultScene2()
 	objects = reader.parseFile("../models/sphere.obj");
 
 	// Central light
-	objects[0].material = Material(ReflectionType::specular, ColorD(0.8, 0.8, 0.8), ColorD(0.8, 0.8, 0.8), 1.0, 1000000.0, 1.0);
+	objects[0].material = Material(ReflectionType::refractive, ColorD(0.0, 0.0, 0.0), ColorD(0.5, 0.5, 0.5), 1.5, 1000000.0, 1.0);
 	nTriangles = objects[0].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
