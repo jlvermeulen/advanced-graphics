@@ -93,13 +93,25 @@ void RenderDialog::setUseDoF(bool use)
 }
 
 //--------------------------------------------------------------------------------
-double RenderDialog::getFocalDistance() const
+double RenderDialog::getFocalDepth() const
 {
-  return ui->focalBox->value();
+  return ui->focalDepthBox->value();
 }
 
 //--------------------------------------------------------------------------------
-void RenderDialog::setFocalDistance(double distance)
+void RenderDialog::setFocalDepth(double distance)
 {
-  ui->focalBox->setValue(distance);
+  ui->focalDepthBox->setValue(distance);
+}
+
+//--------------------------------------------------------------------------------
+double RenderDialog::getAperture() const
+{
+  return ui->apertureBox->value();
+}
+
+//--------------------------------------------------------------------------------
+void RenderDialog::setAperture(double aperture)
+{
+  ui->apertureBox->setValue(aperture);
 }

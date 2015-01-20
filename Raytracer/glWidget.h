@@ -47,8 +47,11 @@ public:
   double getZ() const { return scene.camera.Eye().Z; }
   void setZ(double z) { scene.camera.setZ(z); }
 
-  double getFocalDistance() const { return scene.camera.FocalDistance; }
-  void setFocalDistance(double distance) { scene.camera.FocalDistance = distance; }
+  double getFocalDepth() const { return scene.camera.FocalDepth; }
+  void setFocalDistance(double depth) { scene.camera.FocalDepth = depth; }
+
+  double getAperture() const { return scene.camera.Aperture; }
+  void setAperture(double aperture) { scene.camera.Aperture = aperture; }
 
   void loadScene(QString& fileName);
   int renderScene(uchar* imageData);

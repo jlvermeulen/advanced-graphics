@@ -74,8 +74,6 @@ bool Scene::Render(uchar* imageData, int minTriangles, int maxDepth, int samples
 //--------------------------------------------------------------------------------
 void Scene::TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma, bool useDoF)
 {
-	double lensRadius = 1.0;
-
 	double tanHalfFovY = tan(camera.FovY() / 360 * M_PI);
 	double tanHalfFovX = tanHalfFovY * camera.Width / camera.Height;
 
@@ -102,19 +100,33 @@ void Scene::TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
 
 					if (useDoF)
 					{
-						Vector3D focalPoint = origin + direction * camera.FocalDistance;
+						Vector3D focalPoint = origin + direction * camera.FocalDepth;
 
 						// Get uniformly distributed square [-1,1] x [-1,1]
-						double uX = 2.0 * dist(gen) - 1.0;
-						double uY = 2.0 * dist(gen) - 1.0;
+            float angle = dist(gen) * 2 * M_PI;
+            float radius = dist(gen);
+
+            double aX = cos(angle) * radius * camera.Aperture;
+            double aY = sin(angle) * radius * camera.Aperture;
+
+            Vector3D apertureOffset(aX, aY, 0.0);
+
+            origin += apertureOffset;
+
+            direction *= camera.FocalDepth;
+            direction -= apertureOffset;
+            direction.Normalise();
+
+						//double uX = 2.0 * dist(gen) - 1.0;
+						//double uY = 2.0 * dist(gen) - 1.0;
 
 						// Get uniformly distributed circle with lens radius
-						double lX = lensRadius * uX * sqrt(1 - uY * uY / 2);
-						double lY = lensRadius * uY * sqrt(1 - uX * uX / 2);
+						//double lX = camera.Aperture * uX * sqrt(1 - uY * uY / 2);
+						//double lY = camera.Aperture * uY * sqrt(1 - uX * uX / 2);
 
-						origin += lX * camera.Right() + lY * camera.Up();
+						//origin += lX * camera.Right() + lY * camera.Up();
 
-						direction = Vector3D::Normalise(focalPoint - origin);
+						//direction = Vector3D::Normalise(focalPoint - origin);
 					}
 
 					Ray cameraRay(origin, direction);

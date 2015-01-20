@@ -33,8 +33,11 @@ public:
   bool getUseDoF() const;
   void setUseDoF(bool use);
 
-  double getFocalDistance() const;
-  void setFocalDistance(double distance);
+  double getFocalDepth() const;
+  void setFocalDepth(double distance);
+
+  double getAperture() const;
+  void setAperture(double aperture);
 
 private:
   Ui::RenderDialog* ui;

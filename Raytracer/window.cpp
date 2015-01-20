@@ -65,7 +65,8 @@ void Window::openRenderDialog()
   renderDialog.setNumberOfRays(getGLWidget()->getNumberOfRays());
   renderDialog.setSigma(getGLWidget()->getSigma());
   renderDialog.setUseDoF(getGLWidget()->getUseDoF());
-  renderDialog.setFocalDistance(getGLWidget()->getFocalDistance());
+  renderDialog.setFocalDepth(getGLWidget()->getFocalDepth());
+  renderDialog.setAperture(getGLWidget()->getAperture());
 
   if (renderDialog.exec())
   {
@@ -77,7 +78,8 @@ void Window::openRenderDialog()
     getGLWidget()->setNumberOfRays(renderDialog.getNumberOfRays());
     getGLWidget()->setSigma(renderDialog.getSigma());
     getGLWidget()->setUseDoF(renderDialog.getUseDoF());
-    getGLWidget()->setFocalDistance(renderDialog.getFocalDistance());
+    getGLWidget()->setFocalDistance(renderDialog.getFocalDepth());
+    getGLWidget()->setAperture(renderDialog.getAperture());
 
     uchar* imageData = new uchar[resolution.x() * resolution.y() * 4];    // Width * Height * Color Channels
     int elapsedTime = getGLWidget()->renderScene(imageData);

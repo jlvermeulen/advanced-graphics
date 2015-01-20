@@ -7,7 +7,7 @@ class Camera
 {
 public:
   Camera();
-  Camera(Vector3D eye, Vector3D focus, Vector3D up, int width = 1280, int height = 720, float fovY = 40.0, float zNear = 0.1, float zFar = 1000.0, double focalDistance = 4.0);
+  Camera(Vector3D eye, Vector3D focus, Vector3D up, int width = 1280, int height = 720, float fovY = 40.0, float zNear = 0.1, float zFar = 1000.0, double aperture = 3.0, double focalDepth = 4.0);
   ~Camera();
 
 public:
@@ -35,7 +35,8 @@ public:
   int Width;
   int Height;
 
-  double FocalDistance;
+  double Aperture;
+  double FocalDepth;
 
 private:
   Vector3D eye_;
