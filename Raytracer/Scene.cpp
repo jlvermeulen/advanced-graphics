@@ -189,10 +189,15 @@ ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& normal, 
 	Triangle hitTriangle;
 	double hitTime;
 
-	Ray ray(sample.first.Origin + 0.005 * normal, sample.first.Direction);
-	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial) || hitTriangle != sample.second)
+	Ray ray(sample.first.Origin/* + 0.005 * normal*/, sample.first.Direction);
+	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial) || (hitTriangle != sample.second&& hitMaterial.reflType != ReflectionType::refractive))
 		return ColorD();
 
+	if (hitMaterial.reflType == ReflectionType::refractive)
+	{
+		Vector3D hitPoint =  ray.Origin + ray.Direction*hitTime;
+		return DirectIllumination(hitPoint, hitTriangle.surfaceNormal(hitPoint), material);
+	}
 	return hitMaterial.emission * material.color;
 }
 
@@ -389,7 +394,7 @@ void Scene::LoadDefaultScene()
   objects = reader.parseFile("../models/cube.obj");
 
   // Left sphere
-  objects[0].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.5, 0.0), ColorD(), 1.0, 1.0, 0.5);
+  objects[0].material = Material(ReflectionType::refractive, ColorD(0.0, 0.0, 0.0), ColorD(), 1.5, 1.1, 0.5);
   unsigned int nTriangles = objects[0].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -397,7 +402,8 @@ void Scene::LoadDefaultScene()
     for (unsigned int j = 0; j < 3; ++j)
     {
       objects[0].triangles[i].Vertices[j].Position /= 2.5;
-      objects[0].triangles[i].Vertices[j].Position.X -= 0.5;
+	  objects[0].triangles[i].Vertices[j].Position.X -= 1.0;
+	  objects[0].triangles[i].Vertices[j].Position.Y += 1.0;
       objects[0].triangles[i].Vertices[j].Position.Z += 0.125;
     }
   }

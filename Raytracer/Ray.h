@@ -42,6 +42,7 @@ public:
 		Direction *= r;
 		Direction += (r * c - sqrt(radicand)) * normal;
 		Origin = point + (c1 > 0 ? -0.01 : 0.01) * normal;
+		UpdateInverseDirection();
 	}
 
 	Ray Refract(Ray ray, const Vector3D& point, const Vector3D& normal, const double& n1, const double& n2) { ray.Refract(point, normal, n1, n2); return ray; }
