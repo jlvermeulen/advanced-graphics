@@ -186,15 +186,16 @@ ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& normal, 
 	Triangle hitTriangle;
 	double hitTime;
 
-	Ray ray(sample.first.Origin/* + 0.005 * normal*/, sample.first.Direction);
-	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial) || (hitTriangle != sample.second&& hitMaterial.reflType != ReflectionType::refractive))
+	Ray ray(sample.first.Origin + 0.005 * normal, sample.first.Direction);
+	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial) || (hitTriangle != sample.second && hitMaterial.reflType != ReflectionType::refractive))
 		return ColorD();
 
-	if (hitMaterial.reflType == ReflectionType::refractive)
+	if (hitMaterial.reflType == ReflectionType::refractive && !hitMaterial.emission.IsSignificant())
 	{
 		Vector3D hitPoint =  ray.Origin + ray.Direction*hitTime;
 		return DirectIllumination(hitPoint, hitTriangle.surfaceNormal(hitPoint), material);
 	}
+
 	return hitMaterial.emission * material.color;
 }
 
