@@ -203,7 +203,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 
 	Ray ray(point, in);
 
-	double c = 1 / (2 * M_PI);
+	double c = 1;// / (2 * M_PI);
 	ColorD value(c, c, c);
 
 	// Sample unit sphere
@@ -229,7 +229,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 	if (material.reflType == ReflectionType::specular)
 	{
 		ray.Reflect(point, normal);
-		value = ColorD(1.0, 1.0, 1.0);
+		//value = ColorD(1.0, 1.0, 1.0);
 	}
 	else if (material.reflType == ReflectionType::glossy)
 	{
@@ -248,14 +248,20 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 			reflDir *= -1;
 
 		ray = Ray(point, reflDir);
-    
-    value *= material.color * Vector3D::Dot(normal, w);
+		value *= material.color * Vector3D::Dot(normal, w);
   }
 	else if (material.reflType == ReflectionType::diffuse)
 	{
+		double d = hemi.Dot(normal);
+		if (d < 0) // flip if "behind" normal
+		{
+			hemi *= -1;
+			d *= -1;
+		}
+
 		ray = Ray(point, hemi);
 		point += 0.005 * normal;
-		value *= material.color * Vector3D::Dot(normal, ray.Direction) / (2 * M_PI);
+		value *= material.color * d;
 	}
 	else if (material.reflType == ReflectionType::refractive)
 		ray.Refract(point, normal, 1.0, material.refrIndex);
@@ -268,7 +274,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 		return ColorD();
 
 	Vector3D hitPoint = ray.Origin + hitTime * ray.Direction;
-	return value * ComputeRadiance(hitPoint, ray.Direction, hitTriangle, hitMaterial, depth + 1) / RUSSIAN_ROULETTE_PROBABILITY;
+	return value * ComputeRadiance(hitPoint, ray.Direction, hitTriangle, hitMaterial, depth + 1) / (depth > MIN_PATH_LENGTH ? RUSSIAN_ROULETTE_PROBABILITY : 1.0);
 }
 
 //--------------------------------------------------------------------------------
@@ -383,7 +389,7 @@ void Scene::LoadDefaultScene()
   objects = reader.parseFile("../models/cube.obj");
 
   // Left sphere
-  objects[0].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.5, 0.0), ColorD(), 0.5, 1.0, 0.5);
+  objects[0].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.5, 0.0), ColorD(), 1.0, 1.0, 0.5);
   unsigned int nTriangles = objects[0].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -397,7 +403,7 @@ void Scene::LoadDefaultScene()
   }
 
   // Right sphere
-  objects[1].material = Material(ReflectionType::specular, ColorD(0.8, 0.8, 0.8), ColorD(), 0.5, 100.0, 0.5);
+  objects[1].material = Material(ReflectionType::specular, ColorD(0.0, 0.0, 0.0), ColorD(), 0.5, 100.0, 0.5);
   nTriangles = objects[1].triangles.size();
 
   for (unsigned int i = 0; i < nTriangles; ++i)
@@ -632,7 +638,7 @@ void Scene::LoadDefaultScene3()
 	objects = reader.parseFile("../models/cube.obj");
 
 	// Left box
-	objects[0].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.0, 0.0), ColorD(), 1.0, 1.0, 0.0);
+	objects[0].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.0, 0.0), ColorD(), 1.0, 0.0, 0.0);
 	unsigned int nTriangles = objects[0].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -645,7 +651,7 @@ void Scene::LoadDefaultScene3()
 		}
 
 	// Right box
-	objects[1].material = Material(ReflectionType::diffuse, ColorD(0.0, 0.0, 1.0), ColorD(), 1.0, 1.0, 0.0);
+	objects[1].material = Material(ReflectionType::diffuse, ColorD(0.0, 0.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[1].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -659,7 +665,7 @@ void Scene::LoadDefaultScene3()
 		}
 
 	// Right
-	objects[2].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 1.0, 0.0);
+	objects[2].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[2].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -670,7 +676,7 @@ void Scene::LoadDefaultScene3()
 		}
 
 	// Left
-	objects[3].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 1.0, 0.0);
+	objects[3].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[3].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -681,7 +687,7 @@ void Scene::LoadDefaultScene3()
 		}
 
 	// Back
-	objects[4].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 1.0, 0.0);
+	objects[4].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[4].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -692,7 +698,7 @@ void Scene::LoadDefaultScene3()
 		}
 
 	// Top
-	objects[5].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(1.0, 1.0, 1.0), 1.0, 1.0, 0.0);
+	objects[5].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(1.0, 1.0, 1.0), 1.0, 0.0, 0.0);
 	nTriangles = objects[5].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -708,7 +714,7 @@ void Scene::LoadDefaultScene3()
 	lights.push_back(objects[5]);
 
 	// Bottom
-	objects[6].material = Material(ReflectionType::diffuse, ColorD(0.75, 0.75, 0.75), ColorD(), 1.0, 1.0, 0.0);
+	objects[6].material = Material(ReflectionType::diffuse, ColorD(0.75, 0.75, 0.75), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[6].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
