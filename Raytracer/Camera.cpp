@@ -53,7 +53,7 @@ void Camera::MoveForward(const float& distance)
 //--------------------------------------------------------------------------------
 void Camera::MoveRight(const float& distance)
 {
-  eye_ += Vector3D::Cross(focus_, up_) * distance;
+  eye_ += right_ * distance;
 }
 
 //--------------------------------------------------------------------------------
