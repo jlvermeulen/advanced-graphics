@@ -11,6 +11,9 @@ public:
 			   const double& m20, const double& m21, const double& m22);
 
 	static Matrix3x3D Identity();
+	static Matrix3x3D CreateRotationX(double angle);
+	static Matrix3x3D CreateRotationY(double angle);
+	static Matrix3x3D CreateRotationZ(double angle);
 
 	void Transpose();
 	Matrix3x3D Transposed() const;

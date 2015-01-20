@@ -656,31 +656,41 @@ void Scene::LoadDefaultScene3()
 	objects[0].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.0, 0.0), ColorD(), 1.0, 0.0, 0.0);
 	unsigned int nTriangles = objects[0].triangles.size();
 
+	Matrix3x3D mat = Matrix3x3D::CreateRotationY(M_PI_2) * Matrix3x3D::CreateRotationX(M_PI_4);
 	for (unsigned int i = 0; i < nTriangles; ++i)
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[0].triangles[i].Vertices[j].Position.X /= 1.25;
 			objects[0].triangles[i].Vertices[j].Position.Z /= 2;
+
+			objects[0].triangles[i].Vertices[j].Position *= mat;
+			objects[0].triangles[i].Vertices[j].Normal *= mat;
+
 			objects[0].triangles[i].Vertices[j].Position.X -= 0.75;
-			objects[0].triangles[i].Vertices[j].Position.Y -= 1.0;
+			objects[0].triangles[i].Vertices[j].Position.Y -= 0.97;
 		}
 
 	// Right box
 	objects[1].material = Material(ReflectionType::diffuse, ColorD(0.0, 0.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[1].triangles.size();
 
+	mat = Matrix3x3D::CreateRotationY(-0.3);
 	for (unsigned int i = 0; i < nTriangles; ++i)
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[1].triangles[i].Vertices[j].Position.X /= 1.25;
 			objects[1].triangles[i].Vertices[j].Position.Y /= 1.5;
 			objects[1].triangles[i].Vertices[j].Position.Z /= 2;
-			objects[1].triangles[i].Vertices[j].Position.X += 0.75;
+
+			objects[1].triangles[i].Vertices[j].Position *= mat;
+			objects[1].triangles[i].Vertices[j].Normal *= mat;
+
+			objects[1].triangles[i].Vertices[j].Position.X += 0.2;
 			objects[1].triangles[i].Vertices[j].Position.Y -= 7.0 / 6.0;
 		}
 
 	// Right
-	objects[2].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
+	objects[2].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[2].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -691,7 +701,7 @@ void Scene::LoadDefaultScene3()
 		}
 
 	// Left
-	objects[3].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
+	objects[3].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[3].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -702,7 +712,7 @@ void Scene::LoadDefaultScene3()
 		}
 
 	// Back
-	objects[4].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0, 0.0);
+	objects[4].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[4].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)

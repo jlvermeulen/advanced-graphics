@@ -100,3 +100,7 @@ Matrix3x3D& Matrix3x3D::operator*=(const Matrix3x3D& rhs)
 
 	return *this;
 }
+
+Matrix3x3D Matrix3x3D::CreateRotationX(double angle) { return Matrix3x3D(1, 0, 0, 0, cos(angle), -sin(angle), 0, sin(angle), cos(angle)); }
+Matrix3x3D Matrix3x3D::CreateRotationY(double angle) { return Matrix3x3D(cos(angle), 0, sin(angle), 0, 1, 0, -sin(angle), 0, cos(angle)); }
+Matrix3x3D Matrix3x3D::CreateRotationZ(double angle) { return Matrix3x3D(cos(angle), -sin(angle), 0, sin(angle), cos(angle), 0, 0, 0, 1); }

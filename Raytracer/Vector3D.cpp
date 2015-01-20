@@ -58,9 +58,10 @@ Vector3D& Vector3D::operator*=(const double& rhs)
 
 Vector3D& Vector3D::operator*=(const Matrix3x3D& lhs)
 {
-	X = Dot(Vector3D(lhs[0]));
-	Y = Dot(Vector3D(lhs[1]));
-	Z = Dot(Vector3D(lhs[2]));
+	Vector3D v(*this);
+	X = v.Dot(Vector3D(lhs[0]));
+	Y = v.Dot(Vector3D(lhs[1]));
+	Z = v.Dot(Vector3D(lhs[2]));
 	return *this;
 }
 
