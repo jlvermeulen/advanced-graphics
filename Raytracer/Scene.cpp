@@ -699,6 +699,7 @@ void Scene::LoadDefaultScene3()
 			objects[nr].triangles[i].Vertices[j].Position.X += 0.2;
 			objects[nr].triangles[i].Vertices[j].Position.Y -= 7.0 / 6.0;
 		}
+	++nr;
 
 	// Right
 	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
