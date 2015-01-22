@@ -52,6 +52,7 @@ public:
   void LoadDefaultScene2();
   void LoadDefaultScene3();
   void LoadDefaultScene4();
+  void LoadDefaultScene5();
 
 private:
   ColorD TraceRay(const Ray& ray);

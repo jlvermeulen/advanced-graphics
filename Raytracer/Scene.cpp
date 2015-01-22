@@ -893,3 +893,127 @@ void Scene::LoadDefaultScene4()
 
 	camera = Camera(Vector3D(1.34, 2.405, 5.25), Vector3D::Normalise(Vector3D(-0.8, -2.1, -5.0)), Vector3D(0, 1, 0));
 }
+
+void Scene::LoadDefaultScene5()
+{
+	ObjReader reader;
+	objects.clear();
+	unsigned int nTriangles, nr = 0;
+
+	// Parse floor
+	reader.parseFile("../models/cube.obj");
+
+	// Parse diamonds
+	reader.parseFile("../models/diamond.obj");
+	reader.parseFile("../models/diamond.obj");
+	reader.parseFile("../models/diamond.obj");
+	reader.parseFile("../models/diamond.obj");
+	reader.parseFile("../models/diamond.obj");
+
+	// Parse light
+	objects = reader.parseFile("../models/cube.obj");
+
+	// Left box
+	objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position *= 10;
+			objects[nr].triangles[i].Vertices[j].Position.Y -= 5;
+		}
+	++nr;
+
+	// Diamond
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+	Matrix3x3D mat = Matrix3x3D::CreateRotationY(M_PI + M_PI_4);
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position *= mat;
+			objects[nr].triangles[i].Vertices[j].Normal *= mat;
+
+			objects[nr].triangles[i].Vertices[j].Position /= 10;
+			objects[nr].triangles[i].Vertices[j].Position.X -= 0.25;
+			objects[nr].triangles[i].Vertices[j].Position.Z -= 0.25;
+		}
+	++nr;
+
+	// Diamond
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+	mat = Matrix3x3D::CreateRotationY(M_PI);
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position *= mat;
+			objects[nr].triangles[i].Vertices[j].Normal *= mat;
+
+			objects[nr].triangles[i].Vertices[j].Position /= 15;
+		}
+	++nr;
+
+	// Diamond
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+	mat = Matrix3x3D::CreateRotationY(M_PI_4);
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position *= mat;
+			objects[nr].triangles[i].Vertices[j].Normal *= mat;
+
+			objects[nr].triangles[i].Vertices[j].Position /= 20;
+			objects[nr].triangles[i].Vertices[j].Position.X += 0.2;
+			objects[nr].triangles[i].Vertices[j].Position.Z -= 0.3;
+		}
+	++nr;
+
+	// Diamond
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+	mat = Matrix3x3D::CreateRotationY(0.5);
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position *= mat;
+			objects[nr].triangles[i].Vertices[j].Normal *= mat;
+
+			objects[nr].triangles[i].Vertices[j].Position /= 12;
+			objects[nr].triangles[i].Vertices[j].Position.X += 0.2;
+			objects[nr].triangles[i].Vertices[j].Position.Z += 0.3;
+		}
+	++nr;
+
+	// Diamond
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+	mat = Matrix3x3D::CreateRotationY(2.0);
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position *= mat;
+			objects[nr].triangles[i].Vertices[j].Normal *= mat;
+
+			objects[nr].triangles[i].Vertices[j].Position /= 17;
+			objects[nr].triangles[i].Vertices[j].Position.X -= 0.15;
+			objects[nr].triangles[i].Vertices[j].Position.Z += 0.15;
+		}
+	++nr;
+
+	// Light
+	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(10.0, 10.0, 10.0), 1.0, 0.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position.X *= 10;
+			objects[nr].triangles[i].Vertices[j].Position.Y += 4;
+		}
+	++nr;
+
+	camera = Camera(Vector3D(1.22, 0.73, -0.02), Vector3D::Normalise(Vector3D(-1.22, -0.63, 0.02)), Vector3D(0, 1, 0));
+}

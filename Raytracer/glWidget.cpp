@@ -168,6 +168,8 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
     scene.LoadDefaultScene3();
   else if (event->key() == Qt::Key_U)
     scene.LoadDefaultScene4();
+  else if (event->key() == Qt::Key_Y)
+    scene.LoadDefaultScene5();
   else
   {
     changed = false;
