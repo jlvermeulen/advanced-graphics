@@ -767,3 +767,129 @@ void Scene::LoadDefaultScene3()
 
 	camera = Camera(Vector3D(0, 0.5, 3.0), Vector3D::Normalise(Vector3D(0, -0.5, -1)), Vector3D(0, 1, 0));
 }
+
+void Scene::LoadDefaultScene4()
+{
+	ObjReader reader;
+	objects.clear();
+	unsigned int nTriangles, nr = 0;
+
+	// Parse floor
+	reader.parseFile("../models/cube.obj");
+
+	// Parse teapots
+	reader.parseFile("../models/teapot.obj");
+	reader.parseFile("../models/teapot.obj");
+	reader.parseFile("../models/teapot.obj");
+	reader.parseFile("../models/teapot.obj");
+	reader.parseFile("../models/teapot.obj");
+
+	// Parse light
+	objects = reader.parseFile("../models/cube.obj");
+
+	Matrix3x3D mat = Matrix3x3D::CreateRotationY(M_PI + M_PI_4);
+
+	// Left box
+	objects[nr].material = Material(ReflectionType::glossy, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position *= 10;
+			objects[nr].triangles[i].Vertices[j].Position.Y -= 5;
+		}
+	++nr;
+
+	// Teapot
+	objects[nr].material = Material(ReflectionType::glossy, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 0.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position *= mat;
+			objects[nr].triangles[i].Vertices[j].Normal *= mat;
+
+			objects[nr].triangles[i].Vertices[j].Position /= 1;
+			objects[nr].triangles[i].Vertices[j].Position.X -= 2.5;
+			objects[nr].triangles[i].Vertices[j].Position.Z -= 1;
+		}
+	++nr;
+
+	// Teapot
+	objects[nr].material = Material(ReflectionType::glossy, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 2.5, 0.0);
+	nTriangles = objects[nr].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position *= mat;
+			objects[nr].triangles[i].Vertices[j].Normal *= mat;
+
+			objects[nr].triangles[i].Vertices[j].Position /= 1;
+			objects[nr].triangles[i].Vertices[j].Position.X -= 1.25;
+			objects[nr].triangles[i].Vertices[j].Position.Z -= 0.5;
+		}
+	++nr;
+
+	// Teapot
+	objects[nr].material = Material(ReflectionType::glossy, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 5.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position *= mat;
+			objects[nr].triangles[i].Vertices[j].Normal *= mat;
+
+			objects[nr].triangles[i].Vertices[j].Position /= 1;
+		}
+	++nr;
+
+	// Teapot
+	objects[nr].material = Material(ReflectionType::glossy, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 10.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position *= mat;
+			objects[nr].triangles[i].Vertices[j].Normal *= mat;
+
+			objects[nr].triangles[i].Vertices[j].Position /= 1;
+			objects[nr].triangles[i].Vertices[j].Position.X += 1.25;
+			objects[nr].triangles[i].Vertices[j].Position.Z += 0.5;
+		}
+	++nr;
+
+	// Teapot
+	objects[nr].material = Material(ReflectionType::glossy, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 100.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position *= mat;
+			objects[nr].triangles[i].Vertices[j].Normal *= mat;
+
+			objects[nr].triangles[i].Vertices[j].Position /= 1;
+			objects[nr].triangles[i].Vertices[j].Position.X += 2.5;
+			objects[nr].triangles[i].Vertices[j].Position.Z += 1;
+		}
+	++nr;
+
+	// Light
+	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(10.0, 10.0, 10.0), 1.0, 0.0, 0.0);
+	nTriangles = objects[nr].triangles.size();
+
+	for (unsigned int i = 0; i < nTriangles; ++i)
+		for (unsigned int j = 0; j < 3; ++j)
+		{
+			objects[nr].triangles[i].Vertices[j].Position.X *= 10;
+			objects[nr].triangles[i].Vertices[j].Position.Y += 4;
+		}
+	++nr;
+
+	camera = Camera(Vector3D(1.34, 2.405, 5.25), Vector3D::Normalise(Vector3D(-0.8, -2.1, -5.0)), Vector3D(0, 1, 0));
+}
