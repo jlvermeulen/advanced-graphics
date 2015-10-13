@@ -6,7 +6,7 @@
 
 #include "Intersections.h"
 #include "ObjReader.h"
-
+#include <algorithm>
 #include <math.h>
 #include <random>
 
@@ -555,7 +555,7 @@ void Scene::LoadDefaultScene2()
 {
 	ObjReader reader;
 	objects.clear();
-	unsigned int nTriangles, nr;
+	unsigned int nTriangles=0, nr=0;
 
 	// Parse central light
 	objects = reader.parseFile("../models/cube.obj");
