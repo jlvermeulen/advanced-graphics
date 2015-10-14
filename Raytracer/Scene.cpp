@@ -103,19 +103,19 @@ void Scene::TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
 						Vector3D focalPoint = origin + direction * camera.FocalDepth;
 
 						// Get uniformly distributed square [-1,1] x [-1,1]
-            float angle = dist(gen) * 2 * M_PI;
-            float radius = dist(gen);
+						float angle = dist(gen) * 2 * M_PI;
+						float radius = dist(gen);
 
-            double aX = cos(angle) * radius * camera.Aperture;
-            double aY = sin(angle) * radius * camera.Aperture;
+						double aX = cos(angle) * radius * camera.Aperture;
+						double aY = sin(angle) * radius * camera.Aperture;
 
-            Vector3D apertureOffset(aX, aY, 0.0);
+						Vector3D apertureOffset(aX, aY, 0.0);
 
-            origin += apertureOffset;
+						origin += apertureOffset;
 
-            direction *= camera.FocalDepth;
-            direction -= apertureOffset;
-            direction.Normalise();
+						direction *= camera.FocalDepth;
+						direction -= apertureOffset;
+						direction.Normalise();
 
 						//double uX = 2.0 * dist(gen) - 1.0;
 						//double uY = 2.0 * dist(gen) - 1.0;
@@ -164,7 +164,7 @@ void Scene::TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
 //--------------------------------------------------------------------------------
 double Scene::GaussianWeight(double dx, double dy, double sigma) const
 {
-  return exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
+	return exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
 }
 
 //--------------------------------------------------------------------------------
@@ -263,7 +263,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 
 		ray = Ray(point, reflDir);
 		value *= material.color * Vector3D::Dot(normal, w);
-  }
+	}
 	else if (material.reflType == ReflectionType::diffuse)
 	{
 		double d = Vector3D::Dot(hemi, normal);
@@ -549,6 +549,10 @@ void Scene::LoadDefaultScene()
 	++nr;
 
 	camera = Camera(Vector3D(0.75, 0, 4.5), Vector3D::Normalise(Vector3D(-1.0, 0, -4.5)), Vector3D(0, 1, 0));
+
+	// hack for initial camera transform bug
+	camera.RotateX(0.1f);
+	camera.RotateX(-0.1f);
 }
 
 void Scene::LoadDefaultScene2()
@@ -633,6 +637,10 @@ void Scene::LoadDefaultScene2()
 	++nr;
 
 	camera = Camera(Vector3D(-2.5, 0.75, 2.5), Vector3D::Normalise(Vector3D(1, -0.3, -1)), Vector3D(0, 1, 0));
+
+	// hack for initial camera transform bug
+	camera.RotateX(0.1f);
+	camera.RotateX(-0.1f);
 }
 
 void Scene::LoadDefaultScene3()
@@ -767,6 +775,10 @@ void Scene::LoadDefaultScene3()
 	++nr;
 
 	camera = Camera(Vector3D(0, 0.5, 3.0), Vector3D::Normalise(Vector3D(0, -0.5, -1)), Vector3D(0, 1, 0));
+
+	// hack for initial camera transform bug
+	camera.RotateX(0.1f);
+	camera.RotateX(-0.1f);
 }
 
 void Scene::LoadDefaultScene4()
@@ -893,6 +905,10 @@ void Scene::LoadDefaultScene4()
 	++nr;
 
 	camera = Camera(Vector3D(1.34, 2.405, 5.25), Vector3D::Normalise(Vector3D(-0.8, -2.1, -5.0)), Vector3D(0, 1, 0));
+
+	// hack for initial camera transform bug
+	camera.RotateX(0.1f);
+	camera.RotateX(-0.1f);
 }
 
 void Scene::LoadDefaultScene5()
@@ -1017,4 +1033,8 @@ void Scene::LoadDefaultScene5()
 	++nr;
 
 	camera = Camera(Vector3D(1.22, 0.73, -0.02), Vector3D::Normalise(Vector3D(-1.22, -0.63, 0.02)), Vector3D(0, 1, 0));
+
+	// hack for initial camera transform bug
+	camera.RotateX(0.1f);
+	camera.RotateX(-0.1f);
 }
