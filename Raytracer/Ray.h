@@ -2,7 +2,6 @@
 
 #include "Vector3D.h"
 #include "ColorD.h"
-#include "Triangle.h"
 
 struct Ray
 {

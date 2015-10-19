@@ -267,7 +267,9 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BBox.cpp" />
     <ClCompile Include="BoundingBox.cpp" />
+    <ClCompile Include="BVH.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="cameraControls.cpp" />
     <ClCompile Include="ColorD.cpp" />
@@ -328,7 +330,9 @@
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BBox.h" />
     <ClInclude Include="BoundingBox.h" />
+    <ClInclude Include="BVH.h" />
     <ClInclude Include="Camera.h" />
     <CustomBuild Include="cameraControls.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -353,6 +357,7 @@
     <ClInclude Include="GeneratedFiles\ui_renderDialog.h" />
     <ClInclude Include="GeneratedFiles\ui_renderViewer.h" />
     <ClInclude Include="GeneratedFiles\ui_window.h" />
+    <ClInclude Include="IntersectionInfo.h" />
     <ClInclude Include="Intersections.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Matrix3x3D.h" />
@@ -402,6 +407,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vector2D.h" />
+    <ClInclude Include="Vector3.h" />
     <ClInclude Include="Vector3D.h" />
     <ClInclude Include="Vertex.h" />
     <CustomBuild Include="glWidget.h">

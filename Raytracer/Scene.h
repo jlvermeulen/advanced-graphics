@@ -6,6 +6,7 @@
 #include "Object.h"
 #include "Octree.h"
 #include "Triangle.h"
+#include "BVH.h"
 
 #include <deque>
 #include <vector>

@@ -2,6 +2,9 @@
 
 #include "ColorD.h"
 #include "Vertex.h"
+#include "BBox.h"
+#include "Vector3.h"
+
 
 struct Triangle
 {
@@ -24,6 +27,21 @@ public:
 		Vertices[0] = v[0];
 		Vertices[1] = v[1];
 		Vertices[2] = v[2];
+	}
+
+	BBox getBBox() const
+	{
+		Vector3 v0 = Vector3(Vertices[0].Position.X, Vertices[0].Position.Y, Vertices[0].Position.Z);
+		Vector3 v1 = Vector3(Vertices[1].Position.X, Vertices[1].Position.Y, Vertices[1].Position.Z);
+		Vector3 v2 = Vector3(Vertices[2].Position.X, Vertices[2].Position.Y, Vertices[2].Position.Z);
+		const Vector3 minv = min(min(v0, v1), v2);
+		const Vector3 maxv = max(max(v0, v1), v2);
+		return BBox(minv, maxv);
+	}
+	Vector3 getCentroid()
+	{
+		CalculateCenter();
+		return Vector3(Center.X, Center.Y, Center.Z);
 	}
 
 	Vector3D Interpolate(Vector3D point) const

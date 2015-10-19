@@ -3,6 +3,7 @@
 #include "Material.h"
 #include "Octree.h"
 #include "Triangle.h"
+#include "BVH.h";
 
 #include <deque>
 
@@ -30,7 +31,16 @@ struct Object
     octree = new Octree(triangles, minTriangles, maxDepth);
   }
 
+  void ConstructBVH(int minTriangles)
+  {
+	  std::vector<Triangle*> bvhTriangles;
+	  for (Triangle t : triangles)
+		  bvhTriangles.push_back(&t);
+	  bvh = new BVH(&bvhTriangles, minTriangles);
+  }
+
   Octree* octree;
+  BVH* bvh;
   Material material;
   std::deque<Triangle> triangles;
 };
