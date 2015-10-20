@@ -333,6 +333,7 @@
     <ClInclude Include="BBox.h" />
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BVH.h" />
+    <ClInclude Include="BVHRay.h" />
     <ClInclude Include="Camera.h" />
     <CustomBuild Include="cameraControls.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -564,7 +565,7 @@ endlocal
   <ImportGroup Label="ExtensionTargets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_Win32="msvc2013_opengl" Qt5Version_x0020_x64="5.4" />
+      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_Win32="5" Qt5Version_x0020_x64="5.4" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

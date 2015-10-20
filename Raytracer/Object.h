@@ -28,17 +28,17 @@ struct Object
 
   void ConstructOctree(int minTriangles, int maxDepth)
   {
-    octree = new Octree(triangles, minTriangles, maxDepth);
+	  octree = new Octree(triangles, minTriangles, maxDepth);
   }
 
   void ConstructBVH(int minTriangles)
   {
-	  std::vector<Triangle*> bvhTriangles;
-	  for (Triangle t : triangles)
-		  bvhTriangles.push_back(&t);
+	  bvhTriangles.clear();
+	  for (int i = 0; i < triangles.size();++i)
+		  bvhTriangles.push_back(&triangles[i]);
 	  bvh = new BVH(&bvhTriangles, minTriangles);
   }
-
+  std::vector<Triangle*> bvhTriangles;
   Octree* octree;
   BVH* bvh;
   Material material;

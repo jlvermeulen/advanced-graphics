@@ -2,7 +2,7 @@
 
 #include "Vector3D.h"
 #include "ColorD.h"
-
+#include "Vector3.h"
 struct Ray
 {
 public:
@@ -46,6 +46,9 @@ public:
 
 	Ray Refract(Ray ray, const Vector3D& point, const Vector3D& normal, const double& n1, const double& n2) { ray.Refract(point, normal, n1, n2); return ray; }
 
+	const Vector3 getV3Origin(){return Vector3(Origin.X, Origin.Y, Origin.X); };
+	const Vector3 getV3Dir(){ return Vector3(Direction.X, Direction.Y, Direction.X);};
+	
 private:
 	void UpdateInverseDirection() { InverseDirection = Vector3D(1 / Direction.X, 1 / Direction.Y, 1 / Direction.Z); }
 };

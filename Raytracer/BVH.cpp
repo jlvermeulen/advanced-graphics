@@ -18,7 +18,7 @@ struct BVHTraversal {
 //!   than find the closest.
 bool BVH::getIntersection(const Ray& ray, IntersectionInfo* intersection, bool occlusion) const {
   intersection->t = 999999999.f;
-  intersection->object = NULL;
+  intersection->triangle = NULL;
   float bbhits[4];
   int32_t closer, other;
 
@@ -46,9 +46,11 @@ bool BVH::getIntersection(const Ray& ray, IntersectionInfo* intersection, bool o
       for(uint32_t o=0;o<node.nPrims;++o) {
         IntersectionInfo current;
 
-        const Triangle* obj = (*build_prims)[node.start+o];
+        Triangle* obj = (*build_prims)[node.start+o];
 		double t;
         bool hit = Intersects(ray, *obj, t);
+		current.triangle = obj;
+		current.t = t;
 
         if (hit) {
           // If we're only looking for occlusion, then any hit is good enough
@@ -104,10 +106,10 @@ bool BVH::getIntersection(const Ray& ray, IntersectionInfo* intersection, bool o
   }
 
   // If we hit something,
-  if(intersection->object != NULL)
+  if(intersection->triangle != NULL)
     intersection->hit = ray.Origin + ray.Direction * intersection->t;
 
-  return intersection->object != NULL;
+  return intersection->triangle != NULL;
 }
 
 BVH::~BVH() {

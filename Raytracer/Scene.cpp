@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES
 #define RUSSIAN_ROULETTE_PROBABILITY 0.90
 #define MIN_PATH_LENGTH 2
+#define TREE 1 // 1 = bhv 0 = octtree
 
 #include "Scene.h"
 
@@ -9,6 +10,7 @@
 #include <algorithm>
 #include <math.h>
 #include <random>
+#include "IntersectionInfo.h"
 
 Scene::Scene() :
   gen(std::mt19937(std::random_device()())),
@@ -42,8 +44,13 @@ bool Scene::Render(uchar* imageData, int minTriangles, int maxDepth, int samples
 {
 	// Instantiate octrees
 	for (Object& obj : objects)
+	{
+#if TREE == 0
 		obj.ConstructOctree(minTriangles, maxDepth);
-
+#else
+	obj.ConstructBVH(minTriangles);
+#endif
+}
 	std::pair<ColorD, double>* samples = new std::pair<ColorD, double>[camera.Width * camera.Height];
 	TracePixels(samples, samplesPerPixel, sigma, useDoF);
 
@@ -294,9 +301,10 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 //--------------------------------------------------------------------------------
 bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Material& mat) const
 {
+	
 	time = std::numeric_limits<double>::max();
 	bool hit = false;
-
+#if TREE==0
 	for (const Object& obj : objects)
 	{
 		Triangle tri;
@@ -310,7 +318,21 @@ bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Mater
 			hit = true;
 		}
 	}
-
+#else
+	for (const Object& obj : objects)
+	{
+		Triangle tri;
+		//double t = std::numeric_limits<double>::max();
+		IntersectionInfo io;
+		if (obj.bvh->getIntersection(ray,&io,false) && io.t < time)
+		{
+			mat = obj.material;
+			triangle = *io.triangle;
+			time = io.t;
+			hit = true;
+		}		
+	}
+#endif
 	return hit;
 }
 
@@ -650,88 +672,88 @@ void Scene::LoadDefaultScene3()
 	unsigned int nTriangles, nr = 0;
 
 	// Parse left box
-	reader.parseFile("../models/cube.obj");
+	//reader.parseFile("../models/cube.obj");
 
 	// Parse right box
-	reader.parseFile("../models/cube.obj");
+//	reader.parseFile("../models/cube.obj");
 
 	// Parse right
-	reader.parseFile("../models/cube.obj");
+//	reader.parseFile("../models/cube.obj");
 
 	// Parse left
-	reader.parseFile("../models/cube.obj");
+//	reader.parseFile("../models/cube.obj");
 
 	// Parse back
-	reader.parseFile("../models/cube.obj");
+	//reader.parseFile("../models/cube.obj");
 
 	// Parse top
-	reader.parseFile("../models/cube.obj");
+//	reader.parseFile("../models/cube.obj");
 
 	// Parse bottom
 	objects = reader.parseFile("../models/cube.obj");
 
 	// Left box
-	objects[nr].material = Material(ReflectionType::glossy, ColorD(1.0, 0.0, 0.0), ColorD(), 1.0, 100.0, 0.0);
-	nTriangles = objects[nr].triangles.size();
+	//objects[nr].material = Material(ReflectionType::glossy, ColorD(1.0, 0.0, 0.0), ColorD(), 1.0, 100.0, 0.0);
+	//nTriangles = objects[nr].triangles.size();
 
-	Matrix3x3D mat = Matrix3x3D::CreateRotationY(M_PI_2) * Matrix3x3D::CreateRotationX(M_PI_4);
-	for (unsigned int i = 0; i < nTriangles; ++i)
-		for (unsigned int j = 0; j < 3; ++j)
-		{
-			objects[nr].triangles[i].Vertices[j].Position.X /= 1.25;
-			objects[nr].triangles[i].Vertices[j].Position.Z /= 2;
+	//Matrix3x3D mat = Matrix3x3D::CreateRotationY(M_PI_2) * Matrix3x3D::CreateRotationX(M_PI_4);
+	//for (unsigned int i = 0; i < nTriangles; ++i)
+	//	for (unsigned int j = 0; j < 3; ++j)
+	//	{
+	//		objects[nr].triangles[i].Vertices[j].Position.X /= 1.25;
+	//		objects[nr].triangles[i].Vertices[j].Position.Z /= 2;
 
-			objects[nr].triangles[i].Vertices[j].Position *= mat;
-			objects[nr].triangles[i].Vertices[j].Normal *= mat;
+	//		objects[nr].triangles[i].Vertices[j].Position *= mat;
+	//		objects[nr].triangles[i].Vertices[j].Normal *= mat;
 
-			objects[nr].triangles[i].Vertices[j].Position.X -= 0.75;
-			objects[nr].triangles[i].Vertices[j].Position.Y -= 0.97;
-		}
-	++nr;
+	//		objects[nr].triangles[i].Vertices[j].Position.X -= 0.75;
+	//		objects[nr].triangles[i].Vertices[j].Position.Y -= 0.97;
+	//	}
+	//++nr;
 
-	// Right box
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.0, 0.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
-	nTriangles = objects[nr].triangles.size();
+	//// Right box
+	//objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.0, 0.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
+	//nTriangles = objects[nr].triangles.size();
 
-	mat = Matrix3x3D::CreateRotationY(-0.3);
-	for (unsigned int i = 0; i < nTriangles; ++i)
-		for (unsigned int j = 0; j < 3; ++j)
-		{
-			objects[nr].triangles[i].Vertices[j].Position.X /= 1.25;
-			objects[nr].triangles[i].Vertices[j].Position.Y /= 1.5;
-			objects[nr].triangles[i].Vertices[j].Position.Z /= 2;
+	//mat = Matrix3x3D::CreateRotationY(-0.3);
+	//for (unsigned int i = 0; i < nTriangles; ++i)
+	//	for (unsigned int j = 0; j < 3; ++j)
+	//	{
+	//		objects[nr].triangles[i].Vertices[j].Position.X /= 1.25;
+	//		objects[nr].triangles[i].Vertices[j].Position.Y /= 1.5;
+	//		objects[nr].triangles[i].Vertices[j].Position.Z /= 2;
 
-			objects[nr].triangles[i].Vertices[j].Position *= mat;
-			objects[nr].triangles[i].Vertices[j].Normal *= mat;
+	//		objects[nr].triangles[i].Vertices[j].Position *= mat;
+	//		objects[nr].triangles[i].Vertices[j].Normal *= mat;
 
-			objects[nr].triangles[i].Vertices[j].Position.X += 0.2;
-			objects[nr].triangles[i].Vertices[j].Position.Y -= 7.0 / 6.0;
-		}
-	++nr;
+	//		objects[nr].triangles[i].Vertices[j].Position.X += 0.2;
+	//		objects[nr].triangles[i].Vertices[j].Position.Y -= 7.0 / 6.0;
+	//	}
+	//++nr;
 
-	// Right
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
-	nTriangles = objects[nr].triangles.size();
+	//// Right
+	//objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
+	//nTriangles = objects[nr].triangles.size();
 
-	for (unsigned int i = 0; i < nTriangles; ++i)
-		for (unsigned int j = 0; j < 3; ++j)
-		{
-			objects[nr].triangles[i].Vertices[j].Position *= 5;
-			objects[nr].triangles[i].Vertices[j].Position.X += 4;
-		}
-	++nr;
+	//for (unsigned int i = 0; i < nTriangles; ++i)
+	//	for (unsigned int j = 0; j < 3; ++j)
+	//	{
+	//		objects[nr].triangles[i].Vertices[j].Position *= 5;
+	//		objects[nr].triangles[i].Vertices[j].Position.X += 4;
+	//	}
+	//++nr;
 
-	// Left
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
-	nTriangles = objects[nr].triangles.size();
+	//// Left
+	//objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
+	//nTriangles = objects[nr].triangles.size();
 
-	for (unsigned int i = 0; i < nTriangles; ++i)
-		for (unsigned int j = 0; j < 3; ++j)
-		{
-			objects[nr].triangles[i].Vertices[j].Position *= 5;
-			objects[nr].triangles[i].Vertices[j].Position.X -= 4;
-		}
-	++nr;
+	//for (unsigned int i = 0; i < nTriangles; ++i)
+	//	for (unsigned int j = 0; j < 3; ++j)
+	//	{
+	//		objects[nr].triangles[i].Vertices[j].Position *= 5;
+	//		objects[nr].triangles[i].Vertices[j].Position.X -= 4;
+	//	}
+	//++nr;
 
 	// Back
 	objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0, 0.0);
@@ -741,38 +763,38 @@ void Scene::LoadDefaultScene3()
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr].triangles[i].Vertices[j].Position *= 5;
-			objects[nr].triangles[i].Vertices[j].Position.Z -= 4;
+			objects[nr].triangles[i].Vertices[j].Position.Z -= 2;
 		}
 	++nr;
 
-	// Top
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(1.0, 1.0, 1.0), 1.0, 0.0, 0.0);
-	nTriangles = objects[nr].triangles.size();
+	//// Top
+	//objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(1.0, 1.0, 1.0), 1.0, 0.0, 0.0);
+	//nTriangles = objects[nr].triangles.size();
 
-	for (unsigned int i = 0; i < nTriangles; ++i)
-	{
-		for (unsigned int j = 0; j < 3; ++j)
-		{
-			objects[nr].triangles[i].Vertices[j].Position *= 5;
-			objects[nr].triangles[i].Vertices[j].Position.Y += 4;
-		}
-		objects[nr].triangles[i].CalculateArea();
-		objects[nr].triangles[i].CalculateCenter();
-	}
-	lights.push_back(objects[nr]);
-	++nr;
+	//for (unsigned int i = 0; i < nTriangles; ++i)
+	//{
+	//	for (unsigned int j = 0; j < 3; ++j)
+	//	{
+	//		objects[nr].triangles[i].Vertices[j].Position *= 5;
+	//		objects[nr].triangles[i].Vertices[j].Position.Y += 4;
+	//	}
+	//	objects[nr].triangles[i].CalculateArea();
+	//	objects[nr].triangles[i].CalculateCenter();
+	//}
+	//lights.push_back(objects[nr]);
+	//++nr;
 
-	// Bottom
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.75, 0.75, 0.75), ColorD(), 1.0, 0.0, 0.0);
-	nTriangles = objects[nr].triangles.size();
+	//// Bottom
+	//objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.75, 0.75, 0.75), ColorD(), 1.0, 0.0, 0.0);
+	//nTriangles = objects[nr].triangles.size();
 
-	for (unsigned int i = 0; i < nTriangles; ++i)
-		for (unsigned int j = 0; j < 3; ++j)
-		{
-			objects[nr].triangles[i].Vertices[j].Position *= 5;
-			objects[nr].triangles[i].Vertices[j].Position.Y -= 4;
-		}
-	++nr;
+	//for (unsigned int i = 0; i < nTriangles; ++i)
+	//	for (unsigned int j = 0; j < 3; ++j)
+	//	{
+	//		objects[nr].triangles[i].Vertices[j].Position *= 5;
+	//		objects[nr].triangles[i].Vertices[j].Position.Y -= 4;
+	//	}
+	//++nr;
 
 	camera = Camera(Vector3D(0, 0.5, 3.0), Vector3D::Normalise(Vector3D(0, -0.5, -1)), Vector3D(0, 1, 0));
 

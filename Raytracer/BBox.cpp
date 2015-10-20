@@ -1,5 +1,6 @@
 #include "BBox.h"
 #include <algorithm>
+#include "BVHRay.h"
 
 BBox::BBox(const Vector3& min, const Vector3& max)
   : min(min), max(max) { extent = max - min; }
@@ -47,6 +48,11 @@ static const float
   ps_cst_plus_inf[4] = {  flt_plus_inf,  flt_plus_inf,  flt_plus_inf,  flt_plus_inf },
   ps_cst_minus_inf[4] = { -flt_plus_inf, -flt_plus_inf, -flt_plus_inf, -flt_plus_inf };
 bool BBox::intersect(const Ray& ray, float *tnear, float *tfar) const {
+	Vector3D o = ray.Origin;
+	Vector3D d = ray.Direction;
+	Vector3 oo(o.X, o.Y, o.Z);
+	Vector3 dd(d.X, d.Y, d.Z);
+	BVHRay bvhray(oo,dd);
 
   // you may already have those values hanging around somewhere
   const __m128
@@ -54,11 +60,10 @@ bool BBox::intersect(const Ray& ray, float *tnear, float *tfar) const {
               minus_inf	= loadps(ps_cst_minus_inf);
 
   // use whatever's apropriate to load.
-  const __m128
-    box_min	= loadps(&min),
-            box_max	= loadps(&max),
-            pos	= loadps(&ray.Origin),
-            inv_dir	= loadps(&ray.InverseDirection);
+  const __m128 box_min = loadps(&min);
+  const __m128 box_max = loadps(&max);
+  const __m128 pos = loadps(&bvhray.o);
+  const __m128 inv_dir = loadps(&bvhray.inv_d);
 
   // use a div if inverted directions aren't available
   const __m128 l1 = mulps(subps(box_min, pos), inv_dir);
