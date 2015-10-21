@@ -33,7 +33,7 @@ float BBox::surfaceArea() const {
 
 // http://www.flipcode.com/archives/SSE_RayBox_Intersection_Test.shtml
 // turn those verbose intrinsics into something readable.
-#define loadps(mem)		_mm_load_ps((const float * const)(mem))
+#define loadps(mem)		_mm_loadu_ps((const float * const)(mem))
 #define storess(ss,mem)		_mm_store_ss((float * const)(mem),(ss))
 #define minss			_mm_min_ss
 #define maxss			_mm_max_ss
@@ -53,20 +53,22 @@ bool BBox::intersect(const Ray& ray, float *tnear, float *tfar) const {
 	Vector3 oo(o.X, o.Y, o.Z);
 	Vector3 dd(d.X, d.Y, d.Z);
 	BVHRay bvhray(oo,dd);
-
+	
   // you may already have those values hanging around somewhere
   const __m128
     plus_inf	= loadps(ps_cst_plus_inf),
               minus_inf	= loadps(ps_cst_minus_inf);
 
   // use whatever's apropriate to load.
-  const __m128 box_min = loadps(&min);
-  const __m128 box_max = loadps(&max);
-  const __m128 pos = loadps(&bvhray.o);
-  const __m128 inv_dir = loadps(&bvhray.inv_d);
-
+  const __m128 box_min = min.m128;//loadps(&min);
+  const __m128 box_max = max.m128;// loadps(&max);
+  const __m128 pos = bvhray.o.m128;// loadps(&bvhray.o);
+  const __m128 inv_dir = bvhray.inv_d.m128;// loadps(&bvhray.inv_d);
+  
   // use a div if inverted directions aren't available
-  const __m128 l1 = mulps(subps(box_min, pos), inv_dir);
+  const __m128 h2 = subps(pos, pos);
+  const __m128 h1 = subps(box_min, pos);
+  const __m128 l1 = mulps(h1, inv_dir);
   const __m128 l2 = mulps(subps(box_max, pos), inv_dir);
 
   // the order we use for those min/max is vital to filter out

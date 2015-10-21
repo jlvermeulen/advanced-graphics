@@ -173,8 +173,8 @@ void BVH::build()
     node.rightOffset = Untouched;
 
     // Calculate the bounding box for this node
-    BBox bb( (*build_prims)[start]->getBBox());
-    BBox bc( (*build_prims)[start]->getCentroid());
+	__declspec(align(16)) BBox bb((*build_prims)[start]->getBBox());
+	__declspec(align(16)) BBox bc((*build_prims)[start]->getCentroid());
     for(uint32_t p = start+1; p < end; ++p) {
       bb.expandToInclude( (*build_prims)[p]->getBBox());
       bc.expandToInclude( (*build_prims)[p]->getCentroid());

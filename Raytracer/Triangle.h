@@ -12,7 +12,6 @@ public:
 	Vertex Vertices[3];
 	double Area;
 	Vector3D Center;
-
 	Triangle() { }
 
 	Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3)
@@ -34,8 +33,8 @@ public:
 		Vector3 v0 = Vector3(Vertices[0].Position.X, Vertices[0].Position.Y, Vertices[0].Position.Z);
 		Vector3 v1 = Vector3(Vertices[1].Position.X, Vertices[1].Position.Y, Vertices[1].Position.Z);
 		Vector3 v2 = Vector3(Vertices[2].Position.X, Vertices[2].Position.Y, Vertices[2].Position.Z);
-		const Vector3 minv = min(min(v0, v1), v2);
-		const Vector3 maxv = max(max(v0, v1), v2);
+		const __declspec(align(16))Vector3 minv = min(min(v0, v1), v2);
+		const __declspec(align(16))Vector3 maxv = max(max(v0, v1), v2);
 		return BBox(minv, maxv);
 	}
 	Vector3 getCentroid()

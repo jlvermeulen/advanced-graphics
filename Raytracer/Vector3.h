@@ -8,7 +8,7 @@
 // SSE Vector object
 struct Vector3 {
   // This is silly, but it still helps.
-  union {
+	__declspec(align(16))union {
     struct { float x,y,z,w; };
     __m128 m128;
   };

@@ -4,8 +4,8 @@
 #include "Vector3.h"
 #include <stdint.h>
 #include <stdio.h>
-struct BBox {
-  Vector3 min, max, extent;
+__declspec(align(32))struct BBox {
+	Vector3 __declspec(align(16))min, max, extent;
   BBox() { }
   BBox(const Vector3& min, const Vector3& max);
   BBox(const Vector3& p);
