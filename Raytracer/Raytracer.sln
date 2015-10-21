@@ -28,7 +28,4 @@ Global
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		Qt5Version = Qt 5.4
 	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 EndGlobal

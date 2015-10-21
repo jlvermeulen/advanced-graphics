@@ -17,64 +17,61 @@ typedef unsigned char uchar;
 
 struct Intersection
 {
-  Intersection(const Ray& ray, double time, const Triangle& hit, const Material& material) :
-    hitPoint(ray.Origin + time * ray.Direction),
-    hit(hit),
-    hitMaterial(material)
-  {
-  }
+	Intersection(const Ray& ray, double time, const Triangle& hit, const Material& material) :
+		hitPoint(ray.Origin + time * ray.Direction),
+		hit(hit),
+		hitMaterial(material)
+	{
+	}
 
-  Triangle hit;
-  Material hitMaterial;
-  Vector3D hitPoint;
+	Triangle hit;
+	Material hitMaterial;
+	Vector3D hitPoint;
 };
 
 struct Light
 {
-  Light(const Vector3D& position, const ColorD& color) :
-    position(position),
-    color(color)
-  {
-  }
+	Light(const Vector3D& position, const ColorD& color) :
+		position(position),
+		color(color)
+	{
+	}
 
-  Vector3D position;
-  ColorD color;
+	Vector3D position;
+	ColorD color;
 };
 
 class Scene
 {
 public:
-  Scene();
-  ~Scene();
+	Scene();
+	~Scene();
 
-  bool Render(unsigned char* imageData, int minTriangles, int maxDepth, int samplesPerPixel, double sigma, bool useDoF);
-  void LoadDefaultScene();
-  void LoadDefaultScene2();
-  void LoadDefaultScene3();
-  void LoadDefaultScene4();
-  void LoadDefaultScene5();
+	bool Render(unsigned char* imageData, int minTriangles, int maxDepth, int samplesPerPixel, double sigma, bool useDoF);
+	void LoadDefaultScene();
+	void LoadDefaultScene2();
+	void LoadDefaultScene3();
+	void LoadDefaultScene4();
+	void LoadDefaultScene5();
 
 private:
-  ColorD TraceRay(const Ray& ray);
-  ColorD ComputeRadiance(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth);
-  ColorD DirectIllumination(const Vector3D& point, const Vector3D& normal, const Material& material);
-  ColorD IndirectIllumination(Vector3D point, const Vector3D& in, const Vector3D& triangle, const Material& material, unsigned int depth);
+	ColorD TraceRay(const Ray& ray, bool nee);
+	ColorD ComputeRadiance(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth, bool nee);
+	ColorD DirectIllumination(const Vector3D& point, const Vector3D& in, const Vector3D& normal, const Material& material);
+	ColorD IndirectIllumination(Vector3D point, const Vector3D& in, const Vector3D& triangle, const Material& material, unsigned int depth, bool nee);
 
-  void TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma, bool useDoF);
+	void TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma, bool useDoF);
 
-  double GaussianWeight(double dx, double dy, double sigma) const;
+	double GaussianWeight(double dx, double dy, double sigma) const;
 
-  /*ColorD calculateDiffuse(const Intersection& intersection) const;
-  ColorD calculateReflection(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;
-  ColorD calculateRefraction(const Intersection& intersection, const Ray& ray, double refractiveIndex, int recursionDepth) const;*/
-  std::pair<Ray, Triangle> SampleLight(const Vector3D& hitPoint);
-  bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Material& mat) const;
+	std::pair<Ray, Triangle> SampleLight(const Vector3D& hitPoint);
+	bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Material& mat) const;
 
 public:
-  Camera camera;
-  std::deque<Object> objects;
-  Object checkerboard;
-  std::deque<Object> lights;
-  std::uniform_real_distribution<double> dist;
-  std::mt19937 gen;
+	Camera camera;
+	std::deque<Object> objects;
+	Object checkerboard;
+	std::deque<Object> lights;
+	std::uniform_real_distribution<double> dist;
+	std::mt19937 gen;
 };
