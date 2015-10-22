@@ -17,14 +17,14 @@ struct BVHFlatNode {
 //! \author Brandon Pelfrey
 //! A Bounding Volume Hierarchy system for fast Ray-Object intersection tests
 class BVH {
-  uint32_t nNodes, nLeafs, leafSize;
-  std::vector<Triangle*>* build_prims;
+  uint32_t nNodes=0, nLeafs=0, leafSize=0;
+  std::vector<Triangle*>* build_prims = {};
 
   //! Build the BVH tree out of build_prims
   void build();
 
   // Fast Traversal System
-  BVHFlatNode *flatTree;
+  BVHFlatNode *flatTree = nullptr;
 
   public:
 	  BVH(std::vector<Triangle*>* objects, uint32_t leafSize = 4);

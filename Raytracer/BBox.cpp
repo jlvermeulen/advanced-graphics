@@ -1,6 +1,8 @@
 #include "BBox.h"
 #include <algorithm>
 #include "BVHRay.h"
+#include <iostream>
+#include <fstream>
 
 BBox::BBox(const Vector3& min, const Vector3& max)
   : min(min), max(max) { extent = max - min; }
@@ -48,28 +50,33 @@ static const float
   ps_cst_plus_inf[4] = {  flt_plus_inf,  flt_plus_inf,  flt_plus_inf,  flt_plus_inf },
   ps_cst_minus_inf[4] = { -flt_plus_inf, -flt_plus_inf, -flt_plus_inf, -flt_plus_inf };
 bool BBox::intersect(const Ray& ray, float *tnear, float *tfar) const {
-	Vector3D o = ray.Origin;
+
+	std::cout << "start";
+		Vector3D o = ray.Origin;
 	Vector3D d = ray.Direction;
-	Vector3 oo(o.X, o.Y, o.Z);
-	Vector3 dd(d.X, d.Y, d.Z);
-	BVHRay bvhray(oo,dd);
+	__declspec(align(32))Vector3 oo(o.X, o.Y, o.Z);
+	__declspec(align(32))Vector3 dd(d.X, d.Y, d.Z);
+	__declspec(align(32))BVHRay bvhray(oo, dd);
 	
   // you may already have those values hanging around somewhere
-  const __m128
+	__declspec(align(32)) const __m128
     plus_inf	= loadps(ps_cst_plus_inf),
               minus_inf	= loadps(ps_cst_minus_inf);
 
+	std::cout << bvhray.o.x;
   // use whatever's apropriate to load.
-  const __m128 box_min = min.m128;//loadps(&min);
-  const __m128 box_max = max.m128;// loadps(&max);
-  const __m128 pos = bvhray.o.m128;// loadps(&bvhray.o);
-  const __m128 inv_dir = bvhray.inv_d.m128;// loadps(&bvhray.inv_d);
-  
+  __declspec(align(32)) const __m128 box_min = min.m128;//loadps(&min);
+  __declspec(align(32)) const __m128 box_max = max.m128;// loadps(&max);
+  __declspec(align(32))const __m128 pos = bvhray.o.m128;// loadps(&bvhray.o);
+  __declspec(align(32)) const __m128 inv_dir = bvhray.inv_d.m128;// loadps(&bvhray.inv_d);
+
+  std::cout << pos.m128_f32;
+  std::cout << box_min.m128_f32;
+  std::cout << inv_dir.m128_f32;
   // use a div if inverted directions aren't available
-  const __m128 h2 = subps(pos, pos);
-  const __m128 h1 = subps(box_min, pos);
-  const __m128 l1 = mulps(h1, inv_dir);
-  const __m128 l2 = mulps(subps(box_max, pos), inv_dir);
+  __declspec(align(32))const __m128 h1 = subps(box_min, pos);
+  __declspec(align(32))const __m128 l1 = mulps(h1, inv_dir);
+  __declspec(align(32))const __m128 l2 = mulps(subps(box_max, pos), inv_dir);
 
   // the order we use for those min/max is vital to filter out
   // NaNs that happens when an inv_dir is +/- inf and

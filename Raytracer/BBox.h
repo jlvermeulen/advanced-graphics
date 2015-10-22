@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 __declspec(align(32))struct BBox {
-	Vector3 __declspec(align(16))min, max, extent;
+	Vector3 __declspec(align(16))min = Vector3(0.0f, 0.0f, 0.0f), max = Vector3(0.0f, 0.0f, 0.0f), extent = Vector3(0.0f, 0.0f, 0.0f);
   BBox() { }
   BBox(const Vector3& min, const Vector3& max);
   BBox(const Vector3& p);

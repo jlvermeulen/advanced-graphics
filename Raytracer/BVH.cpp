@@ -20,7 +20,7 @@ bool BVH::getIntersection(const Ray& ray, IntersectionInfo* intersection, bool o
   intersection->t = 999999999.f;
   intersection->triangle = NULL;
   float bbhits[4];
-  int32_t closer, other;
+  int32_t closer=0, other=0;
 
   // Working set
   BVHTraversal todo[64];
@@ -157,7 +157,7 @@ void BVH::build()
   stackptr++;
 
   BVHFlatNode node;
-  std::vector<BVHFlatNode> buildnodes;
+  std::vector<BVHFlatNode> buildnodes = {};
   buildnodes.reserve(build_prims->size()*2);
 
   while(stackptr > 0) {
