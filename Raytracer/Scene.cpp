@@ -133,7 +133,7 @@ void Scene::TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
 
 					//for (unsigned int c = 0; c < 3; ++c)
 					{
-						ColorD value = TraceRay(cameraRay, x <= camera.Width / 2 - 100);
+						ColorD value = TraceRay(cameraRay, x >= camera.Width / 2 - 100);
 
 						// distribute over neighbouring pixels
 						for (int i = -1; i < 2; ++i)
@@ -184,7 +184,7 @@ ColorD Scene::TraceRay(const Ray& ray, bool nee)
 ColorD Scene::ComputeRadiance(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth, bool nee)
 {
 	const Vector3D& normal = triangle.surfaceNormal(point);
-	ColorD c = material.emission * std::max(0.0, -Vector3D::Dot(in, normal));
+	ColorD c = material.emission;
 
 	if (nee)
 		c += DirectIllumination(point, in, normal, material);
@@ -205,7 +205,7 @@ ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& in, cons
 	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial) || hitTriangle != sample.second)
 		return ColorD();
 
-	Vector3D hitPoint = ray.Origin + hitTime * Vector3D::Normalise(ray.Direction);
+	Vector3D hitPoint = ray.Origin + hitTime * ray.Direction;
 	Vector3D triNormal = hitTriangle.surfaceNormal(hitPoint);
 	double weight = hitTriangle.Area * std::max(0.0, -Vector3D::Dot(triNormal, ray.Direction)) / (hitTime * hitTime);
 	if (material.reflType == ReflectionType::diffuse)
@@ -214,8 +214,8 @@ ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& in, cons
 	}
 	else if (material.reflType == ReflectionType::glossy)
 	{
-		//Vector3D idealReflection = ray.Direction + 2 * Vector3D::Dot(normal, -ray.Direction) * normal;
-		//weight *= pow(Vector3D::Dot(idealReflection, ray.Direction), hitMaterial.specularExponent);
+		Vector3D idealReflection = in + 2 * -Vector3D::Dot(normal, in) * normal;
+		weight *= std::max(0.0, Vector3D::Dot(ray.Direction, normal)) * pow(std::max(0.0, Vector3D::Dot(idealReflection, ray.Direction)), 1.0 + material.specularExponent);
 	}
 
 	return weight * hitMaterial.emission * material.color;
@@ -227,59 +227,27 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 		return ColorD();
 
 	Ray ray(point, in);
-
-	double c = 1;// / (2 * M_PI);
-	ColorD value(c, c, c);
-
-	// Sample unit sphere
-	/*double phi = 2.0 * M_PI * dist(gen);
-
-	double cosTheta = pow(1.0 - dist(gen), 1.0 / (1.0 + material.specularExponent));
-	double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-
-	double x = sinTheta * cos(phi);
-	double y = sinTheta * sin(phi);
-	double z = cosTheta;
-
-	Vector3D hemi(x, y, z);*/
-
-	double u1 = dist(gen), u2 = dist(gen);
-	double theta = acos(sqrt(1.0 - u1));
-	double phi = 2.0 * M_PI * u2;
-
-	double xs = sin(theta) * cos(phi);
-	double ys = cos(theta);
-	double zs = sin(theta) * sin(phi);
-
-	Vector3D y(normal.X, normal.Y, normal.Z);
-	Vector3D h = y;
-	if (fabs(h.X) <= fabs(h.Y) && fabs(h.X) <= fabs(h.Z))
-		h.X = 1.0;
-	else if (fabs(h.Y) <= fabs(h.X) && fabs(h.Y) <= fabs(h.Z))
-		h.Y = 1.0;
-	else
-		h.Z = 1.0;
-
-	Vector3D x = Vector3D::Normalise(Vector3D::Cross(h, y));
-	Vector3D z = Vector3D::Normalise(Vector3D::Cross(x, y));
-
-	Vector3D hemi = xs * x + ys * y + zs * z;
-	hemi.Normalise();
-
-	//double z = dist(gen) * 2 - 1, theta = dist(gen) * M_PI * 2, r = sqrt(1 - z * z);
-
-	//Vector3D hemi(r * cos(theta), r * sin(theta), z);
-	//if (hemi.Dot(normal) < 0) // flip if "behind" normal
-	//  hemi *= -1;
+	ColorD value(1.0, 1.0, 1.0);
 
 	if (material.reflType == ReflectionType::specular)
 	{
 		if (Vector3D::Dot(ray.Direction, normal) < 0)
 			ray.Reflect(point, normal);
-		//value = ColorD(1.0, 1.0, 1.0);
 	}
 	else if (material.reflType == ReflectionType::glossy)
 	{
+		// Sample unit sphere
+		double phi = 2.0 * M_PI * dist(gen);
+
+		double cosTheta = pow(dist(gen), 1.0 / (1.0 + material.specularExponent)); // importance sampling on phong lobe
+		double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+		double x = sinTheta * cos(phi);
+		double y = sinTheta * sin(phi);
+		double z = cosTheta;
+
+		Vector3D hemi(x, y, z);
+
 		ray.Reflect(point, normal);
 
 		Vector3D w = ray.Direction;
@@ -291,22 +259,42 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 
 		Vector3D reflDir = hemi.X * u + hemi.Y * v + hemi.Z * w;
 
-		if (Vector3D::Dot(reflDir, normal) < 0)
+		if (Vector3D::Dot(reflDir, normal) < 0) // flip if "behind" normal
 			reflDir *= -1;
 
 		ray = Ray(point, reflDir);
-		value *= material.color * Vector3D::Dot(normal, w);
+		value *= material.color * Vector3D::Dot(normal, reflDir);
 	}
 	else if (material.reflType == ReflectionType::diffuse)
 	{
-		double d = Vector3D::Dot(hemi, normal);
-		if (d < 0) // flip if "behind" normal
-		{
-			hemi *= -1;
-			d *= -1;
-		}
+		// cosine importance sampling
+		double u1 = dist(gen), u2 = dist(gen);
+		double theta = acos(sqrt(1.0 - u1));
+		double phi = 2.0 * M_PI * u2;
 
-		ray = Ray(point/* + 0.005 * normal*/, hemi);
+		double xs = sin(theta) * cos(phi);
+		double ys = cos(theta);
+		double zs = sin(theta) * sin(phi);
+
+		Vector3D y(normal.X, normal.Y, normal.Z);
+		Vector3D h = y;
+		if (fabs(h.X) <= fabs(h.Y) && fabs(h.X) <= fabs(h.Z))
+			h.X = 1.0;
+		else if (fabs(h.Y) <= fabs(h.X) && fabs(h.Y) <= fabs(h.Z))
+			h.Y = 1.0;
+		else
+			h.Z = 1.0;
+
+		Vector3D x = Vector3D::Normalise(Vector3D::Cross(h, y));
+		Vector3D z = Vector3D::Normalise(Vector3D::Cross(x, y));
+
+		Vector3D hemi = xs * x + ys * y + zs * z;
+		hemi.Normalise();
+
+		if (Vector3D::Dot(hemi, normal) < 0) // flip if "behind" normal
+			hemi *= -1;
+
+		ray = Ray(point, hemi);
 		value *= material.color;
 	}
 	else if (material.reflType == ReflectionType::refractive)
@@ -316,7 +304,11 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 	Triangle hitTriangle;
 	double hitTime;
 
-	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial) || (nee && hitMaterial.emission.IsSignificant()))
+	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial)) // didn't hit anything
+		return ColorD();
+
+	if (nee && hitMaterial.emission.IsSignificant() &&																						// discount hitting a light when using next event estimation
+		!(material.reflType == ReflectionType::specular || (material.reflType == ReflectionType::glossy && material.specularExponent > 5)))	// unless we hit a mirror-like surface
 		return ColorD();
 
 	Vector3D hitPoint = ray.Origin + hitTime * ray.Direction;
@@ -349,15 +341,27 @@ bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Mater
 //--------------------------------------------------------------------------------
 std::pair<Ray, Triangle> Scene::SampleLight(const Vector3D& hitPoint)
 {
+	// create random point within the lightsource
+	double u = dist(gen), v = dist(gen);
+	if (u + v > 1)
+	{
+		u = 1 - u;
+		v = 1 - v;
+	}
+
 	std::deque<std::pair<double, const Triangle&>> flux;
 	double totalflux = 0;
 	// loop over all lightsources
 	for (const Object& o : lights)
 		for (const Triangle& t : o.triangles)
 		{
-			Vector3D outgoingRay = hitPoint - t.Center;
+			Vector3D v1 = t.Vertices[1].Position - t.Vertices[0].Position;
+			Vector3D v2 = t.Vertices[2].Position - t.Vertices[0].Position;
+			Vector3D triPoint = v1 * u + v2 * v + t.Vertices[0].Position;
+
+			Vector3D outgoingRay = hitPoint - triPoint;
 			double distance = outgoingRay.LengthSquared();
-			Vector3D normal = t.surfaceNormal(t.Center);
+			Vector3D normal = t.surfaceNormal(triPoint);
 			outgoingRay.Normalise();
 
 			double f = o.material.emission.R * t.Area * std::max(0.0, Vector3D::Dot(outgoingRay, normal)) / distance; // we assume non-coloured emissions
@@ -384,17 +388,10 @@ std::pair<Ray, Triangle> Scene::SampleLight(const Vector3D& hitPoint)
 			r -= p.first;
 	}
 
-	// create random point within the lightsource and return ray towards it.
-	double u = dist(gen), v = dist(gen);
-	if (u + v > 1)
-	{
-		u = 1 - u;
-		v = 1 - v;
-	}
-
 	Vector3D v1 = pair.second.Vertices[1].Position - pair.second.Vertices[0].Position;
 	Vector3D v2 = pair.second.Vertices[2].Position - pair.second.Vertices[0].Position;
 
+	// return ray towards chosen point
 	return std::pair<Ray, Triangle>(Ray(hitPoint, Vector3D::Normalise(v1 * u + v2 * v + pair.second.Vertices[0].Position - hitPoint)), pair.second);
 }
 
@@ -847,7 +844,7 @@ void Scene::LoadDefaultScene4()
 	++nr;
 
 	// Teapot
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::glossy, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 1.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -863,7 +860,7 @@ void Scene::LoadDefaultScene4()
 	++nr;
 
 	// Teapot
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 2.5, 0.0);
+	objects[nr].material = Material(ReflectionType::glossy, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 2.5, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -879,7 +876,7 @@ void Scene::LoadDefaultScene4()
 	++nr;
 
 	// Teapot
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.0, 0.0), ColorD(), 1.0, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::glossy, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 5.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -893,7 +890,7 @@ void Scene::LoadDefaultScene4()
 	++nr;
 
 	// Teapot
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 10.0, 0.0);
+	objects[nr].material = Material(ReflectionType::glossy, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 10.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -909,7 +906,7 @@ void Scene::LoadDefaultScene4()
 	++nr;
 
 	// Teapot
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 100.0, 0.0);
+	objects[nr].material = Material(ReflectionType::glossy, ColorD(0.25, 0.25, 0.25), ColorD(), 1.0, 100.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -940,9 +937,9 @@ void Scene::LoadDefaultScene4()
 	}
 
 	objects[nr] = Object();
-	objects[nr].triangles.push_back(Triangle(Vertex(Vector3D(0, 4, -1.25), Vector3D(0, -1, 0), Vector2D(0, 0)),
-		Vertex(Vector3D(2.5, 4, 1.25), Vector3D(0, -1, 0), Vector2D(0, 0)),
-		Vertex(Vector3D(-2.5, 4, 1.25), Vector3D(0, -1, 0), Vector2D(0, 0))));
+	objects[nr].triangles.push_back(Triangle(Vertex(Vector3D(0, 4, 1.25), Vector3D(0, -1, 0), Vector2D(0, 0)),
+		Vertex(Vector3D(5, 4, -1.25), Vector3D(0, -1, 0), Vector2D(0, 0)),
+		Vertex(Vector3D(-5, 4, -1.25), Vector3D(0, -1, 0), Vector2D(0, 0))));
 	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1, 1), ColorD(6.0, 6, 6), 1.0, 0.0, 0.0);
 	objects[nr].triangles[0].CalculateArea();
 	objects[nr].triangles[0].CalculateCenter();

@@ -4,8 +4,8 @@ Vector3D::Vector3D() : X(0), Y(0), Z(0) { }
 Vector3D::Vector3D(const double& x, const double& y, const double& z) : X(x), Y(y), Z(z) { }
 Vector3D::Vector3D(const double vec[]) { X = vec[0]; Y = vec[1]; Z = vec[2]; }
 
-double Vector3D::Length() { return sqrt(LengthSquared()); }
-double Vector3D::LengthSquared() { return Dot(*this, *this); }
+double Vector3D::Length() const { return sqrt(LengthSquared()); }
+double Vector3D::LengthSquared() const { return Dot(*this, *this); }
 
 double Vector3D::Dot(const Vector3D& other) const { return Dot(*this, other); }
 double Vector3D::Dot(const Vector3D& lhs, const Vector3D& rhs) { return lhs.X * rhs.X + lhs.Y * rhs.Y + lhs.Z * rhs.Z; }
