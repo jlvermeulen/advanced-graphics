@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES
 #define RUSSIAN_ROULETTE_PROBABILITY 0.90
 #define MIN_PATH_LENGTH 2
+#define TREE 1 // 0 octtree 1 bvh
 
 #include "Scene.h"
 
@@ -42,8 +43,14 @@ bool Scene::Render(uchar* imageData, int minTriangles, int maxDepth, int samples
 {
 	// Instantiate octrees
 	for (Object& obj : objects)
-		obj.ConstructOctree(minTriangles, maxDepth);
+	{
+		//#if TREE ==0
+	//	obj.ConstructOctree(minTriangles, maxDepth);
+		//#else 
+		obj.ConstructBVHtree(minTriangles, maxDepth);
 
+		//#endif
+	}
 	std::pair<ColorD, double>* samples = new std::pair<ColorD, double>[camera.Width * camera.Height];
 	TracePixels(samples, samplesPerPixel, sigma, useDoF);
 
@@ -334,7 +341,7 @@ bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Mater
 		Triangle tri;
 		double t = std::numeric_limits<double>::max();
 
-		if (obj.octree->Query(ray, tri, t) && t < time)
+		if (obj.bvhTree->Query(ray, tri, t) && t < time)
 		{
 			mat = obj.material;
 			triangle = tri;

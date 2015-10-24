@@ -158,6 +158,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\Raytracer\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="BVHTree.cpp">
+      <Filter>Source Files\Raytracer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_window.h">
@@ -219,6 +222,9 @@
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Header Files\Raytracer\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="BVHTree.h">
+      <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
