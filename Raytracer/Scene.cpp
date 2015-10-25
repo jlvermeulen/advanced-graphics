@@ -185,6 +185,8 @@ ColorD Scene::ComputeRadiance(const Vector3D& point, const Vector3D& in, const T
 {
 	const Vector3D& normal = triangle.surfaceNormal(point);
 	ColorD c = material.emission;
+	if (c.IsSignificant())
+		return c;
 
 	if (nee)
 		c += DirectIllumination(point, in, normal, material);
@@ -195,7 +197,8 @@ ColorD Scene::ComputeRadiance(const Vector3D& point, const Vector3D& in, const T
 
 ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& in, const Vector3D& normal, const Material& material)
 {
-	std::pair<Ray, Triangle> sample = SampleLight(point);
+	double lightWeight;
+	std::pair<Ray, const Triangle&> sample = SampleLight(point, lightWeight);
 
 	Material hitMaterial;
 	Triangle hitTriangle;
@@ -207,7 +210,7 @@ ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& in, cons
 
 	Vector3D hitPoint = ray.Origin + hitTime * ray.Direction;
 	Vector3D triNormal = hitTriangle.surfaceNormal(hitPoint);
-	double weight = hitTriangle.Area * std::max(0.0, -Vector3D::Dot(triNormal, ray.Direction)) / (hitTime * hitTime);
+	double weight = lightWeight;// hitTriangle.Area * std::max(0.0, -Vector3D::Dot(triNormal, ray.Direction)) / (hitTime * hitTime);
 	if (material.reflType == ReflectionType::diffuse)
 	{
 		weight *= std::max(0.0, Vector3D::Dot(ray.Direction, normal)) / M_PI;
@@ -307,8 +310,9 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial)) // didn't hit anything
 		return ColorD();
 
-	if (nee && hitMaterial.emission.IsSignificant() &&																						// discount hitting a light when using next event estimation
-		!(material.reflType == ReflectionType::specular || (material.reflType == ReflectionType::glossy && material.specularExponent > 5)))	// unless we hit a mirror-like surface
+	if (nee && hitMaterial.emission.IsSignificant() &&															// discount hitting a light when using next event estimation
+		!(material.reflType == ReflectionType::specular || material.reflType == ReflectionType::refractive ||	// unless we hit a mirror-like surface
+			(material.reflType == ReflectionType::glossy && material.specularExponent > 5)))
 		return ColorD();
 
 	Vector3D hitPoint = ray.Origin + hitTime * ray.Direction;
@@ -339,8 +343,10 @@ bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Mater
 }
 
 //--------------------------------------------------------------------------------
-std::pair<Ray, Triangle> Scene::SampleLight(const Vector3D& hitPoint)
+std::pair<Ray, const Triangle&> Scene::SampleLight(const Vector3D& hitPoint, double& weight)
 {
+	weight = 0;
+
 	// create random point within the lightsource
 	double u = dist(gen), v = dist(gen);
 	if (u + v > 1)
@@ -364,7 +370,10 @@ std::pair<Ray, Triangle> Scene::SampleLight(const Vector3D& hitPoint)
 			Vector3D normal = t.surfaceNormal(triPoint);
 			outgoingRay.Normalise();
 
-			double f = o.material.emission.R * t.Area * std::max(0.0, Vector3D::Dot(outgoingRay, normal)) / distance; // we assume non-coloured emissions
+			double f = t.Area * std::max(0.0, Vector3D::Dot(outgoingRay, normal)) / distance;
+			weight += f; // projected area of all lightsources on hemisphere
+			f *= o.material.emission.R; // we assume non-coloured emissions
+
 			flux.push_back(std::pair<double, const Triangle&>(f, t));
 			totalflux += f;
 		}
@@ -375,12 +384,12 @@ std::pair<Ray, Triangle> Scene::SampleLight(const Vector3D& hitPoint)
 
 	// get the light using the probabilities and a random float between 0 and 1
 	double r = dist(gen);
-	std::pair<double, Triangle> pair; int x = -1;
+	std::pair<double, const Triangle&>* pair; int x = -1;
 	for (std::pair<double, const Triangle&> p : flux)
 	{
 		if (p.first >= r)
 		{
-			pair = p;
+			pair = &p;
 			x = 0;
 			break;
 		}
@@ -388,11 +397,11 @@ std::pair<Ray, Triangle> Scene::SampleLight(const Vector3D& hitPoint)
 			r -= p.first;
 	}
 
-	Vector3D v1 = pair.second.Vertices[1].Position - pair.second.Vertices[0].Position;
-	Vector3D v2 = pair.second.Vertices[2].Position - pair.second.Vertices[0].Position;
+	Vector3D v1 = pair->second.Vertices[1].Position - pair->second.Vertices[0].Position;
+	Vector3D v2 = pair->second.Vertices[2].Position - pair->second.Vertices[0].Position;
 
 	// return ray towards chosen point
-	return std::pair<Ray, Triangle>(Ray(hitPoint, Vector3D::Normalise(v1 * u + v2 * v + pair.second.Vertices[0].Position - hitPoint)), pair.second);
+	return std::pair<Ray, const Triangle&>(Ray(hitPoint, Vector3D::Normalise(v1 * u + v2 * v + pair->second.Vertices[0].Position - hitPoint)), pair->second);
 }
 
 //--------------------------------------------------------------------------------
@@ -570,11 +579,16 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr].triangles[i].Vertices[j].Position /= 1;
 			objects[nr].triangles[i].Vertices[j].Position.Y += 1.5;
 		}
+		objects[nr].triangles[i].CalculateArea();
+		objects[nr].triangles[i].CalculateCenter();
+	}
+	lights.push_back(objects[nr]);
 	++nr;
 
 	camera = Camera(Vector3D(0.75, 0, 4.5), Vector3D::Normalise(Vector3D(-1.0, 0, -4.5)), Vector3D(0, 1, 0));
@@ -606,7 +620,7 @@ void Scene::LoadDefaultScene2()
 	objects = reader.parseFile("../models/sphere.obj");
 
 	// Central light
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(0.0, 0.0, 0.0), ColorD(0.5, 0.5, 0.5), 1.5, 1000000.0, 1.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(0.0, 0.0, 0.0), ColorD(1.5, 1.5, 1.5), 1.5, 1000000.0, 1.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -831,7 +845,7 @@ void Scene::LoadDefaultScene4()
 
 	Matrix3x3D mat = Matrix3x3D::CreateRotationY(M_PI + M_PI_4);
 
-	// Left box
+	// Floor
 	objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
@@ -936,13 +950,18 @@ void Scene::LoadDefaultScene4()
 		objects[nr].triangles[i].CalculateCenter();
 	}
 
-	objects[nr] = Object();
-	objects[nr].triangles.push_back(Triangle(Vertex(Vector3D(0, 4, 1.25), Vector3D(0, -1, 0), Vector2D(0, 0)),
-		Vertex(Vector3D(5, 4, -1.25), Vector3D(0, -1, 0), Vector2D(0, 0)),
-		Vertex(Vector3D(-5, 4, -1.25), Vector3D(0, -1, 0), Vector2D(0, 0))));
+	/*objects[nr] = Object();
+	Vertex v1(Vector3D(5, 4, 1.25), Vector3D(0, -1, 0), Vector2D(0, 0));
+	Vertex v2(Vector3D(5, 4, -1.25), Vector3D(0, -1, 0), Vector2D(0, 0));
+	Vertex v3(Vector3D(-5, 4, 1.25), Vector3D(0, -1, 0), Vector2D(0, 0));
+	Vertex v4(Vector3D(-5, 4, -1.25), Vector3D(0, -1, 0), Vector2D(0, 0));
+	objects[nr].triangles.push_back(Triangle(v2, v1, v3));
+	objects[nr].triangles.push_back(Triangle(v2, v3, v4));
 	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1, 1), ColorD(6.0, 6, 6), 1.0, 0.0, 0.0);
 	objects[nr].triangles[0].CalculateArea();
 	objects[nr].triangles[0].CalculateCenter();
+	objects[nr].triangles[1].CalculateArea();
+	objects[nr].triangles[1].CalculateCenter();*/
 
 	lights.push_back(objects[nr]);
 	++nr;
@@ -973,7 +992,7 @@ void Scene::LoadDefaultScene5()
 	// Parse light
 	objects = reader.parseFile("../models/cube.obj");
 
-	// Left box
+	// Floor
 	objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.5, 0.5, 0.5), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
@@ -1068,11 +1087,16 @@ void Scene::LoadDefaultScene5()
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr].triangles[i].Vertices[j].Position.X *= 10;
 			objects[nr].triangles[i].Vertices[j].Position.Y += 4;
 		}
+		objects[nr].triangles[i].CalculateArea();
+		objects[nr].triangles[i].CalculateCenter();
+	}
+	lights.push_back(objects[nr]);
 	++nr;
 
 	camera = Camera(Vector3D(1.22, 0.73, -0.02), Vector3D::Normalise(Vector3D(-1.22, -0.63, 0.02)), Vector3D(0, 1, 0));
