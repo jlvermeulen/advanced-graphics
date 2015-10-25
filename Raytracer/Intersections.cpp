@@ -192,3 +192,138 @@ bool Intersects(const Triangle& triangle, const BoundingBox& boundingBox)
 
 	return true;
 }
+
+//bounding spheres
+bool Intersects(const Triangle& triangle, const BoundingSphere& bs)
+{
+	return dist(closesPointOnTriangle(triangle.Vertices, bs.center), bs.center) <= bs.radius;
+}
+
+bool Intersects(const Ray& ray, const BoundingSphere& bs, double& t)
+{
+http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
+
+	double t0, t1; // solutions for t if the ray intersects 
+
+	// geometric solution
+	double radius2 = bs.radius*bs.radius;
+	Vector3D L = bs.center - ray.Origin;
+	double tca = L.Dot(ray.Direction);
+	// if (tca < 0) return false;
+	double d2 = L.Dot(L) - tca * tca;
+	if (d2 > radius2) return false;
+	double thc = sqrt(radius2 - d2);
+	t0 = tca - thc;
+	t1 = tca + thc;
+	if (t0 > t1) std::swap(t0, t1);
+
+	if (t0 < 0) {
+		t0 = t1; // if t0 is negative, let's use t1 instead 
+		if (t0 < 0) return false; // both t0 and t1 are negative 
+	}
+
+	t = t0;
+
+	return true;
+}
+
+//http://www.gamedev.net/topic/552906-closest-point-on-triangle/
+Vector3D closesPointOnTriangle(const Triangle triangle, const Vector3D &sourcePosition)
+{
+	Vector3D edge0 = triangle.Vertices[1].Position - triangle.Vertices[0].Position;
+	Vector3D edge1 = triangle.Vertices[2].Position - triangle.Vertices[0].Position;
+	Vector3D v0 = triangle.Vertices[0].Position - sourcePosition;
+
+	float a = edge0.Dot(edge0);
+	float b = edge0.Dot(edge1);
+	float c = edge1.Dot(edge1);
+	float d = edge0.Dot(v0);
+	float e = edge1.Dot(v0);
+
+	float det = a*c - b*b;
+	float s = b*e - c*d;
+	float t = b*d - a*e;
+
+	if (s + t < det)
+	{
+		if (s < 0.f)
+		{
+			if (t < 0.f)
+			{
+				if (d < 0.f)
+				{
+					s = clamp(-d / a, 0.f, 1.f);
+					t = 0.f;
+				}
+				else
+				{
+					s = 0.f;
+					t = clamp(-e / c, 0.f, 1.f);
+				}
+			}
+			else
+			{
+				s = 0.f;
+				t = clamp(-e / c, 0.f, 1.f);
+			}
+		}
+		else if (t < 0.f)
+		{
+			s = clamp(-d / a, 0.f, 1.f);
+			t = 0.f;
+		}
+		else
+		{
+			float invDet = 1.f / det;
+			s *= invDet;
+			t *= invDet;
+		}
+	}
+	else
+	{
+		if (s < 0.f)
+		{
+			float tmp0 = b + d;
+			float tmp1 = c + e;
+			if (tmp1 > tmp0)
+			{
+				float numer = tmp1 - tmp0;
+				float denom = a - 2 * b + c;
+				s = clamp(numer / denom, 0.f, 1.f);
+				t = 1 - s;
+			}
+			else
+			{
+				t = clamp(-e / c, 0.f, 1.f);
+				s = 0.f;
+			}
+		}
+		else if (t < 0.f)
+		{
+			if (a + d > b + e)
+			{
+				float numer = c + e - b - d;
+				float denom = a - 2 * b + c;
+				s = clamp(numer / denom, 0.f, 1.f);
+				t = 1 - s;
+			}
+			else
+			{
+				s = clamp(-e / c, 0.f, 1.f);
+				t = 0.f;
+			}
+		}
+		else
+		{
+			float numer = c + e - b - d;
+			float denom = a - 2 * b + c;
+			s = clamp(numer / denom, 0.f, 1.f);
+			t = 1.f - s;
+		}
+	}
+
+	return triangle.Vertices[0].Position + s * edge0 + t * edge1;
+}
+
+double dist(Vector3D v1, Vector3D v2){ return (v1 - v2).Length; }
+float clamp(float v, float min, float max){ return(std::min(std::max(v, min), max)); }
