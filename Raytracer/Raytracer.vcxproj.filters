@@ -161,6 +161,9 @@
     <ClCompile Include="BVHTree.cpp">
       <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
+    <ClCompile Include="BoundingSphere.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_window.h">
@@ -225,6 +228,9 @@
     </ClInclude>
     <ClInclude Include="BVHTree.h">
       <Filter>Header Files\Raytracer</Filter>
+    </ClInclude>
+    <ClInclude Include="BoundingSphere.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

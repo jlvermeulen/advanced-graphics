@@ -14,6 +14,7 @@ public:
 
 	double Length();
 	double LengthSquared();
+	double dist(Vector3D v1, Vector3D v2){ return (v1 - v2).Length; }
 
 	double Dot(const Vector3D& other) const;
 	static double Dot(const Vector3D& lhs, const Vector3D& rhs);

@@ -268,6 +268,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BoundingBox.cpp" />
+    <ClCompile Include="BoundingSphere.cpp" />
     <ClCompile Include="BVHTree.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="cameraControls.cpp" />
@@ -330,6 +331,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoundingBox.h" />
+    <ClInclude Include="BoundingSphere.h" />
     <ClInclude Include="BVHTree.h" />
     <ClInclude Include="Camera.h" />
     <CustomBuild Include="cameraControls.h">
