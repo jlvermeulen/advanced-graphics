@@ -231,7 +231,11 @@ ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& in, cons
 		weight *= std::max(0.0, Vector3D::Dot(ray.Direction, normal)) * pow(std::max(0.0, Vector3D::Dot(idealReflection, ray.Direction)), 1.0 + material.specularExponent);
 	}
 
-	return weight * hitMaterial.emission * material.color;
+	ColorD colorWeight = weight * hitMaterial.emission;
+	double mag = colorWeight.Magnitude();
+	if (mag > 5)
+		colorWeight /= mag;
+	return colorWeight * material.color;
 }
 
 ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vector3D& normal, const Material& material, unsigned int depth, bool nee)
