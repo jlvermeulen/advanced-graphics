@@ -133,7 +133,7 @@ void Scene::TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
 
 					//for (unsigned int c = 0; c < 3; ++c)
 					{
-						ColorD value = TraceRay(cameraRay, x >= camera.Width / 2 - 100);
+						ColorD value = TraceRay(cameraRay, true);// x >= camera.Width / 2 - 100);
 
 						// distribute over neighbouring pixels
 						for (int i = -1; i < 2; ++i)
@@ -197,20 +197,30 @@ ColorD Scene::ComputeRadiance(const Vector3D& point, const Vector3D& in, const T
 
 ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& in, const Vector3D& normal, const Material& material)
 {
+	if (material.reflType == ReflectionType::specular || material.reflType == ReflectionType::refractive || (material.reflType == ReflectionType::glossy && material.specularExponent > 5))
+		return ColorD();
+
 	double lightWeight;
-	std::pair<Ray, const Triangle&> sample = SampleLight(point, lightWeight);
+	std::pair<Ray, const Triangle&>* sample = SampleLight(point, lightWeight);
+	if (sample == nullptr)
+		return ColorD();
 
 	Material hitMaterial;
 	Triangle hitTriangle;
 	double hitTime;
 
-	Ray ray = sample.first;
-	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial) || hitTriangle != sample.second)
+	Ray ray = sample->first;
+	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial) || hitTriangle != sample->second)
+	{
+		delete sample;
 		return ColorD();
+	}
+
+	delete sample;
 
 	Vector3D hitPoint = ray.Origin + hitTime * ray.Direction;
 	Vector3D triNormal = hitTriangle.surfaceNormal(hitPoint);
-	double weight = lightWeight;// hitTriangle.Area * std::max(0.0, -Vector3D::Dot(triNormal, ray.Direction)) / (hitTime * hitTime);
+	double weight = lightWeight;
 	if (material.reflType == ReflectionType::diffuse)
 	{
 		weight *= std::max(0.0, Vector3D::Dot(ray.Direction, normal)) / M_PI;
@@ -236,6 +246,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 	{
 		if (Vector3D::Dot(ray.Direction, normal) < 0)
 			ray.Reflect(point, normal);
+		value *= material.color;
 	}
 	else if (material.reflType == ReflectionType::glossy)
 	{
@@ -343,7 +354,7 @@ bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Mater
 }
 
 //--------------------------------------------------------------------------------
-std::pair<Ray, const Triangle&> Scene::SampleLight(const Vector3D& hitPoint, double& weight)
+std::pair<Ray, const Triangle&>* Scene::SampleLight(const Vector3D& hitPoint, double& weight)
 {
 	weight = 0;
 
@@ -378,6 +389,9 @@ std::pair<Ray, const Triangle&> Scene::SampleLight(const Vector3D& hitPoint, dou
 			totalflux += f;
 		}
 
+	if (totalflux < 1e-3)
+		return nullptr;
+
 	// divide all flux values by the total flux gives the probabilities
 	for (unsigned int l = 0; l < flux.size(); l++)
 		flux[l].first /= totalflux;
@@ -401,7 +415,7 @@ std::pair<Ray, const Triangle&> Scene::SampleLight(const Vector3D& hitPoint, dou
 	Vector3D v2 = pair->second.Vertices[2].Position - pair->second.Vertices[0].Position;
 
 	// return ray towards chosen point
-	return std::pair<Ray, const Triangle&>(Ray(hitPoint, Vector3D::Normalise(v1 * u + v2 * v + pair->second.Vertices[0].Position - hitPoint)), pair->second);
+	return new std::pair<Ray, const Triangle&>(Ray(hitPoint, Vector3D::Normalise(v1 * u + v2 * v + pair->second.Vertices[0].Position - hitPoint)), pair->second);
 }
 
 //--------------------------------------------------------------------------------
