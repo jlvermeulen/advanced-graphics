@@ -39,18 +39,22 @@ Scene::~Scene()
 
 }
 
-bool Scene::Render(uchar* imageData, int minTriangles, int maxDepth, int samplesPerPixel, double sigma, bool useDoF)
+void Scene::BuildTree(unsigned minTriangles, unsigned maxDepth)
 {
 	// Instantiate octrees
 	for (Object& obj : objects)
 	{
 		//#if TREE ==0
-	//	obj.ConstructOctree(minTriangles, maxDepth);
+		//	obj.ConstructOctree(minTriangles, maxDepth);
 		//#else 
 		obj.ConstructBVHtree(minTriangles, maxDepth);
 
 		//#endif
 	}
+}
+
+bool Scene::Render(uchar* imageData, int minTriangles, int maxDepth, int samplesPerPixel, double sigma, bool useDoF)
+{
 	std::pair<ColorD, double>* samples = new std::pair<ColorD, double>[camera.Width * camera.Height];
 	TracePixels(samples, samplesPerPixel, sigma, useDoF);
 

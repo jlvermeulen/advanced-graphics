@@ -54,6 +54,7 @@ public:
 	void LoadDefaultScene4();
 	void LoadDefaultScene5();
 
+	void BuildTree(unsigned minTriangles, unsigned maxDepth);
 private:
 	ColorD TraceRay(const Ray& ray, bool nee);
 	ColorD ComputeRadiance(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth, bool nee);

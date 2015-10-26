@@ -53,9 +53,10 @@ void GLWidget::loadScene(QString& fileName)
 int GLWidget::renderScene(uchar* imageData)
 {
   QTime timer;
+  scene.BuildTree(minTriangles_, maxDepth_);
   timer.start();
-
   scene.Render(imageData, minTriangles_, maxDepth_, numberOfRays_, sigma_, useDoF_);
+
 
   return timer.elapsed();
 
@@ -175,7 +176,6 @@ void GLWidget::keyPressEvent(QKeyEvent* event)
     changed = false;
     QGLWidget::keyPressEvent(event);
   }
-
   if (changed)
     updateGL();
 }
