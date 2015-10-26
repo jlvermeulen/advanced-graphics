@@ -465,7 +465,7 @@ void Scene::LoadDefaultScene()
 	++nr;
 
 	// Left sphere
-	objects[nr].material = Material(ReflectionType::specular, ColorD(0.1, 0.1, 0.1), ColorD(), 1.0, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::specular, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -565,16 +565,11 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
-	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr].triangles[i].Vertices[j].Position *= 5;
 			objects[nr].triangles[i].Vertices[j].Position.Y += 4;
 		}
-		objects[nr].triangles[i].CalculateArea();
-		objects[nr].triangles[i].CalculateCenter();
-	}
-	lights.push_back(objects[nr]);
 	++nr;
 
 	// Bottom
@@ -590,7 +585,7 @@ void Scene::LoadDefaultScene()
 	++nr;
 
 	// Light
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(1.0, 1.0, 1.0), 1.0, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(3.0, 3.0, 3.0), 1.0, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -672,7 +667,7 @@ void Scene::LoadDefaultScene2()
 	++nr;
 
 	// Front sphere
-	objects[nr].material = Material(ReflectionType::specular, ColorD(0.1, 0.1, 0.1), ColorD(), 1.0, 1.0, 0.0);
+	objects[nr].material = Material(ReflectionType::specular, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 1.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
