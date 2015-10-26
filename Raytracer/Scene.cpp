@@ -233,7 +233,7 @@ ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& in, cons
 
 	ColorD colorWeight = weight * hitMaterial.emission;
 	double mag = colorWeight.Magnitude();
-	if (mag > 5)
+	if (mag > 1)
 		colorWeight /= mag;
 	return colorWeight * material.color;
 }
@@ -244,13 +244,12 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 		return ColorD();
 
 	Ray ray(point, in);
-	ColorD value(1.0, 1.0, 1.0);
+	ColorD value = material.color;
 
 	if (material.reflType == ReflectionType::specular)
 	{
 		if (Vector3D::Dot(ray.Direction, normal) < 0)
 			ray.Reflect(point, normal);
-		value *= material.color;
 	}
 	else if (material.reflType == ReflectionType::glossy)
 	{
@@ -281,7 +280,6 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 			reflDir *= -1;
 
 		ray = Ray(point, reflDir);
-		value *= material.color * Vector3D::Dot(normal, reflDir);
 	}
 	else if (material.reflType == ReflectionType::diffuse)
 	{
@@ -313,7 +311,6 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 			hemi *= -1;
 
 		ray = Ray(point, hemi);
-		value *= material.color;
 	}
 	else if (material.reflType == ReflectionType::refractive)
 		ray.Refract(point, normal, 1.0, material.refrIndex);
