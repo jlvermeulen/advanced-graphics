@@ -4,17 +4,17 @@
 
 BVHTree::BVHTree(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth)
 {
-	root = CreateNodeX(triangles, minTriangles, maxDepth, BoundingBox::FromTriangles(triangles));
+	root = CreateNodeX(triangles, minTriangles, maxDepth, BoundingSphere::FromTriangles(triangles));
 }
 
 BVHTree::~BVHTree()
 {
 }
 
-BVHTreeNode* BVHTree::CreateNodeX(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb)
+BVHTreeNode* BVHTree::CreateNodeX(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingSphere bs)
 {
 	BVHTreeNode* res = new BVHTreeNode();
-		res->bb = bb;
+	res->bs = bs;
 	if (triangles.size() <= minTriangles || maxDepth == 0)
 	{
 		res->triangles = triangles;
@@ -22,32 +22,25 @@ BVHTreeNode* BVHTree::CreateNodeX(const std::deque<Triangle>& triangles, unsigne
 		res->right = nullptr;
 		return res;
 	}
-	Vector3D leftCenter = bb.Center,rightCenter = bb.Center;
-	Vector3D quarter = bb.Halfsize;
-	quarter.X /= 2;
-	leftCenter.X -= quarter.X;
-	rightCenter.X += quarter.X;
-
-	BoundingBox leftBB = BoundingBox(leftCenter, quarter), rightBB = BoundingBox(rightCenter, quarter);
 	std::deque<Triangle> leftTriangles, rightTriangles;
 
 	for (Triangle triangle:triangles)
 	{
-		if (Intersects(triangle, leftBB))
+		if (triangle.Vertices[0].Position.X<=bs.center.X)
 			leftTriangles.push_back(triangle);
-		if (Intersects(triangle, rightBB))
+		else
 			rightTriangles.push_back(triangle);
 	}
 
-	res->left = CreateNodeY(leftTriangles, minTriangles, maxDepth-1, leftBB);
-	res->right = CreateNodeY(rightTriangles, minTriangles, maxDepth-1, rightBB);
+	res->left = CreateNodeY(leftTriangles, minTriangles, maxDepth-1, BoundingSphere::FromTriangles(leftTriangles));
+	res->right = CreateNodeY(rightTriangles, minTriangles, maxDepth-1, BoundingSphere::FromTriangles(rightTriangles));
 	return res;
 }
 
-BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb)
+BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingSphere bs)
 {
 	BVHTreeNode* res = new BVHTreeNode();
-	res->bb = bb;
+	res->bs = bs;
 	if (triangles.size() <= minTriangles || maxDepth == 0)
 	{
 		res->triangles = triangles;
@@ -55,32 +48,25 @@ BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle>& triangles, unsigne
 		res->right = nullptr;
 		return res;
 	}
-	Vector3D leftCenter = bb.Center, rightCenter = bb.Center;
-	Vector3D quarter = bb.Halfsize;
-	quarter.Y /= 2;
-	leftCenter.Y -= quarter.Y;
-	rightCenter.Y += quarter.Y;
-
-	BoundingBox leftBB = BoundingBox(leftCenter, quarter), rightBB = BoundingBox(rightCenter, quarter);
 	std::deque<Triangle> leftTriangles, rightTriangles;
 
 	for (Triangle triangle : triangles)
 	{
-		if (Intersects(triangle, leftBB))
+		if (triangle.Vertices[0].Position.Y <= bs.center.Y)
 			leftTriangles.push_back(triangle);
-		if (Intersects(triangle, rightBB))
+		else
 			rightTriangles.push_back(triangle);
 	}
 
-	res->left = CreateNodeZ(leftTriangles, minTriangles, maxDepth - 1, leftBB);
-	res->right = CreateNodeZ(rightTriangles, minTriangles, maxDepth - 1, rightBB);
+	res->left = CreateNodeZ(leftTriangles, minTriangles, maxDepth - 1, BoundingSphere::FromTriangles(leftTriangles));
+	res->right = CreateNodeZ(rightTriangles, minTriangles, maxDepth - 1, BoundingSphere::FromTriangles(rightTriangles));
 	return res;
 }
 
-BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb)
+BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingSphere bs)
 {
 	BVHTreeNode* res = new BVHTreeNode();
-	res->bb = bb;
+	res->bs = bs;
 	if (triangles.size() <= minTriangles || maxDepth == 0)
 	{
 		res->triangles = triangles;
@@ -88,25 +74,18 @@ BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle>& triangles, unsigne
 		res->right = nullptr;
 		return res;
 	}
-	Vector3D leftCenter = bb.Center, rightCenter = bb.Center;
-	Vector3D quarter = bb.Halfsize;
-	quarter.Z /= 2;
-	leftCenter.Z -= quarter.Z;
-	rightCenter.Z += quarter.Z;
-
-	BoundingBox leftBB = BoundingBox(leftCenter, quarter), rightBB = BoundingBox(rightCenter, quarter);
 	std::deque<Triangle> leftTriangles, rightTriangles;
 
 	for (Triangle triangle : triangles)
 	{
-		if (Intersects(triangle, leftBB))
+		if (triangle.Vertices[0].Position.Z <= bs.center.Z)
 			leftTriangles.push_back(triangle);
-		if (Intersects(triangle, rightBB))
+		else
 			rightTriangles.push_back(triangle);
 	}
 
-	res->left = CreateNodeX(leftTriangles, minTriangles, maxDepth - 1, leftBB);
-	res->right = CreateNodeX(rightTriangles, minTriangles, maxDepth - 1, rightBB);
+	res->left = CreateNodeX(leftTriangles, minTriangles, maxDepth - 1, BoundingSphere::FromTriangles(leftTriangles));
+	res->right = CreateNodeX(rightTriangles, minTriangles, maxDepth - 1, BoundingSphere::FromTriangles(rightTriangles));
 	return res;
 }
 
@@ -114,7 +93,7 @@ BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle>& triangles, unsigne
 bool BVHTreeNode::Query(const Ray& ray, Triangle& triangle, double& t) const
 {
 	double tBox = std::numeric_limits<double>::min();
-	if (!Intersects(ray, bb, tBox) || tBox > t)
+	if (!Intersects(ray, bs, tBox) || tBox > t)
 		return false;
 
 	bool hit = false;

@@ -193,40 +193,8 @@ bool Intersects(const Triangle& triangle, const BoundingBox& boundingBox)
 	return true;
 }
 
-//bounding spheres
-bool Intersects(const Triangle& triangle, const BoundingSphere& bs)
-{
-	return dist(closesPointOnTriangle(triangle.Vertices, bs.center), bs.center) <= bs.radius;
-}
-
-bool Intersects(const Ray& ray, const BoundingSphere& bs, double& t)
-{
-http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
-
-	double t0, t1; // solutions for t if the ray intersects 
-
-	// geometric solution
-	double radius2 = bs.radius*bs.radius;
-	Vector3D L = bs.center - ray.Origin;
-	double tca = L.Dot(ray.Direction);
-	// if (tca < 0) return false;
-	double d2 = L.Dot(L) - tca * tca;
-	if (d2 > radius2) return false;
-	double thc = sqrt(radius2 - d2);
-	t0 = tca - thc;
-	t1 = tca + thc;
-	if (t0 > t1) std::swap(t0, t1);
-
-	if (t0 < 0) {
-		t0 = t1; // if t0 is negative, let's use t1 instead 
-		if (t0 < 0) return false; // both t0 and t1 are negative 
-	}
-
-	t = t0;
-
-	return true;
-}
-
+double mdist(Vector3D v1, Vector3D v2){ return (v1 - v2).Length(); }
+float clamp(float v, float min, float max){ return(std::min(std::max(v, min), max)); }
 //http://www.gamedev.net/topic/552906-closest-point-on-triangle/
 Vector3D closesPointOnTriangle(const Triangle triangle, const Vector3D &sourcePosition)
 {
@@ -324,6 +292,39 @@ Vector3D closesPointOnTriangle(const Triangle triangle, const Vector3D &sourcePo
 
 	return triangle.Vertices[0].Position + s * edge0 + t * edge1;
 }
+//bounding spheres
+bool Intersects(const Triangle& triangle, const BoundingSphere& bs)
+{
+	return mdist(closesPointOnTriangle(triangle.Vertices, bs.center), bs.center) <= bs.radius;
+}
 
-double dist(Vector3D v1, Vector3D v2){ return (v1 - v2).Length; }
-float clamp(float v, float min, float max){ return(std::min(std::max(v, min), max)); }
+bool Intersects(const Ray& ray, const BoundingSphere& bs, double& t)
+{
+//http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
+
+	double t0, t1; // solutions for t if the ray intersects 
+
+	// geometric solution
+	double radius2 = bs.radius*bs.radius;
+	Vector3D L = bs.center - ray.Origin;
+	double tca = L.Dot(ray.Direction);
+	// if (tca < 0) return false;
+	double d2 = L.Dot(L) - tca * tca;
+	if (d2 > radius2) return false;
+	double thc = sqrt(radius2 - d2);
+	t0 = tca - thc;
+	t1 = tca + thc;
+	if (t0 > t1) std::swap(t0, t1);
+
+	if (t0 < 0) {
+		t0 = t1; // if t0 is negative, let's use t1 instead 
+		if (t0 < 0) return false; // both t0 and t1 are negative 
+	}
+
+	t = t0;
+
+	return true;
+}
+
+
+
