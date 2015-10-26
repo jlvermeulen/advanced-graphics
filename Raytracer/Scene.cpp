@@ -409,6 +409,7 @@ void Scene::LoadDefaultScene()
 {
 	ObjReader reader;
 	objects.clear();
+	lights.clear();
 	unsigned int nTriangles, nr = 0;
 
 	// Parse spheres
@@ -575,7 +576,7 @@ void Scene::LoadDefaultScene()
 	++nr;
 
 	// Light
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(10.0, 10.0, 10.0), 1.0, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(1.0, 1.0, 1.0), 1.0, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -602,6 +603,7 @@ void Scene::LoadDefaultScene2()
 {
 	ObjReader reader;
 	objects.clear();
+	lights.clear();
 	unsigned int nTriangles=0, nr=0;
 
 	// Parse central light
@@ -690,6 +692,7 @@ void Scene::LoadDefaultScene3()
 {
 	ObjReader reader;
 	objects.clear();
+	lights.clear();
 	unsigned int nTriangles, nr = 0;
 
 	// Parse left box
@@ -714,7 +717,7 @@ void Scene::LoadDefaultScene3()
 	objects = reader.parseFile("../models/cube.obj");
 
 	// Left box
-	objects[nr].material = Material(ReflectionType::glossy, ColorD(1.0, 0.0, 0.0), ColorD(), 1.0, 100.0, 0.0);
+	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 0.0, 0.0), ColorD(), 1.0, 100.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	Matrix3x3D mat = Matrix3x3D::CreateRotationY(M_PI_2) * Matrix3x3D::CreateRotationX(M_PI_4);
@@ -759,8 +762,8 @@ void Scene::LoadDefaultScene3()
 	for (unsigned int i = 0; i < nTriangles; ++i)
 		for (unsigned int j = 0; j < 3; ++j)
 		{
-			objects[nr].triangles[i].Vertices[j].Position *= 5;
-			objects[nr].triangles[i].Vertices[j].Position.X += 4;
+			objects[nr].triangles[i].Vertices[j].Position *= 4;
+			objects[nr].triangles[i].Vertices[j].Position.X += 3.5;
 		}
 	++nr;
 
@@ -771,8 +774,8 @@ void Scene::LoadDefaultScene3()
 	for (unsigned int i = 0; i < nTriangles; ++i)
 		for (unsigned int j = 0; j < 3; ++j)
 		{
-			objects[nr].triangles[i].Vertices[j].Position *= 5;
-			objects[nr].triangles[i].Vertices[j].Position.X -= 4;
+			objects[nr].triangles[i].Vertices[j].Position *= 4;
+			objects[nr].triangles[i].Vertices[j].Position.X -= 3.5;
 		}
 	++nr;
 
@@ -783,8 +786,8 @@ void Scene::LoadDefaultScene3()
 	for (unsigned int i = 0; i < nTriangles; ++i)
 		for (unsigned int j = 0; j < 3; ++j)
 		{
-			objects[nr].triangles[i].Vertices[j].Position *= 5;
-			objects[nr].triangles[i].Vertices[j].Position.Z -= 4;
+			objects[nr].triangles[i].Vertices[j].Position *= 4;
+			objects[nr].triangles[i].Vertices[j].Position.Z -= 3.5;
 		}
 	++nr;
 
@@ -796,8 +799,8 @@ void Scene::LoadDefaultScene3()
 	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
-			objects[nr].triangles[i].Vertices[j].Position *= 5;
-			objects[nr].triangles[i].Vertices[j].Position.Y += 4;
+			objects[nr].triangles[i].Vertices[j].Position *= 4;
+			objects[nr].triangles[i].Vertices[j].Position.Y += 3.5;
 		}
 		objects[nr].triangles[i].CalculateArea();
 		objects[nr].triangles[i].CalculateCenter();
@@ -812,8 +815,8 @@ void Scene::LoadDefaultScene3()
 	for (unsigned int i = 0; i < nTriangles; ++i)
 		for (unsigned int j = 0; j < 3; ++j)
 		{
-			objects[nr].triangles[i].Vertices[j].Position *= 5;
-			objects[nr].triangles[i].Vertices[j].Position.Y -= 4;
+			objects[nr].triangles[i].Vertices[j].Position *= 4;
+			objects[nr].triangles[i].Vertices[j].Position.Y -= 3.5;
 		}
 	++nr;
 
@@ -828,6 +831,7 @@ void Scene::LoadDefaultScene4()
 {
 	ObjReader reader;
 	objects.clear();
+	lights.clear();
 	unsigned int nTriangles, nr = 0;
 
 	// Parse floor
@@ -977,6 +981,7 @@ void Scene::LoadDefaultScene5()
 {
 	ObjReader reader;
 	objects.clear();
+	lights.clear();
 	unsigned int nTriangles, nr = 0;
 
 	// Parse floor
