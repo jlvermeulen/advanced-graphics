@@ -227,15 +227,15 @@ ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& in, cons
 
 	Vector3D hitPoint = ray.Origin + hitTime * ray.Direction;
 	Vector3D triNormal = hitTriangle.surfaceNormal(hitPoint);
-	double weight = lightWeight;
+	double weight = lightWeight * std::max(0.0, Vector3D::Dot(ray.Direction, normal));
 	if (material.reflType == ReflectionType::diffuse)
 	{
-		weight *= std::max(0.0, Vector3D::Dot(ray.Direction, normal)) / M_PI;
+		weight *= 1.0 / M_PI;
 	}
 	else if (material.reflType == ReflectionType::glossy)
 	{
 		Vector3D idealReflection = in + 2 * -Vector3D::Dot(normal, in) * normal;
-		weight *= std::max(0.0, Vector3D::Dot(ray.Direction, normal)) * pow(std::max(0.0, Vector3D::Dot(idealReflection, ray.Direction)), 1.0 + material.specularExponent);
+		weight *= pow(std::max(0.0, Vector3D::Dot(idealReflection, ray.Direction)), 1.0 + material.specularExponent) / pow(M_PI, 1.0 / (1.0 + material.specularExponent));
 	}
 
 	return weight * hitMaterial.emission * material.color;
@@ -283,6 +283,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 			reflDir *= -1;
 
 		ray = Ray(point, reflDir);
+		value *= std::max(0.0, Vector3D::Dot(reflDir, normal));
 	}
 	else if (material.reflType == ReflectionType::diffuse)
 	{
