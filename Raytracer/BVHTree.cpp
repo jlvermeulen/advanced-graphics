@@ -13,6 +13,7 @@ BVHTree::~BVHTree()
 
 BVHTreeNode* BVHTree::CreateNodeX(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb)
 {
+	bb = BoundingBox::FromTriangles(triangles);
 	BVHTreeNode* res = new BVHTreeNode();
 	res->bb = bb;
 	if (triangles.size() <= minTriangles || maxDepth == 0)
@@ -35,7 +36,7 @@ BVHTreeNode* BVHTree::CreateNodeX(const std::deque<Triangle>& triangles, unsigne
 	{
 		if (Intersects(triangle, leftBB))
 			leftTriangles.push_back(triangle);
-		if (Intersects(triangle, rightBB))
+		else 
 			rightTriangles.push_back(triangle);
 	}
 
@@ -46,6 +47,7 @@ BVHTreeNode* BVHTree::CreateNodeX(const std::deque<Triangle>& triangles, unsigne
 
 BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb)
 {
+	bb = BoundingBox::FromTriangles(triangles);
 	BVHTreeNode* res = new BVHTreeNode();
 	res->bb = bb;
 	if (triangles.size() <= minTriangles || maxDepth == 0)
@@ -68,7 +70,7 @@ BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle>& triangles, unsigne
 	{
 		if (Intersects(triangle, leftBB))
 			leftTriangles.push_back(triangle);
-		if (Intersects(triangle, rightBB))
+		else 
 			rightTriangles.push_back(triangle);
 	}
 
@@ -79,6 +81,7 @@ BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle>& triangles, unsigne
 
 BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb)
 {
+	bb = BoundingBox::FromTriangles(triangles);
 	BVHTreeNode* res = new BVHTreeNode();
 	res->bb = bb;
 	if (triangles.size() <= minTriangles || maxDepth == 0)
@@ -101,7 +104,7 @@ BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle>& triangles, unsigne
 	{
 		if (Intersects(triangle, leftBB))
 			leftTriangles.push_back(triangle);
-		if (Intersects(triangle, rightBB))
+		else 
 			rightTriangles.push_back(triangle);
 	}
 
