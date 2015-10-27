@@ -192,6 +192,13 @@ ColorD Scene::ComputeRadiance(const Vector3D& point, const Vector3D& in, const T
 		c += DirectIllumination(point, in, normal, material);
 	c += IndirectIllumination(point, in, normal, material, depth, nee);
 
+	double mag = c.Magnitude(); // prevent giant weights giving fireflies
+	if (mag > 5)
+	{
+		c /= mag;
+		c *= 5;
+	}
+
 	return c;
 }
 
@@ -231,11 +238,7 @@ ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& in, cons
 		weight *= std::max(0.0, Vector3D::Dot(ray.Direction, normal)) * pow(std::max(0.0, Vector3D::Dot(idealReflection, ray.Direction)), 1.0 + material.specularExponent);
 	}
 
-	ColorD colorWeight = weight * hitMaterial.emission;
-	double mag = colorWeight.Magnitude();
-	if (mag > 1)
-		colorWeight /= mag;
-	return colorWeight * material.color;
+	return weight * hitMaterial.emission * material.color;
 }
 
 ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vector3D& normal, const Material& material, unsigned int depth, bool nee)
