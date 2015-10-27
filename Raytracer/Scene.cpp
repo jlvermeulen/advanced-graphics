@@ -485,7 +485,7 @@ void Scene::LoadDefaultScene()
 	++nr;
 
 	// Left sphere
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(0.0, 0.0, 0.0), ColorD(), 1.5, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(), 1.5, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -636,7 +636,7 @@ void Scene::LoadDefaultScene2()
 	objects = reader.parseFile("../models/sphere.obj");
 
 	// Central light
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(0.0, 0.0, 0.0), ColorD(1.5, 1.5, 1.5), 1.5, 1000000.0, 1.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(1.5, 1.5, 1.5), 1.5, 1000000.0, 1.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -806,7 +806,7 @@ void Scene::LoadDefaultScene3()
 	++nr;
 
 	// Top
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(1.0, 1.0, 1.0), 1.0, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(2.0, 2.0, 2.0), 1.0, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
