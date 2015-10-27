@@ -46,23 +46,18 @@ BVHTreeNode* BVHTree::CreateNodeX(const std::deque<Triangle>& triangles, unsigne
 		{
 			if (Intersects(triangle, bbl[i]))
 				leftTriangles[i].push_back(triangle);
-			if (Intersects(triangle, bbr[i]))
+			else
 				rightTriangles[i].push_back(triangle);
-			if (!Intersects(triangle, bbr[i]) && !Intersects(triangle, bbl[i]))
-				throw std::runtime_error("missing triangles!");
 		}
 	}
 
-	for (int i = 0; i < 8; ++i)
-	{
-		if (leftTriangles[i].size() + rightTriangles[i].size() < triangles.size())
-			throw std::runtime_error("missing triangles!");
-	}
 
 	// choose best one
 	std::pair<double, int> best(std::numeric_limits<double>::max(), -1);
 	for (int i = 0; i < 8; ++i)
 	{
+		bbl[i] = BoundingBox::FromTriangles(leftTriangles[i]);
+		bbr[i] = BoundingBox::FromTriangles(rightTriangles[i]);
 		double score = bbl[i].SurfaceArea() / leftTriangles[i].size() + bbr[i].SurfaceArea() / rightTriangles[i].size();
 		if (score < best.first)
 			best = std::pair<double, int>(score, i);
@@ -107,7 +102,7 @@ BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle>& triangles, unsigne
 		{
 			if (Intersects(triangle, bbl[i]))
 				leftTriangles[i].push_back(triangle);
-			if (Intersects(triangle, bbr[i]))
+			else
 				rightTriangles[i].push_back(triangle);
 		}
 	}
@@ -116,6 +111,8 @@ BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle>& triangles, unsigne
 	std::pair<double, int> best(std::numeric_limits<double>::max(), -1);
 	for (int i = 0; i < 8; ++i)
 	{
+		bbl[i] = BoundingBox::FromTriangles(leftTriangles[i]);
+		bbr[i] = BoundingBox::FromTriangles(rightTriangles[i]);
 		double score = bbl[i].SurfaceArea() / leftTriangles[i].size() + bbr[i].SurfaceArea() / rightTriangles[i].size();
 		if (score < best.first)
 			best = std::pair<double, int>(score, i);
@@ -160,7 +157,7 @@ BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle>& triangles, unsigne
 		{
 			if (Intersects(triangle, bbl[i]))
 				leftTriangles[i].push_back(triangle);
-			if (Intersects(triangle, bbr[i]))
+			else
 				rightTriangles[i].push_back(triangle);
 		}
 	}
@@ -169,6 +166,8 @@ BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle>& triangles, unsigne
 	std::pair<double, int> best(std::numeric_limits<double>::max(), -1);
 	for (int i = 0; i < 8; ++i)
 	{
+		bbl[i] = BoundingBox::FromTriangles(leftTriangles[i]);
+		bbr[i] = BoundingBox::FromTriangles(rightTriangles[i]);
 		double score = bbl[i].SurfaceArea() / leftTriangles[i].size() + bbr[i].SurfaceArea() / rightTriangles[i].size();
 		if (score < best.first)
 			best = std::pair<double, int>(score, i);

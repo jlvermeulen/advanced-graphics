@@ -1,0 +1,15 @@
+Smart		default
+diamonds 1 ray
+2.201		2.229
+
+pots 1 ray
+1.656		1.931
+
+cubes 1 ray
+2.515		2.476
+
+spheres1 1 ray
+0.758
+
+10 rays
+3.755		4:321
