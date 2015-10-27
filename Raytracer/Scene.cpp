@@ -1020,7 +1020,7 @@ void Scene::LoadDefaultScene5()
 	++nr;
 
 	// Diamond
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(), 2.42, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 	Matrix3x3D mat = Matrix3x3D::CreateRotationY(M_PI + M_PI_4);
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -1036,7 +1036,7 @@ void Scene::LoadDefaultScene5()
 	++nr;
 
 	// Diamond
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(), 2.42, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 	mat = Matrix3x3D::CreateRotationY(M_PI);
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -1050,7 +1050,7 @@ void Scene::LoadDefaultScene5()
 	++nr;
 
 	// Diamond
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(), 2.42, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 	mat = Matrix3x3D::CreateRotationY(M_PI_4);
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -1066,7 +1066,7 @@ void Scene::LoadDefaultScene5()
 	++nr;
 
 	// Diamond
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(), 2.42, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 	mat = Matrix3x3D::CreateRotationY(0.5);
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -1082,7 +1082,7 @@ void Scene::LoadDefaultScene5()
 	++nr;
 
 	// Diamond
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(), 2.42, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 	mat = Matrix3x3D::CreateRotationY(2.0);
 	for (unsigned int i = 0; i < nTriangles; ++i)
