@@ -95,7 +95,7 @@ void Window::openRenderDialog()
     renderViewer.exec();
 
     // Clean up
-    delete imageData;
+    delete [] imageData;
   }
 }
 
