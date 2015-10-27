@@ -28,10 +28,10 @@ public:
 
 	~BVHTree();
 
-	BVHTreeNode* CreateNodeX(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb);
-	BVHTreeNode* CreateNodeY(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb);
-	BVHTreeNode* CreateNodeZ(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb);
-
+	BVHTreeNode* CreateNodeX(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth);
+	BVHTreeNode* CreateNodeY(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth);
+	BVHTreeNode* CreateNodeZ(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth);
+	BVHTreeNode* SplitNode(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb);
 	bool Query(const Ray& ray, Triangle& triangle, double& t) const;
 };
 

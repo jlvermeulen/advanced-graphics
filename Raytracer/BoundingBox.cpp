@@ -25,3 +25,12 @@ BoundingBox BoundingBox::FromTriangles(const std::deque<Triangle>& triangles)
 
 	return BoundingBox((max + min) / 2, (max - min) / 2);
 }
+
+double BoundingBox::SurfaceArea()
+{
+	double xedge = 2 * Halfsize.X;
+	double yedge = 2 * Halfsize.Y;
+	double zedge = 2 * Halfsize.Z;
+
+	return 2 * (xedge*yedge + xedge*zedge + yedge*zedge);
+}

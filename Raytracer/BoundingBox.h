@@ -14,6 +14,7 @@ public:
 	BoundingBox(const Vector3D& center, const Vector3D& halfsize);
 
 	static BoundingBox FromTriangles(const std::deque<Triangle>& triangles);
+	double SurfaceArea();
 
 private:
 };
