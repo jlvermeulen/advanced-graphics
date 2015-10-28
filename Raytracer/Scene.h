@@ -65,7 +65,7 @@ private:
 
 	double GaussianWeight(double dx, double dy, double sigma) const;
 
-	std::pair<Ray, const Triangle&> SampleLight(const Vector3D& hitPoint, double& weight);
+	std::pair<Ray, const Triangle&>* SampleLight(const Vector3D& hitPoint, double& weight);
 	bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Material& mat) const;
 
 public:

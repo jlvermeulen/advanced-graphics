@@ -144,7 +144,7 @@ void Scene::TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixe
 
 					//for (unsigned int c = 0; c < 3; ++c)
 					{
-						ColorD value = TraceRay(cameraRay, x >= camera.Width / 2 - 100);
+						ColorD value = TraceRay(cameraRay, true);// x >= camera.Width / 2 - 100);
 
 						// distribute over neighbouring pixels
 						for (int i = -1; i < 2; ++i)
@@ -203,33 +203,50 @@ ColorD Scene::ComputeRadiance(const Vector3D& point, const Vector3D& in, const T
 		c += DirectIllumination(point, in, normal, material);
 	c += IndirectIllumination(point, in, normal, material, depth, nee);
 
+	double mag = c.Magnitude(); // prevent giant weights giving fireflies
+	if (mag > 5)
+	{
+		c /= mag;
+		c *= 5;
+	}
+
 	return c;
 }
 
 ColorD Scene::DirectIllumination(const Vector3D& point, const Vector3D& in, const Vector3D& normal, const Material& material)
 {
+	if (material.reflType == ReflectionType::specular || material.reflType == ReflectionType::refractive || (material.reflType == ReflectionType::glossy && material.specularExponent > 5))
+		return ColorD();
+
 	double lightWeight;
-	std::pair<Ray, const Triangle&> sample = SampleLight(point, lightWeight);
+	std::pair<Ray, const Triangle&>* sample = SampleLight(point, lightWeight);
+	if (sample == nullptr)
+		return ColorD();
 
 	Material hitMaterial;
 	Triangle hitTriangle;
 	double hitTime;
 
-	Ray ray = sample.first;
-	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial) || hitTriangle != sample.second)
+	Ray ray = sample->first;
+	if (!FirstHitInfo(ray, hitTime, hitTriangle, hitMaterial) || hitTriangle != sample->second)
+	{
+		delete sample;
 		return ColorD();
+	}
+
+	delete sample;
 
 	Vector3D hitPoint = ray.Origin + hitTime * ray.Direction;
 	Vector3D triNormal = hitTriangle.surfaceNormal(hitPoint);
-	double weight = lightWeight;// hitTriangle.Area * std::max(0.0, -Vector3D::Dot(triNormal, ray.Direction)) / (hitTime * hitTime);
+	double weight = lightWeight * std::max(0.0, Vector3D::Dot(ray.Direction, normal));
 	if (material.reflType == ReflectionType::diffuse)
 	{
-		weight *= std::max(0.0, Vector3D::Dot(ray.Direction, normal)) / M_PI;
+		weight *= 1.0 / M_PI;
 	}
 	else if (material.reflType == ReflectionType::glossy)
 	{
 		Vector3D idealReflection = in + 2 * -Vector3D::Dot(normal, in) * normal;
-		weight *= std::max(0.0, Vector3D::Dot(ray.Direction, normal)) * pow(std::max(0.0, Vector3D::Dot(idealReflection, ray.Direction)), 1.0 + material.specularExponent);
+		weight *= pow(std::max(0.0, Vector3D::Dot(idealReflection, ray.Direction)), 1.0 + material.specularExponent) / pow(M_PI, 1.0 / (1.0 + material.specularExponent));
 	}
 
 	return weight * hitMaterial.emission * material.color;
@@ -241,7 +258,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 		return ColorD();
 
 	Ray ray(point, in);
-	ColorD value(1.0, 1.0, 1.0);
+	ColorD value = material.color;
 
 	if (material.reflType == ReflectionType::specular)
 	{
@@ -277,7 +294,7 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 			reflDir *= -1;
 
 		ray = Ray(point, reflDir);
-		value *= material.color * Vector3D::Dot(normal, reflDir);
+		value *= std::max(0.0, Vector3D::Dot(reflDir, normal));
 	}
 	else if (material.reflType == ReflectionType::diffuse)
 	{
@@ -309,7 +326,6 @@ ColorD Scene::IndirectIllumination(Vector3D point, const Vector3D& in, const Vec
 			hemi *= -1;
 
 		ray = Ray(point, hemi);
-		value *= material.color;
 	}
 	else if (material.reflType == ReflectionType::refractive)
 		ray.Refract(point, normal, 1.0, material.refrIndex);
@@ -354,7 +370,7 @@ bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Mater
 }
 
 //--------------------------------------------------------------------------------
-std::pair<Ray, const Triangle&> Scene::SampleLight(const Vector3D& hitPoint, double& weight)
+std::pair<Ray, const Triangle&>* Scene::SampleLight(const Vector3D& hitPoint, double& weight)
 {
 	weight = 0;
 
@@ -389,6 +405,9 @@ std::pair<Ray, const Triangle&> Scene::SampleLight(const Vector3D& hitPoint, dou
 			totalflux += f;
 		}
 
+	if (totalflux < 1e-3)
+		return nullptr;
+
 	// divide all flux values by the total flux gives the probabilities
 	for (unsigned int l = 0; l < flux.size(); l++)
 		flux[l].first /= totalflux;
@@ -412,7 +431,7 @@ std::pair<Ray, const Triangle&> Scene::SampleLight(const Vector3D& hitPoint, dou
 	Vector3D v2 = pair->second.Vertices[2].Position - pair->second.Vertices[0].Position;
 
 	// return ray towards chosen point
-	return std::pair<Ray, const Triangle&>(Ray(hitPoint, Vector3D::Normalise(v1 * u + v2 * v + pair->second.Vertices[0].Position - hitPoint)), pair->second);
+	return new std::pair<Ray, const Triangle&>(Ray(hitPoint, Vector3D::Normalise(v1 * u + v2 * v + pair->second.Vertices[0].Position - hitPoint)), pair->second);
 }
 
 //--------------------------------------------------------------------------------
@@ -462,7 +481,7 @@ void Scene::LoadDefaultScene()
 	++nr;
 
 	// Left sphere
-	objects[nr].material = Material(ReflectionType::specular, ColorD(0.1, 0.1, 0.1), ColorD(), 1.0, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::specular, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -477,7 +496,7 @@ void Scene::LoadDefaultScene()
 	++nr;
 
 	// Left sphere
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(0.0, 0.0, 0.0), ColorD(), 1.5, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(), 1.5, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -562,16 +581,11 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
-	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr].triangles[i].Vertices[j].Position *= 5;
 			objects[nr].triangles[i].Vertices[j].Position.Y += 4;
 		}
-		objects[nr].triangles[i].CalculateArea();
-		objects[nr].triangles[i].CalculateCenter();
-	}
-	lights.push_back(objects[nr]);
 	++nr;
 
 	// Bottom
@@ -587,7 +601,7 @@ void Scene::LoadDefaultScene()
 	++nr;
 
 	// Light
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(1.0, 1.0, 1.0), 1.0, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(3.0, 3.0, 3.0), 1.0, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -633,7 +647,7 @@ void Scene::LoadDefaultScene2()
 	objects = reader.parseFile("../models/sphere.obj");
 
 	// Central light
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(0.0, 0.0, 0.0), ColorD(1.5, 1.5, 1.5), 1.5, 1000000.0, 1.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(1.5, 1.5, 1.5), 1.5, 1000000.0, 1.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -669,7 +683,7 @@ void Scene::LoadDefaultScene2()
 	++nr;
 
 	// Front sphere
-	objects[nr].material = Material(ReflectionType::specular, ColorD(0.1, 0.1, 0.1), ColorD(), 1.0, 1.0, 0.0);
+	objects[nr].material = Material(ReflectionType::specular, ColorD(1.0, 1.0, 1.0), ColorD(), 1.0, 1.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -803,7 +817,7 @@ void Scene::LoadDefaultScene3()
 	++nr;
 
 	// Top
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(1.0, 1.0, 1.0), 1.0, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(2.0, 2.0, 2.0), 1.0, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -1021,7 +1035,7 @@ void Scene::LoadDefaultScene5()
 	++nr;
 
 	// Diamond
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(), 2.42, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 	Matrix3x3D mat = Matrix3x3D::CreateRotationY(M_PI + M_PI_4);
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -1037,7 +1051,7 @@ void Scene::LoadDefaultScene5()
 	++nr;
 
 	// Diamond
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(), 2.42, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 	mat = Matrix3x3D::CreateRotationY(M_PI);
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -1051,7 +1065,7 @@ void Scene::LoadDefaultScene5()
 	++nr;
 
 	// Diamond
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(), 2.42, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 	mat = Matrix3x3D::CreateRotationY(M_PI_4);
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -1067,7 +1081,7 @@ void Scene::LoadDefaultScene5()
 	++nr;
 
 	// Diamond
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(), 2.42, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 	mat = Matrix3x3D::CreateRotationY(0.5);
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -1083,7 +1097,7 @@ void Scene::LoadDefaultScene5()
 	++nr;
 
 	// Diamond
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(), ColorD(), 2.42, 0.0, 0.0);
+	objects[nr].material = Material(ReflectionType::refractive, ColorD(1.0, 1.0, 1.0), ColorD(), 2.42, 0.0, 0.0);
 	nTriangles = objects[nr].triangles.size();
 	mat = Matrix3x3D::CreateRotationY(2.0);
 	for (unsigned int i = 0; i < nTriangles; ++i)
