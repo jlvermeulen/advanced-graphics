@@ -19,6 +19,7 @@ public:
 	}
 
 	void Clip();
+	double Magnitude();
 
 	static ColorD Mix(const ColorD& c1, const ColorD& c2, const double& w1, const double& w2);
 

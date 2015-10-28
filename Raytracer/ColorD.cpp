@@ -18,6 +18,11 @@ void ColorD::Clip()
 	B = std::max(0.0, std::min(1.0, B));
 }
 
+double ColorD::Magnitude()
+{
+	return std::max(R, std::max(G, B));
+}
+
 ColorD ColorD::Mix(const ColorD& c1, const ColorD& c2, const double& w1, const double& w2) { return w1 * c1 + w2 * c2; }
 
 ColorD& ColorD::operator+=(const ColorD& rhs)
