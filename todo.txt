@@ -1,0 +1,2 @@
+split in create 8 posible boxes allong the longest dimension
+with Surface area heuristic

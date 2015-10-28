@@ -53,14 +53,22 @@ BVHTreeNode* BVHTree::CreateNodeX(const std::deque<Triangle>& triangles, unsigne
 
 
 	// choose best one
-	std::pair<double, int> best(std::numeric_limits<double>::max(), -1);
+	double costNoSplit = bb.SurfaceArea()*triangles.size();
+	std::pair<double, int> best(costNoSplit, -1);
 	for (int i = 0; i < 8; ++i)
 	{
 		bbl[i] = BoundingBox::FromTriangles(leftTriangles[i]);
 		bbr[i] = BoundingBox::FromTriangles(rightTriangles[i]);
-		double score = bbl[i].SurfaceArea() / leftTriangles[i].size() + bbr[i].SurfaceArea() / rightTriangles[i].size();
+		double score = bbl[i].SurfaceArea() * leftTriangles[i].size() + bbr[i].SurfaceArea() * rightTriangles[i].size();
 		if (score < best.first)
 			best = std::pair<double, int>(score, i);
+	}
+	if (best.second == -1)
+	{
+		res->triangles = triangles;
+		res->left = nullptr;
+		res->right = nullptr;
+		return res;
 	}
 
 	res->left = SplitNode(leftTriangles[best.second], minTriangles, maxDepth - 1, bbl[best.second]);
@@ -108,14 +116,22 @@ BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle>& triangles, unsigne
 	}
 
 	// choose best one
-	std::pair<double, int> best(std::numeric_limits<double>::max(), -1);
+	double costNoSplit = bb.SurfaceArea()*triangles.size();
+	std::pair<double, int> best(costNoSplit, -1);
 	for (int i = 0; i < 8; ++i)
 	{
 		bbl[i] = BoundingBox::FromTriangles(leftTriangles[i]);
 		bbr[i] = BoundingBox::FromTriangles(rightTriangles[i]);
-		double score = bbl[i].SurfaceArea() / leftTriangles[i].size() + bbr[i].SurfaceArea() / rightTriangles[i].size();
+		double score = bbl[i].SurfaceArea() * leftTriangles[i].size() + bbr[i].SurfaceArea() * rightTriangles[i].size();
 		if (score < best.first)
 			best = std::pair<double, int>(score, i);
+	}
+	if (best.second == -1)
+	{
+		res->triangles = triangles;
+		res->left = nullptr;
+		res->right = nullptr;
+		return res;
 	}
 
 	res->left = SplitNode(leftTriangles[best.second], minTriangles, maxDepth - 1, bbl[best.second]);
@@ -163,14 +179,22 @@ BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle>& triangles, unsigne
 	}
 
 	// choose best one
-	std::pair<double, int> best(std::numeric_limits<double>::max(), -1);
+	double costNoSplit = bb.SurfaceArea()*triangles.size();
+	std::pair<double, int> best(costNoSplit, -1);
 	for (int i = 0; i < 8; ++i)
 	{
 		bbl[i] = BoundingBox::FromTriangles(leftTriangles[i]);
 		bbr[i] = BoundingBox::FromTriangles(rightTriangles[i]);
-		double score = bbl[i].SurfaceArea() / leftTriangles[i].size() + bbr[i].SurfaceArea() / rightTriangles[i].size();
+		double score = bbl[i].SurfaceArea() * leftTriangles[i].size() + bbr[i].SurfaceArea() * rightTriangles[i].size();
 		if (score < best.first)
 			best = std::pair<double, int>(score, i);
+	}
+	if (best.second == -1)
+	{
+		res->triangles = triangles;
+		res->left = nullptr;
+		res->right = nullptr;
+		return res;
 	}
 
 	res->left = SplitNode(leftTriangles[best.second], minTriangles, maxDepth - 1, bbl[best.second]);
