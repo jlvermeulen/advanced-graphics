@@ -72,6 +72,7 @@ private:
 public:
 	Camera camera;
 	Octree* octree;
+	BVHTree* bvhtree;
 	std::deque<Object> objects;
 	Object checkerboard;
 	std::deque<Object> lights;

@@ -47,12 +47,10 @@ void Scene::BuildTree(unsigned minTriangles, unsigned maxDepth)
 		for (Triangle& tri : obj.triangles)
 			tris.push_back(tri);
 
-	octree = new Octree(tris, minTriangles, maxDepth);
-		obj.ConstructBVHtree(minTriangles, maxDepth);
-
-		//#endif
-	}
+	//octree = new Octree(tris, minTriangles, maxDepth);
+	bvhtree = new BVHTree(tris, minTriangles, maxDepth);
 }
+
 
 bool Scene::Render(uchar* imageData, int minTriangles, int maxDepth, int samplesPerPixel, double sigma, bool useDoF)
 {
@@ -354,7 +352,7 @@ bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle) const
 	Triangle tri;
 	double t = std::numeric_limits<double>::max();
 
-		if (obj.bvhTree->Query(ray, tri, t) && t < time)
+	if (bvhtree->Query(ray, tri, t) && t < time)
 	{
 		triangle = tri;
 		time = t;

@@ -295,7 +295,7 @@ Vector3D closesPointOnTriangle(const Triangle triangle, const Vector3D &sourcePo
 //bounding spheres
 bool Intersects(const Triangle& triangle, const BoundingSphere& bs)
 {
-	return mdist(closesPointOnTriangle(triangle.Vertices, bs.center), bs.center) <= bs.radius;
+	return mdist(closesPointOnTriangle(triangle, bs.center), bs.center) <= bs.radius;
 }
 
 bool Intersects(const Ray& ray, const BoundingSphere& bs, double& t)
