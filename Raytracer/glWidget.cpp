@@ -221,64 +221,64 @@ void GLWidget::glPerspective(double fovY, double aspect, double zNear, double zF
 //--------------------------------------------------------------------------------
 void GLWidget::drawBoundingBoxes() const
 {
-  glEnableClientState(GL_VERTEX_ARRAY);
+  //glEnableClientState(GL_VERTEX_ARRAY);
 
-  for (const Object& obj : scene.objects)
-  {
-    // Initialize queue
-    std::queue<OctreeNode*> q;
-    q.push(&obj.octree->root);
+  //for (const Object& obj : scene.objects)
+  //{
+  //  // Initialize queue
+  //  std::queue<OctreeNode*> q;
+  //  q.push(&obj.octree->root);
 
-    glColor3f(0, 1, 1);
+  //  glColor3f(0, 1, 1);
 
-    GLubyte indices[] = { // 24 indices
-      0, 1, 0, 2,
-      0, 4, 1, 3,
-      1, 5, 2, 3,
-      2, 6, 3, 7,
-      4, 5, 4, 6,
-      5, 7, 6, 7
-    };
+  //  GLubyte indices[] = { // 24 indices
+  //    0, 1, 0, 2,
+  //    0, 4, 1, 3,
+  //    1, 5, 2, 3,
+  //    2, 6, 3, 7,
+  //    4, 5, 4, 6,
+  //    5, 7, 6, 7
+  //  };
 
-    while (!q.empty())
-    {
-      OctreeNode* node = q.front();
-      q.pop();
+  //  while (!q.empty())
+  //  {
+  //    OctreeNode* node = q.front();
+  //    q.pop();
 
-      BoundingBox bb = node->bb;
+  //    BoundingBox bb = node->bb;
 
-      GLfloat vertices[24]; // 8 times 3 coordinates
+  //    GLfloat vertices[24]; // 8 times 3 coordinates
 
-      for (int i = 0; i < 8; i++)
-      {
-        float x = i & 4 ? bb.Halfsize.X : -bb.Halfsize.X;
-        float y = i & 2 ? bb.Halfsize.Y : -bb.Halfsize.Y;
-        float z = i & 1 ? bb.Halfsize.Z : -bb.Halfsize.Z;
+  //    for (int i = 0; i < 8; i++)
+  //    {
+  //      float x = i & 4 ? bb.Halfsize.X : -bb.Halfsize.X;
+  //      float y = i & 2 ? bb.Halfsize.Y : -bb.Halfsize.Y;
+  //      float z = i & 1 ? bb.Halfsize.Z : -bb.Halfsize.Z;
 
-        vertices[i * 3] = bb.Center.X + x;
-        vertices[i * 3 + 1] = bb.Center.Y + y;
-        vertices[i * 3 + 2] = bb.Center.Z + z;
-      }
+  //      vertices[i * 3] = bb.Center.X + x;
+  //      vertices[i * 3 + 1] = bb.Center.Y + y;
+  //      vertices[i * 3 + 2] = bb.Center.Z + z;
+  //    }
 
-      glVertexPointer(3, GL_FLOAT, 0, vertices);
+  //    glVertexPointer(3, GL_FLOAT, 0, vertices);
 
-      glDrawElements(GL_LINES, 24, GL_UNSIGNED_BYTE, indices);
+  //    glDrawElements(GL_LINES, 24, GL_UNSIGNED_BYTE, indices);
 
-	  if (node->children == nullptr)
-		  continue;
+	 // if (node->children == nullptr)
+		//  continue;
 
-      for (int i = 0; i < 8; ++i)
-        q.push(node->children[i]);
-    }
-  }
+  //    for (int i = 0; i < 8; ++i)
+  //      q.push(node->children[i]);
+  //  }
+  //}
 
-  glDisableClientState(GL_VERTEX_ARRAY);
+  //glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 //--------------------------------------------------------------------------------
 void GLWidget::drawCameraRay() const
 {
-  glBegin(GL_LINES);
+  /*glBegin(GL_LINES);
 
   Triangle minTri;
   double minTime = std::numeric_limits<double>::max();
@@ -318,7 +318,7 @@ void GLWidget::drawCameraRay() const
 
   drawLine(debugRay_.Origin, debugRay_.Origin + 10 * debugRay_.Direction);
 
-  glEnd();
+  glEnd();*/
 }
 
 //--------------------------------------------------------------------------------
@@ -339,7 +339,7 @@ void GLWidget::drawModel()
     {
       for (const Vertex& vertex : triangle.Vertices)
       {
-        glColor3f(obj.material.color.R, obj.material.color.G, obj.material.color.B);
+		  glColor3f(obj.material->color.R, obj.material->color.G, obj.material->color.B);
         glNormal3f(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
         glVertex3f(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
       }

@@ -2,28 +2,34 @@
 
 #include "ColorD.h"
 #include "Vertex.h"
+#include "Material.h"
 
 struct Triangle
 {
+	typedef Material Mat;
+
 public:
 	Vertex Vertices[3];
 	double Area;
 	Vector3D Center;
+	Mat* Material;
 
 	Triangle() { }
 
-	Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3, Mat* material)
 	{
 		Vertices[0] = v1;
 		Vertices[1] = v2;
 		Vertices[2] = v3;
+		Material = material;
 	}
 
-	Triangle(const Vertex v[3])
+	Triangle(const Vertex v[3], Mat* material)
 	{
 		Vertices[0] = v[0];
 		Vertices[1] = v[1];
 		Vertices[2] = v[2];
+		Material = material;
 	}
 
 	Vector3D Interpolate(Vector3D point) const

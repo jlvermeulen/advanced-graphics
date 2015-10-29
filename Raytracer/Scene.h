@@ -66,10 +66,11 @@ private:
 	double GaussianWeight(double dx, double dy, double sigma) const;
 
 	std::pair<Ray, const Triangle&>* SampleLight(const Vector3D& hitPoint, double& weight);
-	bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Material& mat) const;
+	bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle) const;
 
 public:
 	Camera camera;
+	Octree* octree;
 	std::deque<Object> objects;
 	Object checkerboard;
 	std::deque<Object> lights;

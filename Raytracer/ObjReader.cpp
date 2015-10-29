@@ -124,7 +124,7 @@ void ObjReader::parseFace(CVSIterator& it)
   }
 
   // Add triangle
-  objects_.back().triangles.push_back(Triangle(vertices));
+  objects_.back().triangles.push_back(Triangle(vertices, nullptr));
 }
 
 //--------------------------------------------------------------------------------
@@ -142,7 +142,7 @@ void ObjReader::parseMaterial(CVSIterator& it)
 {
   std::string name = *it;
 
-  objects_.back().material = materials_.at(name);
+  //objects_.back().material = materials_.at(name);
 }
 
 //--------------------------------------------------------------------------------
