@@ -33,7 +33,10 @@ struct Object
 
   void ConstructBVHtree(int minTriangles, int maxDepth)
   {
-	  bvhTree = new BVHTree(triangles, minTriangles, maxDepth);
+	  std::deque<Triangle*> tris;
+	  for (int i = 0; i < triangles.size(); i++)
+		  tris.push_back(&triangles[i]);
+	  bvhTree = new BVHTree(tris, minTriangles, maxDepth);
   }
 
   BVHTree* bvhTree;

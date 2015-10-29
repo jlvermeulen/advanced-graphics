@@ -26,6 +26,28 @@ BoundingBox BoundingBox::FromTriangles(const std::deque<Triangle>& triangles)
 	return BoundingBox((max + min) / 2, (max - min) / 2);
 }
 
+BoundingBox BoundingBox::FromTriangles(const std::deque<Triangle*>& triangles)
+{
+	Vector3D min(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+	Vector3D max(-std::numeric_limits<double>::max(), -std::numeric_limits<double>::max(), -std::numeric_limits<double>::max());
+
+
+	for (std::deque<Triangle*>::const_iterator it = triangles.begin(); it != triangles.end(); ++it)
+		for (int i = 0; i < 3; i++)
+		{
+		const Vector3D& v = (*it)->Vertices[i].Position;
+		for (int j = 0; j < 3; j++)
+		{
+			if (v[j] < min[j])
+				min[j] = v[j];
+			if (v[j] > max[j])
+				max[j] = v[j];
+		}
+		}
+
+	return BoundingBox((max + min) / 2, (max - min) / 2);
+}
+
 double BoundingBox::SurfaceArea()
 {
 	double xedge = 2 * Halfsize.X;

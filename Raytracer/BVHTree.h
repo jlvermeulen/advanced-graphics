@@ -11,7 +11,7 @@ public:
 	~BVHTreeNode(){};
 	bool Query(const Ray& ray, Triangle& triangle, double& t) const;
 
-	std::deque<Triangle> triangles;
+	std::deque<Triangle*> triangles;
 	BoundingBox bb;
 	//BoundingSphere bs;
 	BVHTreeNode* left;
@@ -24,14 +24,14 @@ class BVHTree
 public:
 	BVHTreeNode* root;
 
-	BVHTree(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth);
+	BVHTree(const std::deque<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth);
 
 	~BVHTree();
 
-	BVHTreeNode* CreateNodeX(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth);
-	BVHTreeNode* CreateNodeY(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth);
-	BVHTreeNode* CreateNodeZ(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth);
-	BVHTreeNode* SplitNode(const std::deque<Triangle>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb);
+	BVHTreeNode* CreateNodeX(const std::deque<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth);
+	BVHTreeNode* CreateNodeY(const std::deque<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth);
+	BVHTreeNode* CreateNodeZ(const std::deque<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth);
+	BVHTreeNode* SplitNode(const std::deque<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb);
 	bool Query(const Ray& ray, Triangle& triangle, double& t) const;
 };
 
