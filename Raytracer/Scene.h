@@ -53,6 +53,7 @@ public:
 	void LoadDefaultScene3();
 	void LoadDefaultScene4();
 	void LoadDefaultScene5();
+	void LoadDefaultScene6();
 
 	void BuildTree(unsigned minTriangles, unsigned maxDepth);
 private:
