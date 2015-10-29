@@ -1143,7 +1143,7 @@ void Scene::LoadDefaultScene6()
 	objects = reader.parseFile("../models/cube.obj");
 
 	// Floor
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(0.7, 0.7, 0.7), ColorD(), 1.0, 0.0, 0.0);
+	objects[nr].SetMaterial(new Material(ReflectionType::diffuse, ColorD(0.7, 0.7, 0.7), ColorD(), 1.0, 0.0, 0.0));
 	nTriangles = objects[nr].triangles.size();
 	for (unsigned int i = 0; i < nTriangles; ++i)
 		for (unsigned int j = 0; j < 3; ++j)
@@ -1154,7 +1154,7 @@ void Scene::LoadDefaultScene6()
 	++nr;
 
 	// Dragon
-	objects[nr].material = Material(ReflectionType::glossy, ColorD((unsigned char)112, 142, 108), ColorD(), 1.0, 2.0, 0.0);
+	objects[nr].SetMaterial(new Material(ReflectionType::glossy, ColorD((unsigned char)112, 142, 108), ColorD(), 1.0, 2.0, 0.0));
 	nTriangles = objects[nr].triangles.size();
 	Matrix3x3D mat = Matrix3x3D::CreateRotationY(-M_PI * (5.0 / 16.0));
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -1169,7 +1169,7 @@ void Scene::LoadDefaultScene6()
 	++nr;
 
 	// Mirror
-	objects[nr].material = Material(ReflectionType::specular, ColorD(0.75, 0.75, 0.75), ColorD(), 1.0, 0.0, 0.0);
+	objects[nr].SetMaterial(new Material(ReflectionType::specular, ColorD(0.75, 0.75, 0.75), ColorD(), 1.0, 0.0, 0.0));
 	nTriangles = objects[nr].triangles.size();
 	mat = Matrix3x3D::CreateRotationY(M_PI_4 * (3.0 / 4.0));
 	for (unsigned int i = 0; i < nTriangles; ++i)
@@ -1188,7 +1188,7 @@ void Scene::LoadDefaultScene6()
 	++nr;
 
 	// Glass ball
-	objects[nr].material = Material(ReflectionType::refractive, ColorD(0.7, 0.7, 0.7), ColorD(), 2.5, 0.0, 0.0);
+	objects[nr].SetMaterial(new Material(ReflectionType::refractive, ColorD(0.7, 0.7, 0.7), ColorD(), 2.5, 0.0, 0.0));
 	nTriangles = objects[nr].triangles.size();
 	for (unsigned int i = 0; i < nTriangles; ++i)
 		for (unsigned int j = 0; j < 3; ++j)
@@ -1201,7 +1201,7 @@ void Scene::LoadDefaultScene6()
 	++nr;
 
 	// Shiny ball
-	objects[nr].material = Material(ReflectionType::glossy, ColorD(0.75, 0.75, 0.75), ColorD(), 1.0, 100.0, 0.0);
+	objects[nr].SetMaterial(new Material(ReflectionType::glossy, ColorD(0.75, 0.75, 0.75), ColorD(), 1.0, 100.0, 0.0));
 	nTriangles = objects[nr].triangles.size();
 	for (unsigned int i = 0; i < nTriangles; ++i)
 		for (unsigned int j = 0; j < 3; ++j)
@@ -1214,7 +1214,7 @@ void Scene::LoadDefaultScene6()
 	++nr;
 
 	// Light
-	objects[nr].material = Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(7.0, 7.0, 7.0), 1.0, 0.0, 0.0);
+	objects[nr].SetMaterial(new Material(ReflectionType::diffuse, ColorD(1.0, 1.0, 1.0), ColorD(7.0, 7.0, 7.0), 1.0, 0.0, 0.0));
 	nTriangles = objects[nr].triangles.size();
 	mat = Matrix3x3D::CreateRotationY(M_PI_4 * (3.0 / 4.0));
 	for (unsigned int i = 0; i < nTriangles; ++i)
