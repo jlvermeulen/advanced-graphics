@@ -3,15 +3,15 @@
 #include <cmath>
 #include "Intersections.h"
 
-bool Intersects(const Ray& ray, const BoundingBox& bb, double& t)
+bool Intersects(const Ray& ray, const BoundingBox& bb, float& t)
 {
-	Vector3D lb = bb.Center - bb.Halfsize - ray.Origin, rt = bb.Center + bb.Halfsize - ray.Origin;
+	Vector3F lb = bb.Center - bb.Halfsize - ray.Origin, rt = bb.Center + bb.Halfsize - ray.Origin;
 
-	double t1 = lb.X * ray.InverseDirection.X;
-	double t2 = rt.X * ray.InverseDirection.X;
+	float t1 = lb.X * ray.InverseDirection.X;
+	float t2 = rt.X * ray.InverseDirection.X;
 
-	double tmin = std::min(t1, t2);
-	double tmax = std::max(t1, t2);
+	float tmin = std::min(t1, t2);
+	float tmax = std::max(t1, t2);
 
 	t1 = lb.Y * ray.InverseDirection.Y;
 	t2 = rt.Y * ray.InverseDirection.Y;
@@ -35,30 +35,30 @@ bool Intersects(const Ray& ray, const BoundingBox& bb, double& t)
 }
 
 // Möller-Trumbore intersection algorithm
-bool Intersects(const Ray& ray, const Triangle& triangle, double& t)
+bool Intersects(const Ray& ray, const Triangle& triangle, float& t)
 {
-	Vector3D e1 = triangle.Vertices[1].Position - triangle.Vertices[0].Position;
-	Vector3D e2 = triangle.Vertices[2].Position - triangle.Vertices[0].Position;
-	Vector3D p = ray.Direction.Cross(e2);
-	double det = e1.Dot(p);
+	Vector3F e1 = triangle.Vertices[1].Position - triangle.Vertices[0].Position;
+	Vector3F e2 = triangle.Vertices[2].Position - triangle.Vertices[0].Position;
+	Vector3F p = ray.Direction.Cross(e2);
+	float det = e1.Dot(p);
 
 	if (det > - EPSILON && det < EPSILON)
 		return false;
 
-	double invDet = 1 / det;
-	Vector3D r = ray.Origin - triangle.Vertices[0].Position;
-	double u = r.Dot(p) * invDet;
+	float invDet = 1 / det;
+	Vector3F r = ray.Origin - triangle.Vertices[0].Position;
+	float u = r.Dot(p) * invDet;
 
 	if (u < 0 || u > 1)
 		return false;
 
-	Vector3D q = r.Cross(e1);
-	double v = ray.Direction.Dot(q) * invDet;
+	Vector3F q = r.Cross(e1);
+	float v = ray.Direction.Dot(q) * invDet;
 
 	if (v < 0 || u + v > 1)
 		return false;
 
-	double tt = e2.Dot(q) * invDet;
+	float tt = e2.Dot(q) * invDet;
 
 	if (tt > EPSILON)
 	{
@@ -127,15 +127,15 @@ bool Intersects(const Ray& ray, const Triangle& triangle, double& t)
 
 bool Intersects(const Triangle& triangle, const BoundingBox& boundingBox)
 {
-	Vector3D v0 = triangle.Vertices[0].Position - boundingBox.Center;
-	Vector3D v1 = triangle.Vertices[1].Position - boundingBox.Center;
-	Vector3D v2 = triangle.Vertices[2].Position - boundingBox.Center;
+	Vector3F v0 = triangle.Vertices[0].Position - boundingBox.Center;
+	Vector3F v1 = triangle.Vertices[1].Position - boundingBox.Center;
+	Vector3F v2 = triangle.Vertices[2].Position - boundingBox.Center;
 
-	Vector3D e0 = triangle.Vertices[1].Position - triangle.Vertices[0].Position;
-	Vector3D e1 = triangle.Vertices[2].Position - triangle.Vertices[1].Position;
-	Vector3D e2 = triangle.Vertices[0].Position - triangle.Vertices[2].Position;
+	Vector3F e0 = triangle.Vertices[1].Position - triangle.Vertices[0].Position;
+	Vector3F e1 = triangle.Vertices[2].Position - triangle.Vertices[1].Position;
+	Vector3F e2 = triangle.Vertices[0].Position - triangle.Vertices[2].Position;
 
-	double p0, p1, p2, min, max, rad, fex, fey, fez;
+	float p0, p1, p2, min, max, rad, fex, fey, fez;
 
 	fex = std::abs(e0.X);
 	fey = std::abs(e0.Y);
@@ -170,7 +170,7 @@ bool Intersects(const Triangle& triangle, const BoundingBox& boundingBox)
 	if (min > boundingBox.Halfsize.Z || max < -boundingBox.Halfsize.Z)
 		return false;
 
-	Vector3D normal = e0.Cross(e1), vMin, vMax;
+	Vector3F normal = e0.Cross(e1), vMin, vMax;
 	for (int i = 0; i < 3; ++i)
 	{
 		if (normal[i] > 0)

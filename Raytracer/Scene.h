@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Camera.h"
-#include "ColorD.h"
+#include "Color3F.h"
 #include "Material.h"
 #include "Object.h"
 #include "Octree.h"
@@ -11,12 +11,13 @@
 #include <utility>
 #include <tuple>
 #include <random>
+#include <stdexcept>
 
 typedef unsigned char uchar;
 
 struct Intersection
 {
-	Intersection(const Ray& ray, double time, const Triangle& hit, const Material& material) :
+	Intersection(const Ray& ray, float time, const Triangle& hit, const Material& material) :
 		hitPoint(ray.Origin + time * ray.Direction),
 		hit(hit),
 		hitMaterial(material)
@@ -25,19 +26,19 @@ struct Intersection
 
 	Triangle hit;
 	Material hitMaterial;
-	Vector3D hitPoint;
+	Vector3F hitPoint;
 };
 
 struct Light
 {
-	Light(const Vector3D& position, const ColorD& color) :
+	Light(const Vector3F& position, const Color3F& color) :
 		position(position),
 		color(color)
 	{
 	}
 
-	Vector3D position;
-	ColorD color;
+	Vector3F position;
+	Color3F color;
 };
 
 class Scene
@@ -47,7 +48,7 @@ public:
 	~Scene();
 
 	void PreRender(int minTriangles, int maxDepth);
-	void Render(unsigned char* imageData, int samplesPerPixel, double sigma, bool useDoF);
+	void Render(unsigned char* imageData, int samplesPerPixel, float sigma, bool useDoF);
 	void PostRender();
 
 	void LoadDefaultScene();
@@ -59,22 +60,22 @@ public:
 	void Clear();
 
 private:
-	ColorD TraceRay(const Ray& ray, bool nee);
-	ColorD ComputeRadiance(const Vector3D& point, const Vector3D& in, Triangle* triangle, const Material& material, unsigned int depth, bool nee);
-	ColorD DirectIllumination(const Vector3D& point, const Vector3D& in, const Vector3D& normal, const Material& material);
-	ColorD IndirectIllumination(Vector3D point, const Vector3D& in, const Vector3D& normal, const Material& material, unsigned int depth, bool nee);
+	Color3F TraceRay(const Ray& ray, bool nee);
+	Color3F ComputeRadiance(const Vector3F& point, const Vector3F& in, Triangle* triangle, const Material& material, unsigned int depth, bool nee);
+	Color3F DirectIllumination(const Vector3F& point, const Vector3F& in, const Vector3F& normal, const Material& material);
+	Color3F IndirectIllumination(Vector3F point, const Vector3F& in, const Vector3F& normal, const Material& material, unsigned int depth, bool nee);
 
-	void TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma, bool useDoF);
+	void TracePixels(std::pair<Color3F, float>* pixelData, int samplesPerPixel, float sigma, bool useDoF);
 
-	double GaussianWeight(double dx, double dy, double sigma) const;
+	float GaussianWeight(float dx, float dy, float sigma) const;
 
-	std::pair<Ray, Triangle*>* SampleLight(const Vector3D& hitPoint, double& weight);
-	Triangle* FirstHitInfo(const Ray& ray, double& time, Material& mat) const;
+	std::pair<Ray, Triangle*>* SampleLight(const Vector3F& hitPoint, float& weight);
+	Triangle* FirstHitInfo(const Ray& ray, float& time, Material& mat) const;
 
 public:
 	Camera camera;
 	std::vector<Object*> objects;
 	std::vector<Object*> lights;
-	std::uniform_real_distribution<double> dist;
+	std::uniform_real_distribution<float> dist;
 	std::mt19937 gen;
 };

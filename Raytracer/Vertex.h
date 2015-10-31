@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Vector2D.h"
-#include "Vector3D.h"
-#include "ColorD.h"
+#include "Vector2F.h"
+#include "Vector3F.h"
+#include "Color3F.h"
 
 struct Vertex
 {
 public:
-	Vector3D Position, Normal;
-	Vector2D UV;
+	Vector3F Position, Normal;
+	Vector2F UV;
 
 	Vertex() { }
-	Vertex(const Vector3D& position, const Vector3D& normal, const Vector2D& uv) : Position(position), Normal(normal), UV(uv) { }
+	Vertex(const Vector3F& position, const Vector3F& normal, const Vector2F& uv) : Position(position), Normal(normal), UV(uv) { }
 };

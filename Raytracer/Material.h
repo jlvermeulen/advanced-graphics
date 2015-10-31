@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ColorD.h"
+#include "Color3F.h"
 
 enum ReflectionType
 {
@@ -14,15 +14,15 @@ struct Material
 {
   Material() :
     reflType(ReflectionType::diffuse),
-    color(1.0, 1.0, 1.0),
-    emission(0.0, 0.0, 0.0),
-    refrIndex(1.0),
-    specularExponent(0.0),
-    transparency(0.0)
+    color(1.0f, 1.0f, 1.0f),
+    emission(0.0f, 0.0f, 0.0f),
+    refrIndex(1.0f),
+    specularExponent(0.0f),
+    transparency(0.0f)
   {
   }
 
-  Material(ReflectionType reflType, const ColorD& color, const ColorD& emission, double refrIndex, double specularExponent, double transparency) :
+  Material(ReflectionType reflType, const Color3F& color, const Color3F& emission, float refrIndex, float specularExponent, float transparency) :
     reflType(reflType),
     color(color),
     emission(emission),
@@ -33,9 +33,9 @@ struct Material
   }
 
   ReflectionType reflType;
-  ColorD color;
-  ColorD emission;
-  double refrIndex;
-  double specularExponent;
-  double transparency;
+  Color3F color;
+  Color3F emission;
+  float refrIndex;
+  float specularExponent;
+  float transparency;
 };

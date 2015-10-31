@@ -13,26 +13,26 @@ Octree::Octree(const std::vector<Triangle*>& triangles, int minTriangles, int ma
 }
 Octree::~Octree() { delete root; }
 
-Triangle* Octree::Query(const Ray& ray, double& t) const
+Triangle* Octree::Query(const Ray& ray, float& t) const
 {
-	t = std::numeric_limits<double>::max();
+	t = std::numeric_limits<float>::max();
 	return root->Query(ray, t);
 }
 
 OctreeInternal::OctreeInternal(const std::vector<Triangle*>& triangles, const BoundingBox& bb, unsigned int minTriangles, unsigned int maxDepth)
 {
 	this->bb = bb;
-	Vector3D half = bb.Halfsize / 2;
+	Vector3F half = bb.Halfsize / 2;
 	children = new OctreeNode*[8];
 	for (int i = 0; i < 8; ++i)
 	{
-		double x = bb.Center.X + (i & 4 ? half.X : -half.X);
-		double y = bb.Center.Y + (i & 2 ? half.Y : -half.Y);
-		double z = bb.Center.Z + (i & 1 ? half.Z : -half.Z);
-		BoundingBox childBB(Vector3D(x, y, z), half);
+		float x = bb.Center.X + (i & 4 ? half.X : -half.X);
+		float y = bb.Center.Y + (i & 2 ? half.Y : -half.Y);
+		float z = bb.Center.Z + (i & 1 ? half.Z : -half.Z);
+		BoundingBox childBB(Vector3F(x, y, z), half);
 
 		std::vector<Triangle*> childTriangles;
-		for (int j = 0; j < triangles.size(); j++)
+		for (unsigned int j = 0; j < triangles.size(); j++)
 			if (Intersects(*triangles[j], childBB))
 				childTriangles.push_back(triangles[j]);
 
@@ -53,9 +53,9 @@ OctreeInternal::~OctreeInternal()
 	delete [] children;
 }
 
-Triangle* OctreeInternal::Query(const Ray& ray, double& t) const
+Triangle* OctreeInternal::Query(const Ray& ray, float& t) const
 {
-	double tBox = std::numeric_limits<double>::min();
+	float tBox = std::numeric_limits<float>::min();
 	if (!Intersects(ray, bb, tBox) || tBox > t)
 		return nullptr;
 
@@ -72,7 +72,7 @@ OctreeLeaf::OctreeLeaf(const std::vector<Triangle*>& triangles, const BoundingBo
 {
 	this->bb = bb;
 
-	int i = 0;
+	unsigned int i = 0;
 	for (; i < triangles.size(); i++)
 	{
 		this->triangles[i] = triangles[i];
@@ -92,85 +92,85 @@ OctreeLeaf::OctreeLeaf(const std::vector<Triangle*>& triangles, const BoundingBo
 
 	for (; i < MAXSIZE; i++)
 	{
-		vert0X[i] = vert0Y[i] = vert0Z[i] = 0;
-		edge1X[i] = edge1Y[i] = edge1Z[i] = 0;
-		edge2X[i] = edge2Y[i] = edge2Z[i] = 0;
+		vert0X[i] = vert0Y[i] = vert0Z[i] = 0.0f;
+		edge1X[i] = edge1Y[i] = edge1Z[i] = 0.0f;
+		edge2X[i] = edge2Y[i] = edge2Z[i] = 0.0f;
 	}
 
-	this->count = triangles.size() / 4;
-	if (triangles.size() % 4 != 0)
+	this->count = triangles.size() / NROFLANES;
+	if (triangles.size() % NROFLANES != 0)
 		this->count++;
 }
 
-Triangle* OctreeLeaf::Query(const Ray& ray, double& t) const
+Triangle* OctreeLeaf::Query(const Ray& ray, float& t) const
 {
-	double tBox = std::numeric_limits<double>::min();
+	float tBox = std::numeric_limits<float>::min();
 	if (!Intersects(ray, bb, tBox) || tBox > t)
 		return nullptr;
 
-	const __m256d rayDirX = _mm256_set1_pd(ray.Direction.X);
-	const __m256d rayDirY = _mm256_set1_pd(ray.Direction.Y);
-	const __m256d rayDirZ = _mm256_set1_pd(ray.Direction.Z);
+	const __m256 rayDirX = _mm256_set1_ps(ray.Direction.X);
+	const __m256 rayDirY = _mm256_set1_ps(ray.Direction.Y);
+	const __m256 rayDirZ = _mm256_set1_ps(ray.Direction.Z);
 
-	const __m256d rayPosX = _mm256_set1_pd(ray.Origin.X);
-	const __m256d rayPosY = _mm256_set1_pd(ray.Origin.Y);
-	const __m256d rayPosZ = _mm256_set1_pd(ray.Origin.Z);
+	const __m256 rayPosX = _mm256_set1_ps(ray.Origin.X);
+	const __m256 rayPosY = _mm256_set1_ps(ray.Origin.Y);
+	const __m256 rayPosZ = _mm256_set1_ps(ray.Origin.Z);
 
-	union { __m256d distances[MAXSIZE / NROFLANES]; double dists[MAXSIZE]; };
+	union { float dists[MAXSIZE]; __m256 distances[MAXSIZE / NROFLANES]; };
 
 	for (int i = 0; i < count; i++)
 	{
-		// Vector3D e1 = triangle.Vertices[1].Position - triangle.Vertices[0].Position;
-		const __m256d e1X = edge1X4[i];
-		const __m256d e1Y = edge1Y4[i];
-		const __m256d e1Z = edge1Z4[i];
+		// Vector3F e1 = triangle.Vertices[1].Position - triangle.Vertices[0].Position;
+		const __m256 e1X = edge1X8[i];
+		const __m256 e1Y = edge1Y8[i];
+		const __m256 e1Z = edge1Z8[i];
 
-		// Vector3D e2 = triangle.Vertices[2].Position - triangle.Vertices[0].Position;
-		const __m256d e2X = edge2X4[i];
-		const __m256d e2Y = edge2Y4[i];
-		const __m256d e2Z = edge2Z4[i];
+		// Vector3F e2 = triangle.Vertices[2].Position - triangle.Vertices[0].Position;
+		const __m256 e2X = edge2X8[i];
+		const __m256 e2Y = edge2Y8[i];
+		const __m256 e2Z = edge2Z8[i];
 
-		// Vector3D p = ray.Direction.Cross(e2);
-		const __m256d pX = _mm256_sub_pd(_mm256_mul_pd(rayDirY, e2Z), _mm256_mul_pd(rayDirZ, e2Y));
-		const __m256d pY = _mm256_sub_pd(_mm256_mul_pd(rayDirZ, e2X), _mm256_mul_pd(rayDirX, e2Z));
-		const __m256d pZ = _mm256_sub_pd(_mm256_mul_pd(rayDirX, e2Y), _mm256_mul_pd(rayDirY, e2X));
+		// Vector3F p = ray.Direction.Cross(e2);
+		const __m256 pX = _mm256_sub_ps(_mm256_mul_ps(rayDirY, e2Z), _mm256_mul_ps(rayDirZ, e2Y));
+		const __m256 pY = _mm256_sub_ps(_mm256_mul_ps(rayDirZ, e2X), _mm256_mul_ps(rayDirX, e2Z));
+		const __m256 pZ = _mm256_sub_ps(_mm256_mul_ps(rayDirX, e2Y), _mm256_mul_ps(rayDirY, e2X));
 
-		// double det = e1.Dot(p);
-		const __m256d det = _mm256_add_pd(_mm256_mul_pd(e1X, pX), _mm256_add_pd(_mm256_mul_pd(e1Y, pY), _mm256_mul_pd(e1Z, pZ)));
+		// float det = e1.Dot(p);
+		const __m256 det = _mm256_add_ps(_mm256_mul_ps(e1X, pX), _mm256_add_ps(_mm256_mul_ps(e1Y, pY), _mm256_mul_ps(e1Z, pZ)));
 
 		// if (det > -EPSILON && det < EPSILON)
 		//     return false;
-		__m256d mask = _mm256_or_pd(_mm256_cmp_pd(det, _mm256_set1_pd(-EPSILON), _CMP_LE_OS), _mm256_cmp_pd(det, _mm256_set1_pd(EPSILON), _CMP_GE_OS));
+		__m256 mask = _mm256_or_ps(_mm256_cmp_ps(det, _mm256_set1_ps(-EPSILON), _CMP_LE_OS), _mm256_cmp_ps(det, _mm256_set1_ps(EPSILON), _CMP_GE_OS));
 
-		// double invDet = 1 / det;
-		const __m256d invDet = _mm256_div_pd(_mm256_set1_pd(1.0), det);
+		// float invDet = 1 / det;
+		const __m256 invDet = _mm256_div_ps(_mm256_set1_ps(1.0f), det);
 
-		// Vector3D r = ray.Origin - triangle.Vertices[0].Position;
-		const __m256d rX = _mm256_sub_pd(rayPosX, vert0X4[i]);
-		const __m256d rY = _mm256_sub_pd(rayPosY, vert0Y4[i]);
-		const __m256d rZ = _mm256_sub_pd(rayPosZ, vert0Z4[i]);
+		// Vector3F r = ray.Origin - triangle.Vertices[0].Position;
+		const __m256 rX = _mm256_sub_ps(rayPosX, vert0X8[i]);
+		const __m256 rY = _mm256_sub_ps(rayPosY, vert0Y8[i]);
+		const __m256 rZ = _mm256_sub_ps(rayPosZ, vert0Z8[i]);
 
-		// double u = r.Dot(p) * invDet;
-		const __m256d u = _mm256_mul_pd(invDet, _mm256_add_pd(_mm256_mul_pd(rX, pX), _mm256_add_pd(_mm256_mul_pd(rY, pY), _mm256_mul_pd(rZ, pZ))));
+		// float u = r.Dot(p) * invDet;
+		const __m256 u = _mm256_mul_ps(invDet, _mm256_add_ps(_mm256_mul_ps(rX, pX), _mm256_add_ps(_mm256_mul_ps(rY, pY), _mm256_mul_ps(rZ, pZ))));
 
 		// if (u < 0 || u > 1)
 		//	   return false;
-		mask = _mm256_and_pd(mask, _mm256_cmp_pd(u, _mm256_setzero_pd(), _CMP_GE_OS));
+		mask = _mm256_and_ps(mask, _mm256_cmp_ps(u, _mm256_setzero_ps(), _CMP_GE_OS));
 
-		// Vector3D q = r.Cross(e1);
-		const __m256d qX = _mm256_sub_pd(_mm256_mul_pd(rY, e1Z), _mm256_mul_pd(rZ, e1Y));
-		const __m256d qY = _mm256_sub_pd(_mm256_mul_pd(rZ, e1X), _mm256_mul_pd(rX, e1Z));
-		const __m256d qZ = _mm256_sub_pd(_mm256_mul_pd(rX, e1Y), _mm256_mul_pd(rY, e1X));
+		// Vector3F q = r.Cross(e1);
+		const __m256 qX = _mm256_sub_ps(_mm256_mul_ps(rY, e1Z), _mm256_mul_ps(rZ, e1Y));
+		const __m256 qY = _mm256_sub_ps(_mm256_mul_ps(rZ, e1X), _mm256_mul_ps(rX, e1Z));
+		const __m256 qZ = _mm256_sub_ps(_mm256_mul_ps(rX, e1Y), _mm256_mul_ps(rY, e1X));
 
-		// double v = ray.Direction.Dot(q) * invDet;
-		const __m256d v = _mm256_mul_pd(invDet, _mm256_add_pd(_mm256_mul_pd(rayDirX, qX), _mm256_add_pd(_mm256_mul_pd(rayDirY, qY), _mm256_mul_pd(rayDirZ, qZ))));
+		// float v = ray.Direction.Dot(q) * invDet;
+		const __m256 v = _mm256_mul_ps(invDet, _mm256_add_ps(_mm256_mul_ps(rayDirX, qX), _mm256_add_ps(_mm256_mul_ps(rayDirY, qY), _mm256_mul_ps(rayDirZ, qZ))));
 
 		// if (v < 0 || u + v > 1)
 		//     return false;
-		mask = _mm256_and_pd(mask, _mm256_and_pd(_mm256_cmp_pd(v, _mm256_setzero_pd(), _CMP_GE_OS), _mm256_cmp_pd(_mm256_add_pd(u, v), _mm256_set1_pd(1.0), _CMP_LE_OS)));
+		mask = _mm256_and_ps(mask, _mm256_and_ps(_mm256_cmp_ps(v, _mm256_setzero_ps(), _CMP_GE_OS), _mm256_cmp_ps(_mm256_add_ps(u, v), _mm256_set1_ps(1.0f), _CMP_LE_OS)));
 
-		// double tt = e2.Dot(q) * invDet;
-		const __m256d tt = _mm256_mul_pd(invDet, _mm256_add_pd(_mm256_mul_pd(e2X, qX), _mm256_add_pd(_mm256_mul_pd(e2Y, qY), _mm256_mul_pd(e2Z, qZ))));
+		// float tt = e2.Dot(q) * invDet;
+		const __m256 tt = _mm256_mul_ps(invDet, _mm256_add_ps(_mm256_mul_ps(e2X, qX), _mm256_add_ps(_mm256_mul_ps(e2Y, qY), _mm256_mul_ps(e2Z, qZ))));
 
 		// if (tt > EPSILON)
 		// {
@@ -179,11 +179,11 @@ Triangle* OctreeLeaf::Query(const Ray& ray, double& t) const
 		// }
 		//
 		// return false;
-		distances[i] = _mm256_and_pd(tt, mask);
+		distances[i] = _mm256_and_ps(tt, mask);
 	}
 
 	Triangle* triangle = nullptr;
-	for (int i = 0; i < count * 4; i++)
+	for (int i = 0; i < count * NROFLANES; i++)
 		if (dists[i] < t && dists[i] > EPSILON)
 		{
 			t = dists[i];

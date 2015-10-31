@@ -148,7 +148,7 @@ void ObjReader::parseMaterial(CVSIterator& it)
 //--------------------------------------------------------------------------------
 void ObjReader::parseNormal(CVSIterator& it)
 {
-  Vector3D normal;
+  Vector3F normal;
 
   normal.X = parseDouble(it);
   normal.Y = parseDouble(++it);
@@ -160,7 +160,7 @@ void ObjReader::parseNormal(CVSIterator& it)
 //--------------------------------------------------------------------------------
 void ObjReader::parseTexCoords(CVSIterator& it)
 {
-  Vector2D texCoord;
+  Vector2F texCoord;
 
   texCoord.X = parseDouble(it);
   texCoord.Y = parseDouble(++it);
@@ -171,7 +171,7 @@ void ObjReader::parseTexCoords(CVSIterator& it)
 //--------------------------------------------------------------------------------
 void ObjReader::parseVertex(CVSIterator& it)
 {
-  Vector3D position;
+  Vector3F position;
 
   position.X = parseDouble(it);
   position.Y = parseDouble(++it);

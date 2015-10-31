@@ -4,8 +4,8 @@
 #include "Triangle.h"
 #include "BoundingBox.h"
 
-#define EPSILON 0.000001
+#define EPSILON 0.000001f
 
-bool Intersects(const Ray& ray, const Triangle& triangle, double& t);
-bool Intersects(const Ray& ray, const BoundingBox& bb, double& t);
+bool Intersects(const Ray& ray, const Triangle& triangle, float& t);
+bool Intersects(const Ray& ray, const BoundingBox& bb, float& t);
 bool Intersects(const Triangle& triangle, const BoundingBox& boundingBox);

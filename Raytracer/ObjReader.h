@@ -3,12 +3,12 @@
 #include "Reader.h"
 #include "Object.h"
 #include "Triangle.h"
-#include "Vector3D.h"
+#include "Vector3F.h"
 
 #include <map>
 #include <vector>
 
-typedef std::vector<Vector3D> Vector3List;
+typedef std::vector<Vector3F> Vector3List;
 
 namespace ObjType
 {
@@ -49,9 +49,9 @@ private:
   void reset();
 
 private:
-  std::vector<Vector3D> normals_;
-  std::vector<Vector3D> positions_;
-  std::vector<Vector2D> texCoords_;
+  std::vector<Vector3F> normals_;
+  std::vector<Vector3F> positions_;
+  std::vector<Vector2F> texCoords_;
 
   std::map<std::string, Material> materials_;
   std::vector<Object*> objects_;

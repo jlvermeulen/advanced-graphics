@@ -2,17 +2,17 @@
 #include <limits>
 
 BoundingBox::BoundingBox() { }
-BoundingBox::BoundingBox(const Vector3D& center, const Vector3D& halfsize) : Center(center), Halfsize(halfsize) { }
+BoundingBox::BoundingBox(const Vector3F& center, const Vector3F& halfsize) : Center(center), Halfsize(halfsize) { }
 
 BoundingBox BoundingBox::FromTriangles(const std::vector<Triangle*>& triangles)
 {
-	Vector3D min(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
-	Vector3D max(-std::numeric_limits<double>::max(), -std::numeric_limits<double>::max(), -std::numeric_limits<double>::max());
+	Vector3F min(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+	Vector3F max(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
 
-	for (int i = 0; i < triangles.size(); i++)
-		for (int j = 0; j < 3; j++)
+	for (unsigned int i = 0; i < triangles.size(); i++)
+		for (unsigned int j = 0; j < 3; j++)
 		{
-			const Vector3D& v = triangles[i]->Vertices[j].Position;
+			const Vector3F& v = triangles[i]->Vertices[j].Position;
 			for (int j = 0; j < 3; j++)
 			{
 				if (v[j] < min[j])

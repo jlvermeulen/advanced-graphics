@@ -5,15 +5,15 @@
 #include "BoundingBox.h"
 #include "Ray.h"
 
-#define MAXSIZE 64
-#define NROFLANES 4
+#define MAXSIZE 128
+#define NROFLANES 8
 
 class OctreeNode
 {
 	friend class GLWidget;
 
 public:
-	virtual Triangle* Query(const Ray& ray, double& t) const = 0;
+	virtual Triangle* Query(const Ray& ray, float& t) const = 0;
 
 protected:
 	BoundingBox bb;
@@ -24,34 +24,39 @@ class OctreeInternal : public OctreeNode
 public:
 	OctreeInternal(const std::vector<Triangle*>& triangles, const BoundingBox& bb, unsigned int minTriangles, unsigned int maxDepth);
 	~OctreeInternal();
-	Triangle* Query(const Ray& ray, double& t) const;
+	Triangle* Query(const Ray& ray, float& t) const;
 
 	OctreeNode** children;
 };
 
+__declspec(align(32))
 class OctreeLeaf : public OctreeNode
 {
 public:
 	OctreeLeaf(const std::vector<Triangle*>& triangles, const BoundingBox& bb);
-	Triangle* Query(const Ray& ray, double& t) const;
+	Triangle* Query(const Ray& ray, float& t) const;
 
 	int count;
 	Triangle* triangles[MAXSIZE];
 
 	// Vertices[0]
-	union { double vert0X[MAXSIZE]; __m256d vert0X4[MAXSIZE / NROFLANES]; };
-	union { double vert0Y[MAXSIZE]; __m256d vert0Y4[MAXSIZE / NROFLANES]; };
-	union { double vert0Z[MAXSIZE]; __m256d vert0Z4[MAXSIZE / NROFLANES]; };
+	union { float vert0X[MAXSIZE]; __m256 vert0X8[MAXSIZE / NROFLANES]; };
+	union { float vert0Y[MAXSIZE]; __m256 vert0Y8[MAXSIZE / NROFLANES]; };
+	union { float vert0Z[MAXSIZE]; __m256 vert0Z8[MAXSIZE / NROFLANES]; };
 
 	// Vertices[1] - Vertices[0]
-	union { double edge1X[MAXSIZE]; __m256d edge1X4[MAXSIZE / NROFLANES]; };
-	union { double edge1Y[MAXSIZE]; __m256d edge1Y4[MAXSIZE / NROFLANES]; };
-	union { double edge1Z[MAXSIZE]; __m256d edge1Z4[MAXSIZE / NROFLANES]; };
+	union { float edge1X[MAXSIZE]; __m256 edge1X8[MAXSIZE / NROFLANES]; };
+	union { float edge1Y[MAXSIZE]; __m256 edge1Y8[MAXSIZE / NROFLANES]; };
+	union { float edge1Z[MAXSIZE]; __m256 edge1Z8[MAXSIZE / NROFLANES]; };
 
 	// Vertices[2] - Vertices[0]
-	union { double edge2X[MAXSIZE]; __m256d edge2X4[MAXSIZE / NROFLANES]; };
-	union { double edge2Y[MAXSIZE]; __m256d edge2Y4[MAXSIZE / NROFLANES]; };
-	union { double edge2Z[MAXSIZE]; __m256d edge2Z4[MAXSIZE / NROFLANES]; };
+	union { float edge2X[MAXSIZE]; __m256 edge2X8[MAXSIZE / NROFLANES]; };
+	union { float edge2Y[MAXSIZE]; __m256 edge2Y8[MAXSIZE / NROFLANES]; };
+	union { float edge2Z[MAXSIZE]; __m256 edge2Z8[MAXSIZE / NROFLANES]; };
+
+	// crazy shit to ensure alignment
+	void* operator new(size_t i) { return _mm_malloc(i, 32); }
+	void operator delete(void* p) { _mm_free(p); }
 };
 
 class Octree
@@ -63,7 +68,7 @@ public:
 	Octree(const std::vector<Triangle*>& triangles, int minTriangles, int maxDepth);
 	~Octree();
 
-	Triangle* Query(const Ray& ray, double& t) const;
+	Triangle* Query(const Ray& ray, float& t) const;
 
 private:
 	OctreeNode* root;
