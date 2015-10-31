@@ -20,7 +20,7 @@ ObjReader::~ObjReader()
 }
 
 //--------------------------------------------------------------------------------
-std::deque<Object> ObjReader::parseFile(const char* fileName)
+std::vector<Object*> ObjReader::parseFile(const char* fileName)
 {
   // Out with the old
   reset();
@@ -84,7 +84,7 @@ void ObjReader::parseLine(const std::string& path, const std::vector<std::string
       if (combined_)
       {
         // Create empty object
-        objects_.push_back(Object());
+        objects_.push_back(new Object());
 
         combined_ = false;
       }
@@ -124,7 +124,7 @@ void ObjReader::parseFace(CVSIterator& it)
   }
 
   // Add triangle
-  objects_.back().triangles.push_back(Triangle(vertices));
+  objects_.back()->triangles.push_back(new Triangle(vertices));
 }
 
 //--------------------------------------------------------------------------------
@@ -142,7 +142,7 @@ void ObjReader::parseMaterial(CVSIterator& it)
 {
   std::string name = *it;
 
-  objects_.back().material = materials_.at(name);
+  objects_.back()->material = materials_.at(name);
 }
 
 //--------------------------------------------------------------------------------

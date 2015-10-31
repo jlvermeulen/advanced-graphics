@@ -3,8 +3,6 @@
 #include <cmath>
 #include "Intersections.h"
 
-#define EPSILON 0.000001
-
 bool Intersects(const Ray& ray, const BoundingBox& bb, double& t)
 {
 	Vector3D lb = bb.Center - bb.Halfsize - ray.Origin, rt = bb.Center + bb.Halfsize - ray.Origin;

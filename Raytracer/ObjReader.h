@@ -5,7 +5,6 @@
 #include "Triangle.h"
 #include "Vector3D.h"
 
-#include <deque>
 #include <map>
 #include <vector>
 
@@ -33,7 +32,7 @@ public:
   ~ObjReader();
 
 public:
-  std::deque<Object> parseFile(const char* fileName);
+  std::vector<Object*> parseFile(const char* fileName);
   void parseLine(const std::string& path, const std::vector<std::string>& segments);
 
   void parseLibrary(const std::string& path, CVSIterator& it);
@@ -50,12 +49,12 @@ private:
   void reset();
 
 private:
-  std::deque<Vector3D> normals_;
-  std::deque<Vector3D> positions_;
-  std::deque<Vector2D> texCoords_;
+  std::vector<Vector3D> normals_;
+  std::vector<Vector3D> positions_;
+  std::vector<Vector2D> texCoords_;
 
   std::map<std::string, Material> materials_;
-  std::deque<Object> objects_;
+  std::vector<Object*> objects_;
 
   bool combined_;
 };

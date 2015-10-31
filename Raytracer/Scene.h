@@ -7,7 +7,6 @@
 #include "Octree.h"
 #include "Triangle.h"
 
-#include <deque>
 #include <vector>
 #include <utility>
 #include <tuple>
@@ -47,32 +46,35 @@ public:
 	Scene();
 	~Scene();
 
-	bool Render(unsigned char* imageData, int minTriangles, int maxDepth, int samplesPerPixel, double sigma, bool useDoF);
+	void PreRender(int minTriangles, int maxDepth);
+	void Render(unsigned char* imageData, int samplesPerPixel, double sigma, bool useDoF);
+	void PostRender();
+
 	void LoadDefaultScene();
 	void LoadDefaultScene2();
 	void LoadDefaultScene3();
 	void LoadDefaultScene4();
 	void LoadDefaultScene5();
 	void LoadDefaultScene6();
+	void Clear();
 
 private:
 	ColorD TraceRay(const Ray& ray, bool nee);
-	ColorD ComputeRadiance(const Vector3D& point, const Vector3D& in, const Triangle& triangle, const Material& material, unsigned int depth, bool nee);
+	ColorD ComputeRadiance(const Vector3D& point, const Vector3D& in, Triangle* triangle, const Material& material, unsigned int depth, bool nee);
 	ColorD DirectIllumination(const Vector3D& point, const Vector3D& in, const Vector3D& normal, const Material& material);
-	ColorD IndirectIllumination(Vector3D point, const Vector3D& in, const Vector3D& triangle, const Material& material, unsigned int depth, bool nee);
+	ColorD IndirectIllumination(Vector3D point, const Vector3D& in, const Vector3D& normal, const Material& material, unsigned int depth, bool nee);
 
 	void TracePixels(std::pair<ColorD, double>* pixelData, int samplesPerPixel, double sigma, bool useDoF);
 
 	double GaussianWeight(double dx, double dy, double sigma) const;
 
-	std::pair<Ray, const Triangle&>* SampleLight(const Vector3D& hitPoint, double& weight);
-	bool Scene::FirstHitInfo(const Ray& ray, double& time, Triangle& triangle, Material& mat) const;
+	std::pair<Ray, Triangle*>* SampleLight(const Vector3D& hitPoint, double& weight);
+	Triangle* FirstHitInfo(const Ray& ray, double& time, Material& mat) const;
 
 public:
 	Camera camera;
-	std::deque<Object> objects;
-	Object checkerboard;
-	std::deque<Object> lights;
+	std::vector<Object*> objects;
+	std::vector<Object*> lights;
 	std::uniform_real_distribution<double> dist;
 	std::mt19937 gen;
 };

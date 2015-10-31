@@ -1,6 +1,6 @@
 #pragma once
 
-#include <deque>
+#include <vector>
 #include <limits>
 #include "Vector3D.h"
 #include "Triangle.h"
@@ -13,7 +13,7 @@ public:
 	BoundingBox();
 	BoundingBox(const Vector3D& center, const Vector3D& halfsize);
 
-	static BoundingBox FromTriangles(const std::deque<Triangle>& triangles);
+	static BoundingBox FromTriangles(const std::vector<Triangle*> & triangles);
 
 private:
 };
