@@ -1201,8 +1201,8 @@ void Scene::LoadDefaultScene6()
 	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
-			objects[nr]->triangles[i]->Vertices[j].Position *= 10;
-			objects[nr]->triangles[i]->Vertices[j].Position.Y -= 5;
+			objects[nr]->triangles[i]->Vertices[j].Position *= 10 * 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Y -= 5 * 5;
 		}
 		objects[nr]->triangles[i]->PreCalc();
 	}
@@ -1219,8 +1219,9 @@ void Scene::LoadDefaultScene6()
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
 			objects[nr]->triangles[i]->Vertices[j].Normal *= mat;
 
-			objects[nr]->triangles[i]->Vertices[j].Position.Y += 0.27f;
-			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.1f;
+			objects[nr]->triangles[i]->Vertices[j].Position *= 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Y += 0.27f * 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.1f * 5;
 		}
 		objects[nr]->triangles[i]->PreCalc();
 	}
@@ -1234,15 +1235,15 @@ void Scene::LoadDefaultScene6()
 	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
-			objects[nr]->triangles[i]->Vertices[j].Position.X *= 10;
-			objects[nr]->triangles[i]->Vertices[j].Position.Y *= 10;
-			objects[nr]->triangles[i]->Vertices[j].Position.Z /= 8;
+			objects[nr]->triangles[i]->Vertices[j].Position.X *= 10 * 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Y *= 10 * 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Z *= 0.625f;
 
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
 			objects[nr]->triangles[i]->Vertices[j].Normal *= mat;
 
-			objects[nr]->triangles[i]->Vertices[j].Position.Y += 5.0f;
-			objects[nr]->triangles[i]->Vertices[j].Position.Z += 1.0f;
+			objects[nr]->triangles[i]->Vertices[j].Position.Y += 5.0f * 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Z += 1.0f * 5;
 		}
 		objects[nr]->triangles[i]->PreCalc();
 	}
@@ -1255,10 +1256,10 @@ void Scene::LoadDefaultScene6()
 	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
-			objects[nr]->triangles[i]->Vertices[j].Position /= 4;
-			objects[nr]->triangles[i]->Vertices[j].Position.X += 0.3f;
-			objects[nr]->triangles[i]->Vertices[j].Position.Y += 0.25f;
-			objects[nr]->triangles[i]->Vertices[j].Position.Z += 0.2f;
+			objects[nr]->triangles[i]->Vertices[j].Position /= 0.8;
+			objects[nr]->triangles[i]->Vertices[j].Position.X += 0.3f * 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Y += 0.25f * 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Z += 0.2f * 5;
 		}
 		objects[nr]->triangles[i]->PreCalc();
 	}
@@ -1271,10 +1272,10 @@ void Scene::LoadDefaultScene6()
 	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
-			objects[nr]->triangles[i]->Vertices[j].Position /= 5;
-			objects[nr]->triangles[i]->Vertices[j].Position.X += 0.6f;
-			objects[nr]->triangles[i]->Vertices[j].Position.Y += 0.2f;
-			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.1f;
+			objects[nr]->triangles[i]->Vertices[j].Position /= 1.0f;
+			objects[nr]->triangles[i]->Vertices[j].Position.X += 0.6f * 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Y += 0.2f * 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.1f * 5;
 		}
 		objects[nr]->triangles[i]->PreCalc();
 	}
@@ -1288,23 +1289,23 @@ void Scene::LoadDefaultScene6()
 	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
-			objects[nr]->triangles[i]->Vertices[j].Position.X *= 5;
-			objects[nr]->triangles[i]->Vertices[j].Position.Y /= 2;
-			objects[nr]->triangles[i]->Vertices[j].Position.Z *= 2;
+			objects[nr]->triangles[i]->Vertices[j].Position.X *= 5 * 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Y /= 0.4f;
+			objects[nr]->triangles[i]->Vertices[j].Position.Z *= 2 * 5;
 
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
 			objects[nr]->triangles[i]->Vertices[j].Normal *= mat;
 
-			objects[nr]->triangles[i]->Vertices[j].Position.X -= 0.5f;
-			objects[nr]->triangles[i]->Vertices[j].Position.Y += 4;
-			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.5f;
+			objects[nr]->triangles[i]->Vertices[j].Position.X -= 0.5f * 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Y += 4.0f * 5;
+			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.5f * 5;
 		}
 		objects[nr]->triangles[i]->PreCalc();
 	}
 	lights.push_back(objects[nr]);
 	++nr;
 
-	camera = Camera(Vector3F(0.3f, 1.25f, -1.5f), Vector3F::Normalise(Vector3F(0, -1.2f, 1.75f)), Vector3F(0, 1, 0));
+	camera = Camera(Vector3F(0.3f * 5, 1.25f * 5, -1.5f * 5), Vector3F::Normalise(Vector3F(0, -1.2f, 1.75f)), Vector3F(0, 1, 0));
 
 	// hack for initial camera transform bug
 	camera.RotateX(0.1f);
