@@ -9,7 +9,7 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QProgressDialog>
-#include <Vector3D.h>
+#include <Vector3F.h>
 #include <queue>
 
 //--------------------------------------------------------------------------------
@@ -45,28 +45,22 @@ void GLWidget::loadScene(QString& fileName)
   scene.objects = reader.parseFile(fileName.toUtf8().data());
 
   // Add lights
-  //scene.lights.push_back(Light(Vector3D(-3.0, -5.0, -4.0), ColorD(15.0, 15.0, 15.0)));
-  //scene.lights.push_back(Light(Vector3D(3.0, 5.0, 4.0), ColorD(15.0, 15.0, 15.0)));
+  //scene.lights.push_back(Light(Vector3F(-3.0, -5.0, -4.0), Color3F(15.0, 15.0, 15.0)));
+  //scene.lights.push_back(Light(Vector3F(3.0, 5.0, 4.0), Color3F(15.0, 15.0, 15.0)));
 }
 
 //--------------------------------------------------------------------------------
 int GLWidget::renderScene(uchar* imageData)
 {
   QTime timer;
-  scene.BuildTree(minTriangles_, maxDepth_);
+  scene.PreRender(minTriangles_, maxDepth_);
+
   timer.start();
-  scene.Render(imageData, minTriangles_, maxDepth_, numberOfRays_, sigma_, useDoF_);
+  scene.Render(imageData, numberOfRays_, sigma_, useDoF_);
+  int elapsed = timer.elapsed();
 
-
-  return timer.elapsed();
-
-  // Progress dialog slows it down enormously, so left it out..
-  // Show rendering progress
-  //int numIterations = scene.camera.Width * scene.camera.Height;
-
-  //QProgressDialog progressDialog("Rendering in progress...", "Cancel", 0, numIterations, parentWidget());
-  //progressDialog.setWindowModality(Qt::WindowModal);
-  //progressDialog.close();
+  scene.PostRender();
+  return elapsed;
 }
 
 //--------------------------------------------------------------------------------
@@ -124,7 +118,7 @@ void GLWidget::paintGL()
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  Vector3D viewPoint = scene.camera.Eye() + scene.camera.Focus();
+  Vector3F viewPoint = scene.camera.Eye() + scene.camera.Focus();
 
   // Camera position
   glLoadIdentity();
@@ -223,58 +217,58 @@ void GLWidget::glPerspective(double fovY, double aspect, double zNear, double zF
 //--------------------------------------------------------------------------------
 void GLWidget::drawBoundingBoxes() const
 {
-  glEnableClientState(GL_VERTEX_ARRAY);
+  //glEnableClientState(GL_VERTEX_ARRAY);
 
-  for (const Object& obj : scene.objects)
-  {
-    // Initialize queue
-    std::queue<OctreeNode*> q;
-    q.push(&obj.octree->root);
+  //for (const Object& obj : scene.objects)
+  //{
+  //  // Initialize queue
+  //  std::queue<OctreeNode*> q;
+  //  q.push(&obj.octree->root);
 
-    glColor3f(0, 1, 1);
+  //  glColor3f(0, 1, 1);
 
-    GLubyte indices[] = { // 24 indices
-      0, 1, 0, 2,
-      0, 4, 1, 3,
-      1, 5, 2, 3,
-      2, 6, 3, 7,
-      4, 5, 4, 6,
-      5, 7, 6, 7
-    };
+  //  GLubyte indices[] = { // 24 indices
+  //    0, 1, 0, 2,
+  //    0, 4, 1, 3,
+  //    1, 5, 2, 3,
+  //    2, 6, 3, 7,
+  //    4, 5, 4, 6,
+  //    5, 7, 6, 7
+  //  };
 
-    while (!q.empty())
-    {
-      OctreeNode* node = q.front();
-      q.pop();
+  //  while (!q.empty())
+  //  {
+  //    OctreeNode* node = q.front();
+  //    q.pop();
 
-      BoundingBox bb = node->bb;
+  //    BoundingBox bb = node->bb;
 
-      GLfloat vertices[24]; // 8 times 3 coordinates
+  //    GLfloat vertices[24]; // 8 times 3 coordinates
 
-      for (int i = 0; i < 8; i++)
-      {
-        float x = i & 4 ? bb.Halfsize.X : -bb.Halfsize.X;
-        float y = i & 2 ? bb.Halfsize.Y : -bb.Halfsize.Y;
-        float z = i & 1 ? bb.Halfsize.Z : -bb.Halfsize.Z;
+  //    for (int i = 0; i < 8; i++)
+  //    {
+  //      float x = i & 4 ? bb.Halfsize.X : -bb.Halfsize.X;
+  //      float y = i & 2 ? bb.Halfsize.Y : -bb.Halfsize.Y;
+  //      float z = i & 1 ? bb.Halfsize.Z : -bb.Halfsize.Z;
 
-        vertices[i * 3] = bb.Center.X + x;
-        vertices[i * 3 + 1] = bb.Center.Y + y;
-        vertices[i * 3 + 2] = bb.Center.Z + z;
-      }
+  //      vertices[i * 3] = bb.Center.X + x;
+  //      vertices[i * 3 + 1] = bb.Center.Y + y;
+  //      vertices[i * 3 + 2] = bb.Center.Z + z;
+  //    }
 
-      glVertexPointer(3, GL_FLOAT, 0, vertices);
+  //    glVertexPointer(3, GL_FLOAT, 0, vertices);
 
-      glDrawElements(GL_LINES, 24, GL_UNSIGNED_BYTE, indices);
+  //    glDrawElements(GL_LINES, 24, GL_UNSIGNED_BYTE, indices);
 
-	  if (node->children == nullptr)
-		  continue;
+	 // if (node->children == nullptr)
+		//  continue;
 
-      for (int i = 0; i < 8; ++i)
-        q.push(node->children[i]);
-    }
-  }
+  //    for (int i = 0; i < 8; ++i)
+  //      q.push(node->children[i]);
+  //  }
+  //}
 
-  glDisableClientState(GL_VERTEX_ARRAY);
+  //glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 //--------------------------------------------------------------------------------
@@ -282,26 +276,23 @@ void GLWidget::drawCameraRay() const
 {
   glBegin(GL_LINES);
 
-  Triangle minTri;
+  Triangle* minTri;
   double minTime = std::numeric_limits<double>::max();
 
-  Triangle tri;
-  double time;
-  bool hit = false;
-
-  for (const Object& obj : scene.objects)
+  for (Object* obj : scene.objects)
   {
-    if (obj.octree->Query(debugRay_, tri, time) && time < minTime)
+	float time;
+	Triangle* tri = obj->octree->Query(debugRay_, time);
+    if (tri != nullptr && time < minTime)
     {
-      hit = true;
       minTri = tri;
       minTime = time;
     }
   }
 
-  if (hit)
+  if (minTri != nullptr)
   {
-    Vector3D point = debugRay_.Origin + minTime * debugRay_.Direction;
+    Vector3F point = debugRay_.Origin + minTime * debugRay_.Direction;
     glColor3f(1, 0, 0);
     double eps = 0.0025;
     for (int i = 0; i < 8; i++)
@@ -309,7 +300,7 @@ void GLWidget::drawCameraRay() const
       double x = i & 1 ? eps : -eps;
       double y = i & 2 ? eps : -eps;
       double z = i & 4 ? eps : -eps;
-      drawLine(point, Vector3D(point.X + x, point.Y + y, point.Z + z));
+      drawLine(point, Vector3F(point.X + x, point.Y + y, point.Z + z));
     }
     glColor3f(0, 1, 0);
   }
@@ -324,7 +315,7 @@ void GLWidget::drawCameraRay() const
 }
 
 //--------------------------------------------------------------------------------
-void GLWidget::drawLine(const Vector3D& v1, const Vector3D& v2) const
+void GLWidget::drawLine(const Vector3F& v1, const Vector3F& v2) const
 {
   glVertex3f(v1.X, v1.Y, v1.Z);
   glVertex3f(v2.X, v2.Y, v2.Z);
@@ -335,13 +326,13 @@ void GLWidget::drawModel()
 {
   glBegin(GL_TRIANGLES);
 
-  for (const Object& obj : scene.objects)
+  for (Object* obj : scene.objects)
   {
-    for (const Triangle& triangle : obj.triangles)
+    for (const Triangle* triangle : obj->triangles)
     {
-      for (const Vertex& vertex : triangle.Vertices)
+      for (const Vertex& vertex : triangle->Vertices)
       {
-        glColor3f(obj.material.color.R, obj.material.color.G, obj.material.color.B);
+        glColor3f(obj->material.color.R, obj->material.color.G, obj->material.color.B);
         glNormal3f(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
         glVertex3f(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
       }

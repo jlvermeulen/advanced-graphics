@@ -76,7 +76,7 @@ protected:
 private:
   void drawBoundingBoxes() const;
   void drawCameraRay() const;
-  void drawLine(const Vector3D& v1, const Vector3D& v2) const;
+  void drawLine(const Vector3F& v1, const Vector3F& v2) const;
   void drawModel();
 
   // Rendering

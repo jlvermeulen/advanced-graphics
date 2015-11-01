@@ -1,19 +1,19 @@
 #pragma once
 
-#include "Vector3D.h"
+#include "Vector3F.h"
 
 #include <math.h>
 
 class Quaternion
 {
 public:
-  double X, Y, Z, W;
+  float X, Y, Z, W;
 
   Quaternion();
-  Quaternion(Vector3D xyz, double w);
-  Quaternion(double x, double y, double z, double w);
+  Quaternion(Vector3F xyz, float w);
+  Quaternion(float x, float y, float z, float w);
 
-  double length() const;
+  float length() const;
 
   void normalize();
   static Quaternion normalize(Quaternion quat);
@@ -22,8 +22,8 @@ public:
   static Quaternion conjugate(Quaternion quat);
 
   Quaternion& operator*=(const Quaternion& rhs);
-  Quaternion& operator/=(const double& rhs);
+  Quaternion& operator/=(const float& rhs);
 };
 
 inline Quaternion operator*(Quaternion lhs, const Quaternion& rhs) { return lhs *= rhs; }
-inline Quaternion operator/(Quaternion lhs, const double& rhs) { return lhs /= rhs; }
+inline Quaternion operator/(Quaternion lhs, const float& rhs) { return lhs /= rhs; }

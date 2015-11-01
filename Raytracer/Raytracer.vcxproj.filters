@@ -89,22 +89,13 @@
     <ClCompile Include="BoundingBox.cpp">
       <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
-    <ClCompile Include="ColorD.cpp">
-      <Filter>Source Files\Raytracer</Filter>
-    </ClCompile>
     <ClCompile Include="glWidget.cpp">
       <Filter>Source Files\Interface</Filter>
     </ClCompile>
     <ClCompile Include="Intersections.cpp">
       <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
-    <ClCompile Include="Matrix3x3D.cpp">
-      <Filter>Source Files\Raytracer</Filter>
-    </ClCompile>
     <ClCompile Include="Octree.cpp">
-      <Filter>Source Files\Raytracer</Filter>
-    </ClCompile>
-    <ClCompile Include="Vector3D.cpp">
       <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
     <ClCompile Include="window.cpp">
@@ -140,9 +131,6 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files\Raytracer\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Vector2D.cpp">
-      <Filter>Source Files\Raytracer</Filter>
-    </ClCompile>
     <ClCompile Include="Quaternion.cpp">
       <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
@@ -162,7 +150,19 @@
       <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
     <ClCompile Include="BoundingSphere.cpp">
-      <Filter>Generated Files</Filter>
+      <Filter>Source Files\Raytracer</Filter>
+    </ClCompile>
+    <ClCompile Include="Color3F.cpp">
+      <Filter>Source Files\Raytracer</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix3x3F.cpp">
+      <Filter>Source Files\Raytracer</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector2F.cpp">
+      <Filter>Source Files\Raytracer</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector3F.cpp">
+      <Filter>Source Files\Raytracer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -172,13 +172,7 @@
     <ClInclude Include="BoundingBox.h">
       <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
-    <ClInclude Include="ColorD.h">
-      <Filter>Header Files\Raytracer</Filter>
-    </ClInclude>
     <ClInclude Include="Intersections.h">
-      <Filter>Header Files\Raytracer</Filter>
-    </ClInclude>
-    <ClInclude Include="Matrix3x3D.h">
       <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
     <ClInclude Include="Octree.h">
@@ -214,9 +208,6 @@
     <ClInclude Include="Material.h">
       <Filter>Header Files\Raytracer\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Vector2D.h">
-      <Filter>Header Files\Raytracer</Filter>
-    </ClInclude>
     <ClInclude Include="Quaternion.h">
       <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
@@ -230,7 +221,19 @@
       <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
     <ClInclude Include="BoundingSphere.h">
-      <Filter>Generated Files</Filter>
+      <Filter>Header Files\Raytracer</Filter>
+    </ClInclude>
+    <ClInclude Include="Color3F.h">
+      <Filter>Header Files\Raytracer</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix3x3F.h">
+      <Filter>Header Files\Raytracer</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2F.h">
+      <Filter>Header Files\Raytracer</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector3F.h">
+      <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -263,9 +266,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Vector3D.h">
-      <Filter>Header Files\Raytracer</Filter>
-    </ClInclude>
     <ClInclude Include="Vertex.h">
       <Filter>Header Files\Raytracer</Filter>
     </ClInclude>

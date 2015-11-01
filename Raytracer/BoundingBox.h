@@ -1,21 +1,18 @@
 #pragma once
 
-#include <deque>
+#include <vector>
 #include <limits>
-#include "Vector3D.h"
+#include "Vector3F.h"
 #include "Triangle.h"
 
 struct BoundingBox
 {
 public:
-	Vector3D Center, Halfsize;
+	Vector3F Center, Halfsize;
 
 	BoundingBox();
-	BoundingBox(const Vector3D& center, const Vector3D& halfsize);
+	BoundingBox(const Vector3F& center, const Vector3F& halfsize);
 
-	static BoundingBox FromTriangles(const std::deque<Triangle>& triangles);
-	static BoundingBox FromTriangles(const std::deque<Triangle*>& triangles);
-	double SurfaceArea();
-
-private:
+	static BoundingBox FromTriangles(const std::vector<Triangle*> & triangles);
+	float SurfaceArea();
 };

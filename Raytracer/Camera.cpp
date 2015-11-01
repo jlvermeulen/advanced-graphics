@@ -3,27 +3,28 @@
 #include <Camera.h>
 #include <math.h>
 
-#define M_PI_180 M_PI/180.0
+#define M_PI_180 M_PI/180.0f
+
 
 //--------------------------------------------------------------------------------
 Camera::Camera() :
-  eye_(Vector3D(0, 0, 3)),
-  focus_(Vector3D::Forward),
-  right_(Vector3D::Right),
-  up_(Vector3D::Up),
+  eye_(Vector3F(0, 0, 3)),
+  focus_(Vector3F::Forward),
+  right_(Vector3F::Right),
+  up_(Vector3F::Up),
   Width(1280),
   Height(720),
   fovY_(40.0f),
   zNear_(0.1f),
   zFar_(20.0f),
   Aperture(3.0f),
-  FocalDepth(4.0)
+  FocalDepth(4.0f)
 {
 
 }
 
 //--------------------------------------------------------------------------------
-Camera::Camera(Vector3D eye, Vector3D focus, Vector3D up, int width, int height, float fovY, float zNear, float zFar, double aperture, double focalDepth) :
+Camera::Camera(Vector3F eye, Vector3F focus, Vector3F up, int width, int height, float fovY, float zNear, float zFar, float aperture, float focalDepth) :
   eye_(eye),
   focus_(focus),
   up_(up),
@@ -35,7 +36,7 @@ Camera::Camera(Vector3D eye, Vector3D focus, Vector3D up, int width, int height,
   Aperture(aperture),
   FocalDepth(focalDepth)
 {
-  right_ = Vector3D::Cross(focus_, up_);
+  right_ = Vector3F::Cross(focus_, up_);
 }
 
 //--------------------------------------------------------------------------------
@@ -63,13 +64,13 @@ void Camera::MoveUpward(const float& distance)
 }
 
 //--------------------------------------------------------------------------------
-void Camera::Rotate(const Vector3D& axis, float angle)
+void Camera::Rotate(const Vector3F& axis, float angle)
 {
   Quaternion rotation(
-    axis.X * sin(angle / 2),
-    axis.Y * sin(angle / 2),
-    axis.Z * sin(angle / 2),
-    cos(angle / 2)
+    axis.X * sinf(angle / 2),
+    axis.Y * sinf(angle / 2),
+    axis.Z * sinf(angle / 2),
+    cosf(angle / 2)
   );
 
   Quaternion view(
@@ -89,24 +90,24 @@ void Camera::Rotate(const Vector3D& axis, float angle)
 //--------------------------------------------------------------------------------
 void Camera::RotateX(float angle)
 {
-  //Rotate(Vector3D::Cross(focus_, up_), 0.01 * angle);
+  //Rotate(Vector3F::Cross(focus_, up_), 0.01f * angle);
 
-  focus_ = Vector3D::Normalise(focus_ * cos(angle * M_PI_180) + up_ * sin(angle * M_PI_180));
-  up_ = Vector3D::Cross(focus_, right_) * -1;
+  focus_ = Vector3F::Normalise(focus_ * cosf(angle * M_PI_180) + up_ * sinf(angle * M_PI_180));
+  up_ = Vector3F::Cross(focus_, right_) * -1;
 }
 
 //--------------------------------------------------------------------------------
 void Camera::RotateY(float angle)
 {
-  //Rotate(Vector3D::Up, 0.01 * angle);
+  //Rotate(Vector3F::Up, 0.01f * angle);
 
-  focus_ = Vector3D::Normalise(focus_ * cos(angle * M_PI_180) - right_ * sin(angle * M_PI_180));
-  right_ = Vector3D::Cross(focus_, up_);
+  focus_ = Vector3F::Normalise(focus_ * cosf(angle * M_PI_180) - right_ * sinf(angle * M_PI_180));
+  right_ = Vector3F::Cross(focus_, up_);
 }
 
 //--------------------------------------------------------------------------------
 void Camera::RotateZ(float angle)
 {
-  right_ = Vector3D::Normalise(right_ * cos(angle * M_PI_180) + up_ * sin(angle * M_PI_180));
-  up_ = Vector3D::Cross(focus_, right_) * -1;
+  right_ = Vector3F::Normalise(right_ * cosf(angle * M_PI_180) + up_ * sinf(angle * M_PI_180));
+  up_ = Vector3F::Cross(focus_, right_) * -1;
 }

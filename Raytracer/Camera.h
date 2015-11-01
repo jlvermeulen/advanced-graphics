@@ -1,32 +1,32 @@
 #pragma once
 
-#include "Vector3D.h"
+#include "Vector3F.h"
 #include "Quaternion.h"
 
 class Camera
 {
 public:
   Camera();
-  Camera(Vector3D eye, Vector3D focus, Vector3D up, int width = 1280, int height = 720, float fovY = 40.0, float zNear = 0.1, float zFar = 1000.0, double aperture = 3.0, double focalDepth = 4.0);
+  Camera(Vector3F eye, Vector3F focus, Vector3F up, int width = 1280, int height = 720, float fovY = 40.0f, float zNear = 0.1f, float zFar = 1000.0f, float aperture = 3.0f, float focalDepth = 4.0f);
   ~Camera();
 
 public:
   void MoveForward(const float& distance);
   void MoveRight(const float& distance);
   void MoveUpward(const float& distance);
-  void Rotate(const Vector3D& axis, float angle);
+  void Rotate(const Vector3F& axis, float angle);
   void RotateX(float angle);
   void RotateY(float angle);
   void RotateZ(float angle);
 
-  void setX(double x) { eye_.X = x; }
-  void setY(double y) { eye_.Y = y; }
-  void setZ(double z) { eye_.Z = z; }
+  void setX(float x) { eye_.X = x; }
+  void setY(float y) { eye_.Y = y; }
+  void setZ(float z) { eye_.Z = z; }
 
-  Vector3D Eye() const { return eye_; }
-  Vector3D Focus() const { return focus_; }
-  Vector3D Right() const { return right_; }
-  Vector3D Up() const { return up_;  }
+  Vector3F Eye() const { return eye_; }
+  Vector3F Focus() const { return focus_; }
+  Vector3F Right() const { return right_; }
+  Vector3F Up() const { return up_;  }
   float FovY() const { return fovY_; }
   float ZNear() const { return zNear_; }
   float ZFar() const { return zFar_; }
@@ -35,14 +35,14 @@ public:
   int Width;
   int Height;
 
-  double Aperture;
-  double FocalDepth;
+  float Aperture;
+  float FocalDepth;
 
 private:
-  Vector3D eye_;
-  Vector3D focus_;
-  Vector3D right_;
-  Vector3D up_;
+  Vector3F eye_;
+  Vector3F focus_;
+  Vector3F right_;
+  Vector3F up_;
 
   Quaternion orientation_;
   

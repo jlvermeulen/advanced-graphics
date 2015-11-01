@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ColorD.h"
+#include "Color3F.h"
 #include "Material.h"
 #include "Reader.h"
 
@@ -42,7 +42,7 @@ private:
   void parseSpecularWeight(CVSIterator& it);
   void parseTransparency(CVSIterator& it);
 
-  ColorD parseColor(CVSIterator& it) const;
+  Color3F parseColor(CVSIterator& it) const;
   MtlType::MtlType parseType(const std::string& type) const;
 
 private:

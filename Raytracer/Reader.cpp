@@ -13,11 +13,11 @@ Reader::~Reader()
 }
 
 //--------------------------------------------------------------------------------
-double Reader::parseDouble(const CVSIterator& it) const
+float Reader::parseDouble(const CVSIterator& it) const
 {
   std::string s = it->c_str();
   std::istringstream os(s);
-  double d;
+  float d;
   os >> d;
   return d;
 }

@@ -1,9 +1,7 @@
 #include "BVHTree.h"
-#include "BoundingBox.h"
 #include "Intersections.h"
-#include <stdexcept>
 
-BVHTree::BVHTree(const std::deque<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth)
+BVHTree::BVHTree(const std::vector<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth)
 {
 	root = SplitNode(triangles, minTriangles, maxDepth, BoundingBox::FromTriangles(triangles));
 }
@@ -12,7 +10,7 @@ BVHTree::~BVHTree()
 {
 }
 
-BVHTreeNode* BVHTree::CreateNodeX(const std::deque<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth)
+BVHTreeNode* BVHTree::CreateNodeX(const std::vector<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth)
 {
 	BoundingBox bb = BoundingBox::FromTriangles(triangles);
 	BVHTreeNode* res = new BVHTreeNode();
@@ -25,7 +23,7 @@ BVHTreeNode* BVHTree::CreateNodeX(const std::deque<Triangle*>& triangles, unsign
 		return res;
 	}
 
-	Vector3D one18X = Vector3D(bb.Halfsize.X/9, 0, 0); // used to find other halfsizes + centers
+	Vector3F one18X = Vector3F(bb.Halfsize.X/9, 0, 0); // used to find other halfsizes + centers
 
 	BoundingBox bbl[8];// left halfs
 	BoundingBox bbr[8];//  right halfs
@@ -33,18 +31,18 @@ BVHTreeNode* BVHTree::CreateNodeX(const std::deque<Triangle*>& triangles, unsign
 	// create partitionings
 	for (int i = 0; i < 8; ++i)
 	{
-		bbl[i] = BoundingBox(bb.Center - (8 - i) * one18X, bb.Halfsize - (8 - i)*one18X);
-		bbr[i] = BoundingBox(bb.Center + (i+1)*one18X, bb.Halfsize - (1 + i)*one18X);
+		bbl[i] = BoundingBox(bb.Center - (8 - i) * one18X, bb.Halfsize - (8 - i) * one18X);
+		bbr[i] = BoundingBox(bb.Center + (i + 1) * one18X, bb.Halfsize - (i + 1) * one18X);
 	}
 
-	std::deque<Triangle*> leftTriangles[8], rightTriangles[8];
+	std::vector<Triangle*> leftTriangles[8], rightTriangles[8];
 
 	// add triangles to partitions
 	for (Triangle* triangle : triangles)
 	{
 		for (int i = 0; i < 8; ++i)
 		{
-			if (Intersects(*triangle, bbl[i]))
+			if (Intersects(triangle, bbl[i]))
 				leftTriangles[i].push_back(triangle);
 			else
 				rightTriangles[i].push_back(triangle);
@@ -76,7 +74,7 @@ BVHTreeNode* BVHTree::CreateNodeX(const std::deque<Triangle*>& triangles, unsign
 	return res;
 }
 
-BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth)
+BVHTreeNode* BVHTree::CreateNodeY(const std::vector<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth)
 {
 	BoundingBox bb = BoundingBox::FromTriangles(triangles);
 	BVHTreeNode* res = new BVHTreeNode();
@@ -89,7 +87,7 @@ BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle*>& triangles, unsign
 		return res;
 	}
 
-	Vector3D one18Y = Vector3D(0,bb.Halfsize.Y/9, 0); // used to find other halfsizes + centers
+	Vector3F one18Y = Vector3F(0,bb.Halfsize.Y/9, 0); // used to find other halfsizes + centers
 
 	BoundingBox bbl[8];// left halfs
 	BoundingBox bbr[8];//  right halfs
@@ -97,18 +95,18 @@ BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle*>& triangles, unsign
 	// create partitionings
 	for (int i = 0; i < 8; ++i)
 	{
-		bbl[i] = BoundingBox(bb.Center - (8 - i) * one18Y, bb.Halfsize - (8 - i)*one18Y);
-		bbr[i] = BoundingBox(bb.Center + (i+1)*one18Y, bb.Halfsize - (1 + i)*one18Y);
+		bbl[i] = BoundingBox(bb.Center - (8 - i) * one18Y, bb.Halfsize - (8 - i) * one18Y);
+		bbr[i] = BoundingBox(bb.Center + (i + 1) * one18Y, bb.Halfsize - (i + 1) * one18Y);
 	}
 
-	std::deque<Triangle*> leftTriangles[8], rightTriangles[8];
+	std::vector<Triangle*> leftTriangles[8], rightTriangles[8];
 
 	// add triangles to partitions
 	for (Triangle* triangle : triangles)
 	{
 		for (int i = 0; i < 8; ++i)
 		{
-			if (Intersects(*triangle, bbl[i]))
+			if (Intersects(triangle, bbl[i]))
 				leftTriangles[i].push_back(triangle);
 			else
 				rightTriangles[i].push_back(triangle);
@@ -139,7 +137,7 @@ BVHTreeNode* BVHTree::CreateNodeY(const std::deque<Triangle*>& triangles, unsign
 	return res;
 }
 
-BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth)
+BVHTreeNode* BVHTree::CreateNodeZ(const std::vector<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth)
 {
 	BoundingBox bb = BoundingBox::FromTriangles(triangles);
 	BVHTreeNode* res = new BVHTreeNode();
@@ -152,7 +150,7 @@ BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle*>& triangles, unsign
 		return res;
 	}
 
-	Vector3D one18Z = Vector3D(0,0,bb.Halfsize.Z/9); // used to find other halfsizes + centers
+	Vector3F one18Z = Vector3F(0,0,bb.Halfsize.Z/9); // used to find other halfsizes + centers
 
 	BoundingBox bbl[8];// left halfs
 	BoundingBox bbr[8];//  right halfs
@@ -160,18 +158,18 @@ BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle*>& triangles, unsign
 	// create partitionings
 	for (int i = 0; i < 8; ++i)
 	{
-		bbl[i] = BoundingBox(bb.Center - (8 - i) * one18Z, bb.Halfsize - (8 - i)*one18Z);
-		bbr[i] = BoundingBox(bb.Center + (1+i)*one18Z, bb.Halfsize - (1 + i)*one18Z);
+		bbl[i] = BoundingBox(bb.Center - (8 - i) * one18Z, bb.Halfsize - (8 - i) * one18Z);
+		bbr[i] = BoundingBox(bb.Center + (i + 1) * one18Z, bb.Halfsize - (i + 1) * one18Z);
 	}
 
-	std::deque<Triangle*> leftTriangles[8], rightTriangles[8];
+	std::vector<Triangle*> leftTriangles[8], rightTriangles[8];
 
 	// add triangles to partitions
 	for (Triangle* triangle : triangles)
 	{
 		for (int i = 0; i < 8; ++i)
 		{
-			if (Intersects(*triangle, bbl[i]))
+			if (Intersects(triangle, bbl[i]))
 				leftTriangles[i].push_back(triangle);
 			else
 				rightTriangles[i].push_back(triangle);
@@ -203,7 +201,7 @@ BVHTreeNode* BVHTree::CreateNodeZ(const std::deque<Triangle*>& triangles, unsign
 }
 
 
-BVHTreeNode* BVHTree::SplitNode(const std::deque<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb)
+BVHTreeNode* BVHTree::SplitNode(const std::vector<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb)
 {
 	if (bb.Halfsize.X >= bb.Halfsize.Y)
 		if (bb.Halfsize.X > bb.Halfsize.Z)
@@ -216,34 +214,41 @@ BVHTreeNode* BVHTree::SplitNode(const std::deque<Triangle*>& triangles, unsigned
 
 }
 
-bool BVHTreeNode::Query(const Ray& ray, Triangle& triangle, double& t) const
+Triangle* BVHTreeNode::Query(const Ray& ray, float& t) const
 {
-	double tBox = std::numeric_limits<double>::min();
+	float tBox = std::numeric_limits<float>::min();
 	if (!Intersects(ray, bb, tBox) || tBox > t)
-		return false;
+		return nullptr;
 
-	bool hit = false;
-	for (std::deque<Triangle*>::const_iterator it = triangles.begin(); it != triangles.end(); ++it)
+	Triangle* triangle = nullptr;
+
+	for (Triangle* tri : triangles)
 	{
-		double tCurr = 0;
-		if (Intersects(ray, **it, tCurr) && tCurr < t)
+		float tCurr = 0;
+		if (Intersects(ray, tri, tCurr) && tCurr < t)
 		{
 			t = tCurr;
-			triangle = **it;
-			hit = true;
+			triangle = tri;
 		}
 	}
 
 	if (left != nullptr)
-		hit |= left->Query(ray, triangle, t);
-	if (right != nullptr)
-		hit |= right->Query(ray, triangle, t);
+	{
+		Triangle* tri = left->Query(ray, t);
+		triangle = tri == nullptr ? triangle : tri;
+	}
 
-	return hit;
+	if (right != nullptr)
+	{
+		Triangle* tri = right->Query(ray, t);
+		triangle = tri == nullptr ? triangle : tri;
+	}
+
+	return triangle;
 }
 
-bool BVHTree::Query(const Ray& ray, Triangle& triangle, double& t) const
+Triangle* BVHTree::Query(const Ray& ray, float& t) const
 {
-	t = std::numeric_limits<double>::max();
-	return root->Query(ray, triangle, t);
+	t = std::numeric_limits<float>::max();
+	return root->Query(ray, t);
 }

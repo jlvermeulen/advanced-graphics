@@ -203,6 +203,7 @@
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <WarningLevel>Level3</WarningLevel>
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(QTDIR)\lib\qtmaind.lib;shell32.lib;$(QTDIR)\lib\Qt5Cored.lib;$(QTDIR)\lib\Qt5OpenGLd.lib;$(QTDIR)\lib\Qt5Widgetsd.lib;$(QTDIR)\lib\Qt5Guid.lib;$(QTDIR)\lib\Qt5Cored.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -272,7 +273,7 @@
     <ClCompile Include="BVHTree.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="cameraControls.cpp" />
-    <ClCompile Include="ColorD.cpp" />
+    <ClCompile Include="Color3F.cpp" />
     <ClCompile Include="Debug\moc_cameraControls.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -295,7 +296,7 @@
     </ClCompile>
     <ClCompile Include="Intersections.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Matrix3x3D.cpp" />
+    <ClCompile Include="Matrix3x3F.cpp" />
     <ClCompile Include="MtlReader.cpp" />
     <ClCompile Include="ObjReader.cpp" />
     <ClCompile Include="Octree.cpp" />
@@ -324,8 +325,8 @@
     <ClCompile Include="renderDialog.cpp" />
     <ClCompile Include="renderViewer.cpp" />
     <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="Vector2D.cpp" />
-    <ClCompile Include="Vector3D.cpp" />
+    <ClCompile Include="Vector2F.cpp" />
+    <ClCompile Include="Vector3F.cpp" />
     <ClCompile Include="glWidget.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
@@ -352,14 +353,14 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -DQT_DLL  "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I." "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles"</Command>
     </CustomBuild>
-    <ClInclude Include="ColorD.h" />
+    <ClInclude Include="Color3F.h" />
     <ClInclude Include="GeneratedFiles\ui_cameraControls.h" />
     <ClInclude Include="GeneratedFiles\ui_renderDialog.h" />
     <ClInclude Include="GeneratedFiles\ui_renderViewer.h" />
     <ClInclude Include="GeneratedFiles\ui_window.h" />
     <ClInclude Include="Intersections.h" />
     <ClInclude Include="Material.h" />
-    <ClInclude Include="Matrix3x3D.h" />
+    <ClInclude Include="Matrix3x3F.h" />
     <ClInclude Include="MtlReader.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjReader.h" />
@@ -405,8 +406,8 @@
     <ClInclude Include="Reader.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Triangle.h" />
-    <ClInclude Include="Vector2D.h" />
-    <ClInclude Include="Vector3D.h" />
+    <ClInclude Include="Vector2F.h" />
+    <ClInclude Include="Vector3F.h" />
     <ClInclude Include="Vertex.h" />
     <CustomBuild Include="glWidget.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
@@ -562,7 +563,7 @@ endlocal
   <ImportGroup Label="ExtensionTargets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_Win32="5" Qt5Version_x0020_x64="5.4" />
+      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_Win32="msvc2013_opengl" Qt5Version_x0020_x64="5.4" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

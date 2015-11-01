@@ -9,7 +9,7 @@ Quaternion::Quaternion() :
 {
 }
 //--------------------------------------------------------------------------------
-Quaternion::Quaternion(Vector3D xyz, double w) :
+Quaternion::Quaternion(Vector3F xyz, float w) :
   X(xyz.X),
   Y(xyz.Y),
   Z(xyz.Z),
@@ -19,7 +19,7 @@ Quaternion::Quaternion(Vector3D xyz, double w) :
 }
 
 //--------------------------------------------------------------------------------
-Quaternion::Quaternion(double x, double y, double z, double w) :
+Quaternion::Quaternion(float x, float y, float z, float w) :
   X(x),
   Y(y),
   Z(z),
@@ -29,7 +29,7 @@ Quaternion::Quaternion(double x, double y, double z, double w) :
 }
 
 //--------------------------------------------------------------------------------
-double Quaternion::length() const { return sqrt(X * X + Y * Y + Z * Z + W * W); }
+float Quaternion::length() const { return sqrtf(X * X + Y * Y + Z * Z + W * W); }
 
 //--------------------------------------------------------------------------------
 void Quaternion::normalize()
@@ -75,7 +75,7 @@ Quaternion& Quaternion::operator*=(const Quaternion& rhs)
 }
 
 //--------------------------------------------------------------------------------
-Quaternion& Quaternion::operator/=(const double& rhs)
+Quaternion& Quaternion::operator/=(const float& rhs)
 {
   X /= rhs;
   Y /= rhs;

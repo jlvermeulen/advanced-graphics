@@ -1,16 +1,16 @@
 #pragma once
-#include <deque>
+
+#include <vector>
 #include <limits>
-#include "Vector3D.h"
+#include "Vector3F.h"
 #include "Triangle.h"
+
 struct BoundingSphere
 {
 public:
-	double radius;
-	Vector3D center;
-	BoundingSphere();
-	~BoundingSphere();
-	BoundingSphere(const Vector3D& center, const double& radius) :center(center), radius(radius){};
-	static BoundingSphere FromTriangles(const std::deque<Triangle>& triangles);
-};
+	float Radius;
+	Vector3F Center;
+	BoundingSphere(const Vector3F& center, const float& radius) : Center(center), Radius(radius) { };
 
+	static BoundingSphere FromTriangles(const std::vector<Triangle*>& triangles);
+};

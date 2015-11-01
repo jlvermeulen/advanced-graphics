@@ -101,7 +101,7 @@ void MtlReader::parseDiffuse(CVSIterator& it)
 //--------------------------------------------------------------------------------
 void MtlReader::parseDissolve(CVSIterator& it)
 {
-  materials_.at(current_).transparency = 1.0 - parseDouble(it);
+  materials_.at(current_).transparency = 1.0f - parseDouble(it);
 }
 
 //--------------------------------------------------------------------------------
@@ -163,9 +163,9 @@ void MtlReader::parseTransparency(CVSIterator& it)
 }
 
 //--------------------------------------------------------------------------------
-ColorD MtlReader::parseColor(CVSIterator& it) const
+Color3F MtlReader::parseColor(CVSIterator& it) const
 {
-  ColorD color;
+  Color3F color;
   
   color.R = parseDouble(it);
   color.G = parseDouble(++it);

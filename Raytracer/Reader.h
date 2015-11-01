@@ -11,7 +11,7 @@ public:
   Reader();
   ~Reader();
 
-  double parseDouble(const CVSIterator& iterator) const;
+  float parseDouble(const CVSIterator& iterator) const;
   int parseInteger(const CVSIterator& iterator) const;
 
   std::vector<std::string> split(const std::string& text, char sep, bool multiple = true);

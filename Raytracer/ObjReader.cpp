@@ -20,7 +20,7 @@ ObjReader::~ObjReader()
 }
 
 //--------------------------------------------------------------------------------
-std::deque<Object> ObjReader::parseFile(const char* fileName)
+std::vector<Object*> ObjReader::parseFile(const char* fileName)
 {
   // Out with the old
   reset();
@@ -84,7 +84,7 @@ void ObjReader::parseLine(const std::string& path, const std::vector<std::string
       if (combined_)
       {
         // Create empty object
-        objects_.push_back(Object());
+        objects_.push_back(new Object());
 
         combined_ = false;
       }
@@ -124,7 +124,7 @@ void ObjReader::parseFace(CVSIterator& it)
   }
 
   // Add triangle
-  objects_.back().triangles.push_back(Triangle(vertices));
+  objects_.back()->triangles.push_back(new Triangle(vertices));
 }
 
 //--------------------------------------------------------------------------------
@@ -142,13 +142,13 @@ void ObjReader::parseMaterial(CVSIterator& it)
 {
   std::string name = *it;
 
-  objects_.back().material = materials_.at(name);
+  objects_.back()->material = materials_.at(name);
 }
 
 //--------------------------------------------------------------------------------
 void ObjReader::parseNormal(CVSIterator& it)
 {
-  Vector3D normal;
+  Vector3F normal;
 
   normal.X = parseDouble(it);
   normal.Y = parseDouble(++it);
@@ -160,7 +160,7 @@ void ObjReader::parseNormal(CVSIterator& it)
 //--------------------------------------------------------------------------------
 void ObjReader::parseTexCoords(CVSIterator& it)
 {
-  Vector2D texCoord;
+  Vector2F texCoord;
 
   texCoord.X = parseDouble(it);
   texCoord.Y = parseDouble(++it);
@@ -171,7 +171,7 @@ void ObjReader::parseTexCoords(CVSIterator& it)
 //--------------------------------------------------------------------------------
 void ObjReader::parseVertex(CVSIterator& it)
 {
-  Vector3D position;
+  Vector3F position;
 
   position.X = parseDouble(it);
   position.Y = parseDouble(++it);
