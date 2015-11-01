@@ -67,10 +67,10 @@ void Camera::MoveUpward(const float& distance)
 void Camera::Rotate(const Vector3F& axis, float angle)
 {
   Quaternion rotation(
-    axis.X * sin(angle / 2),
-    axis.Y * sin(angle / 2),
-    axis.Z * sin(angle / 2),
-    cos(angle / 2)
+    axis.X * sinf(angle / 2),
+    axis.Y * sinf(angle / 2),
+    axis.Z * sinf(angle / 2),
+    cosf(angle / 2)
   );
 
   Quaternion view(

@@ -29,7 +29,7 @@ Quaternion::Quaternion(float x, float y, float z, float w) :
 }
 
 //--------------------------------------------------------------------------------
-float Quaternion::length() const { return sqrt(X * X + Y * Y + Z * Z + W * W); }
+float Quaternion::length() const { return sqrtf(X * X + Y * Y + Z * Z + W * W); }
 
 //--------------------------------------------------------------------------------
 void Quaternion::normalize()

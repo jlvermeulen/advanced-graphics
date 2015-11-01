@@ -40,7 +40,7 @@ public:
 		}
 
 		Direction *= r;
-		Direction += (r * c - sqrt(radicand)) * normal;
+		Direction += (r * c - sqrtf(radicand)) * normal;
 		Origin = point + (c1 > 0 ? -0.01f : 0.01f) * normal;
 		UpdateInverseDirection();
 	}

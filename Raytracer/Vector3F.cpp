@@ -4,7 +4,7 @@ Vector3F::Vector3F() : X(0), Y(0), Z(0) { }
 Vector3F::Vector3F(const float& x, const float& y, const float& z) : X(x), Y(y), Z(z) { }
 Vector3F::Vector3F(const float vec[]) { X = vec[0]; Y = vec[1]; Z = vec[2]; }
 
-float Vector3F::Length() const { return sqrt(LengthSquared()); }
+float Vector3F::Length() const { return sqrtf(LengthSquared()); }
 float Vector3F::LengthSquared() const { return Dot(*this, *this); }
 
 float Vector3F::Dot(const Vector3F& other) const { return Dot(*this, other); }

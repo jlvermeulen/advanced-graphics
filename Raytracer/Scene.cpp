@@ -14,30 +14,9 @@
 Scene::Scene() :
   gen(std::mt19937(std::random_device()())),
   dist(std::uniform_real_distribution<float>(0, 1))
-{
-	// checkerboard
-	//Vertex v1(Vector3F(-100, -0.5f, -100), Vector3F(0, 1, 0), Color3F(1.0f, 1.0f, 1.0f), Vector3F());
-	//Vertex v2(Vector3F(100, -0.5f, -100), Vector3F(0, 1, 0), Color3F(1.0f, 1.0f, 1.0f), Vector3F());
-	//Vertex v3(Vector3F(-100, -0.5f, 100), Vector3F(0, 1, 0), Color3F(1.0f, 1.0f, 1.0f), Vector3F());
-	//Vertex v4(Vector3F(100, -0.5f, 100), Vector3F(0, 1, 0), Color3F(1.0f, 1.0f, 1.0f), Vector3F());
+{ }
 
-	//std::deque<Triangle> tris;
-	//tris.push_back(Triangle(v1, v3, v2));
-	//tris.push_back(Triangle(v4, v2, v3));
-
-	//checkerboard = Object(tris, Material(ReflectionType::diffuse, Color3F(1.0f, 1.0f, 1.0f), Color3F(), 1, 0));
-
-	// Add lights
-	//lights.push_back(Light(Vector3F(-3.0f, -5.0f, -4.0f), Color3F(25.0f, 25.0f, 25.0f)));
-	//lights.push_back(Light(Vector3F(3.0f, 5.0f, 4.0f), Color3F(25.0f, 25.0f, 25.0f)));
-
-	//camera = Camera(Vector3F(0, 15.0f, -10.0f), Vector3F::Normalise(Vector3F(0, -0.5f, 1)), Vector3F(0, 1, 0));
-}
-
-Scene::~Scene()
-{
-
-}
+Scene::~Scene() { }
 
 void Scene::PreRender(int minTriangles, int maxDepth)
 {
@@ -53,7 +32,6 @@ void Scene::Render(uchar* imageData, int samplesPerPixel, float sigma, bool useD
 
 	#pragma omp parallel for
 	for (int x = 0; x < camera.Width; ++x)
-	{
 		for (int y = 0; y < camera.Height; ++y)
 		{
 			std::pair<Color3F, float> sample = samples[y * camera.Width + x];
@@ -68,7 +46,6 @@ void Scene::Render(uchar* imageData, int samplesPerPixel, float sigma, bool useD
 			imageData[offset + 2] = (uchar) (color.R * 255.0f);
 			imageData[offset + 3] = 255;
 		}
-	}
 
 	delete [] samples;
 
@@ -83,7 +60,7 @@ void Scene::PostRender()
 //--------------------------------------------------------------------------------
 void Scene::TracePixels(std::pair<Color3F, float>* pixelData, int samplesPerPixel, float sigma, bool useDoF)
 {
-	float tanHalfFovY = tan(camera.FovY() / 360 * M_PI);
+	float tanHalfFovY = tanf(camera.FovY() / 360 * M_PI);
 	float tanHalfFovX = tanHalfFovY * camera.Width / camera.Height;
 
 	float left = -tanHalfFovX;
@@ -112,11 +89,11 @@ void Scene::TracePixels(std::pair<Color3F, float>* pixelData, int samplesPerPixe
 						Vector3F focalPoint = origin + direction * camera.FocalDepth;
 
 						// Get uniformly distributed square [-1,1] x [-1,1]
-						float angle = dist(gen) * 2 * M_PI;
+						float angle = dist(gen) * 2.0f * M_PI;
 						float radius = dist(gen);
 
-						float aX = cos(angle) * radius * camera.Aperture;
-						float aY = sin(angle) * radius * camera.Aperture;
+						float aX = cosf(angle) * radius * camera.Aperture;
+						float aY = sinf(angle) * radius * camera.Aperture;
 
 						Vector3F apertureOffset(aX, aY, 0.0f);
 
@@ -125,46 +102,31 @@ void Scene::TracePixels(std::pair<Color3F, float>* pixelData, int samplesPerPixe
 						direction *= camera.FocalDepth;
 						direction -= apertureOffset;
 						direction.Normalise();
-
-						//float uX = 2.0f * dist(gen) - 1.0f;
-						//float uY = 2.0f * dist(gen) - 1.0f;
-
-						// Get uniformly distributed circle with lens radius
-						//float lX = camera.Aperture * uX * sqrt(1 - uY * uY / 2);
-						//float lY = camera.Aperture * uY * sqrt(1 - uX * uX / 2);
-
-						//origin += lX * camera.Right() + lY * camera.Up();
-
-						//direction = Vector3F::Normalise(focalPoint - origin);
 					}
 
 					Ray cameraRay(origin, direction);
+					Color3F value = TraceRay(cameraRay, true);
 
-					//for (unsigned int c = 0; c < 3; ++c)
+					// distribute over neighbouring pixels
+					for (int i = -1; i < 2; ++i)
 					{
-						Color3F value = TraceRay(cameraRay, true);// x >= camera.Width / 2 - 100);
+						int xx = x + i;
+						if (xx < 0 || xx >= camera.Width)
+							continue;
 
-						// distribute over neighbouring pixels
-						for (int i = -1; i < 2; ++i)
+						for (int j = -1; j < 2; ++j)
 						{
-							int xx = x + i;
-							if (xx < 0 || xx >= camera.Width)
+							int yy = y + j;
+							if (yy < 0 || yy >= camera.Height)
 								continue;
 
-							for (int j = -1; j < 2; ++j)
-							{
-								int yy = y + j;
-								if (yy < 0 || yy >= camera.Height)
-									continue;
+							float weight = GaussianWeight(i - rX + 0.5f, j - rY + 0.5f, sigma);
 
-								float weight = GaussianWeight(i - rX + 0.5f, j - rY + 0.5f, sigma);
+							int index = yy * camera.Width + xx;
+							std::pair<Color3F, float>& data = pixelData[index];
 
-								int index = yy * camera.Width + xx;
-								std::pair<Color3F, float>& data = pixelData[index];
-
-								data.first += value * weight;
-								data.second += weight;
-							}
+							data.first += value * weight;
+							data.second += weight;
 						}
 					}
 				}
@@ -268,10 +230,10 @@ Color3F Scene::IndirectIllumination(Vector3F point, const Vector3F& in, const Ve
 		float phi = 2.0f * M_PI * dist(gen);
 
 		float cosTheta = pow(dist(gen), 1.0f / (1.0f + material.specularExponent)); // importance sampling on phong lobe
-		float sinTheta = sqrt(1.0f - cosTheta * cosTheta);
+		float sinTheta = sqrtf(1.0f - cosTheta * cosTheta);
 
-		float x = sinTheta * cos(phi);
-		float y = sinTheta * sin(phi);
+		float x = sinTheta * cosf(phi);
+		float y = sinTheta * sinf(phi);
 		float z = cosTheta;
 
 		Vector3F hemi(x, y, z);
@@ -297,12 +259,12 @@ Color3F Scene::IndirectIllumination(Vector3F point, const Vector3F& in, const Ve
 	{
 		// cosine importance sampling
 		float u1 = dist(gen), u2 = dist(gen);
-		float theta = acos(sqrt(1.0f - u1));
+		float theta = acosf(sqrtf(1.0f - u1));
 		float phi = 2.0f * M_PI * u2;
 
-		float xs = sin(theta) * cos(phi);
-		float ys = cos(theta);
-		float zs = sin(theta) * sin(phi);
+		float xs = sinf(theta) * cosf(phi);
+		float ys = cosf(theta);
+		float zs = sinf(theta) * sinf(phi);
 
 		Vector3F y(normal.X, normal.Y, normal.Z);
 		Vector3F h = y;
@@ -972,20 +934,6 @@ void Scene::LoadDefaultScene4()
 		objects[nr]->triangles[i]->CalculateArea();
 		objects[nr]->triangles[i]->CalculateCenter();
 	}
-
-	/*objects[nr] = Object();
-	Vertex v1(Vector3F(5, 4, 1.25f), Vector3F(0, -1, 0), Vector2F(0, 0));
-	Vertex v2(Vector3F(5, 4, -1.25f), Vector3F(0, -1, 0), Vector2F(0, 0));
-	Vertex v3(Vector3F(-5, 4, 1.25f), Vector3F(0, -1, 0), Vector2F(0, 0));
-	Vertex v4(Vector3F(-5, 4, -1.25f), Vector3F(0, -1, 0), Vector2F(0, 0));
-	objects[nr]->triangles.push_back(Triangle(v2, v1, v3));
-	objects[nr]->triangles.push_back(Triangle(v2, v3, v4));
-	objects[nr]->material = Material(ReflectionType::diffuse, Color3F(1.0f, 1, 1), Color3F(6.0f, 6, 6), 1.0f, 0.0f, 0.0f);
-	objects[nr]->triangles[0].CalculateArea();
-	objects[nr]->triangles[0].CalculateCenter();
-	objects[nr]->triangles[1].CalculateArea();
-	objects[nr]->triangles[1].CalculateCenter();*/
-
 	lights.push_back(objects[nr]);
 	++nr;
 

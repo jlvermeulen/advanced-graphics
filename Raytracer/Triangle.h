@@ -8,7 +8,6 @@ struct Triangle
 public:
 	Vertex Vertices[3];
 	float Area;
-	Vector3F Center;
 
 	Triangle() { }
 

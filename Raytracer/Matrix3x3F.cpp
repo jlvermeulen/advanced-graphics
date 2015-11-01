@@ -101,6 +101,6 @@ Matrix3x3F& Matrix3x3F::operator*=(const Matrix3x3F& rhs)
 	return *this;
 }
 
-Matrix3x3F Matrix3x3F::CreateRotationX(float angle) { return Matrix3x3F(1, 0, 0, 0, cos(angle), -sin(angle), 0, sin(angle), cos(angle)); }
-Matrix3x3F Matrix3x3F::CreateRotationY(float angle) { return Matrix3x3F(cos(angle), 0, sin(angle), 0, 1, 0, -sin(angle), 0, cos(angle)); }
-Matrix3x3F Matrix3x3F::CreateRotationZ(float angle) { return Matrix3x3F(cos(angle), -sin(angle), 0, sin(angle), cos(angle), 0, 0, 0, 1); }
+Matrix3x3F Matrix3x3F::CreateRotationX(float angle) { return Matrix3x3F(1, 0, 0, 0, cosf(angle), -sinf(angle), 0, sinf(angle), cosf(angle)); }
+Matrix3x3F Matrix3x3F::CreateRotationY(float angle) { return Matrix3x3F(cosf(angle), 0, sinf(angle), 0, 1, 0, -sinf(angle), 0, cosf(angle)); }
+Matrix3x3F Matrix3x3F::CreateRotationZ(float angle) { return Matrix3x3F(cosf(angle), -sinf(angle), 0, sinf(angle), cosf(angle), 0, 0, 0, 1); }
