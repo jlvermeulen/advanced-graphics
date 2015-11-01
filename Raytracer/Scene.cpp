@@ -342,14 +342,12 @@ std::pair<Ray, Triangle*>* Scene::SampleLight(const Vector3F& hitPoint, float& w
 		v = 1 - v;
 	}
 
-	std::vector<std::pair<float, Triangle*>> flux;
+	unsigned int i = 0;
+	std::pair<float, Triangle*>* flux = new std::pair<float, Triangle*>[lightCount];
 	float totalflux = 0;
 	// loop over all lightsources
 	for (Object* o : lights)
 	{
-		if (o->triangles.size() == 0)
-			throw std::runtime_error("empty light");
-
 		for (Triangle* t : o->triangles)
 		{
 			Vector3F v1 = t->Vertices[1].Position - t->Vertices[0].Position;
@@ -365,7 +363,7 @@ std::pair<Ray, Triangle*>* Scene::SampleLight(const Vector3F& hitPoint, float& w
 			weight += f; // projected area of all lightsources on hemisphere
 			f *= o->material.emission.R; // we assume non-coloured emissions
 
-			flux.push_back(std::pair<float, Triangle*>(f, t));
+			flux[i++] = std::pair<float, Triangle*>(f, t);
 			totalflux += f;
 		}
 	}
@@ -374,14 +372,16 @@ std::pair<Ray, Triangle*>* Scene::SampleLight(const Vector3F& hitPoint, float& w
 		return nullptr;
 
 	// divide all flux values by the total flux gives the probabilities
-	for (unsigned int l = 0; l < flux.size(); l++)
-		flux[l].first /= totalflux;
+	for (i = 0; i < lightCount; ++i)
+		flux[i].first /= totalflux;
 
 	// get the light using the probabilities and a random float between 0 and 1
 	float r = dist(gen);
-	std::pair<float, Triangle*>* pair = nullptr;
-	for (std::pair<float, Triangle*> p : flux)
+	const std::pair<float, Triangle*>* pair = nullptr;
+	for (i = 0; i < lightCount; ++i)
 	{
+		const std::pair<float, Triangle*>& p = flux[i];
+
 		if (p.first + 0.001f >= r) // add small value to prevent floating point errors
 		{
 			pair = &p;
@@ -395,7 +395,9 @@ std::pair<Ray, Triangle*>* Scene::SampleLight(const Vector3F& hitPoint, float& w
 	Vector3F v2 = pair->second->Vertices[2].Position - pair->second->Vertices[0].Position;
 
 	// return ray towards chosen point
-	return new std::pair<Ray, Triangle*>(Ray(hitPoint, Vector3F::Normalise(v1 * u + v2 * v + pair->second->Vertices[0].Position - hitPoint)), pair->second);
+	std::pair<Ray, Triangle*>* result = new std::pair<Ray, Triangle*>(Ray(hitPoint, Vector3F::Normalise(v1 * u + v2 * v + pair->second->Vertices[0].Position - hitPoint)), pair->second);
+	delete [] flux;
+	return result;
 }
 
 //--------------------------------------------------------------------------------
@@ -599,7 +601,6 @@ void Scene::LoadDefaultScene()
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
 	{
-	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 1;
@@ -607,9 +608,8 @@ void Scene::LoadDefaultScene()
 		}
 		objects[nr]->triangles[i]->PreCalc();
 	}
-		objects[nr]->triangles[i]->PreCalc();
-	}
 	lights.push_back(objects[nr]);
+	lightCount += nTriangles;
 	++nr;
 
 	camera = Camera(Vector3F(0.75f, 0, 4.5f), Vector3F::Normalise(Vector3F(-1.0f, 0, -4.5f)), Vector3F(0, 1, 0));
@@ -641,13 +641,13 @@ void Scene::LoadDefaultScene2()
 	objects = reader.parseFile("../models/sphere.obj");
 
 	// Central light
-	objects[nr]->material = Material(ReflectionType::refractive, Color3F(1.0f, 1.0f, 1.0f), Color3F(1.5f, 1.5f, 1.5f), 1.5f, 1000000.0f, 1.0f);
+	objects[nr]->material = Material(ReflectionType::refractive, Color3F(1.0f, 1.0f, 1.0f), Color3F(2.5f, 2.5f, 2.5f), 1.5f, 1000000.0f, 1.0f);
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
-	{
 		objects[nr]->triangles[i]->PreCalc();
 	lights.push_back(objects[nr]);
+	lightCount += nTriangles;
 	++nr;
 
 	// Left sphere
@@ -655,6 +655,7 @@ void Scene::LoadDefaultScene2()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 3;
@@ -847,6 +848,7 @@ void Scene::LoadDefaultScene3()
 		objects[nr]->triangles[i]->PreCalc();
 	}
 	lights.push_back(objects[nr]);
+	lightCount += nTriangles;
 	++nr;
 
 	// Bottom
@@ -1017,6 +1019,7 @@ void Scene::LoadDefaultScene4()
 		objects[nr]->triangles[i]->PreCalc();
 	}
 	lights.push_back(objects[nr]);
+	lightCount += nTriangles;
 	++nr;
 
 	camera = Camera(Vector3F(1.34f, 2.405f, 5.25f), Vector3F::Normalise(Vector3F(-0.8f, -2.1f, -5.0f)), Vector3F(0, 1, 0));
@@ -1167,6 +1170,7 @@ void Scene::LoadDefaultScene5()
 		objects[nr]->triangles[i]->PreCalc();
 	}
 	lights.push_back(objects[nr]);
+	lightCount += nTriangles;
 	++nr;
 
 	camera = Camera(Vector3F(1.22f, 0.73f, -0.02f), Vector3F::Normalise(Vector3F(-1.22f, -0.63f, 0.02f)), Vector3F(0, 1, 0));
@@ -1303,6 +1307,7 @@ void Scene::LoadDefaultScene6()
 		objects[nr]->triangles[i]->PreCalc();
 	}
 	lights.push_back(objects[nr]);
+	lightCount += nTriangles;
 	++nr;
 
 	camera = Camera(Vector3F(0.3f * 5, 1.25f * 5, -1.5f * 5), Vector3F::Normalise(Vector3F(0, -1.2f, 1.75f)), Vector3F(0, 1, 0));
@@ -1318,4 +1323,5 @@ void Scene::Clear()
 		delete objects[i];
 	objects.clear();
 	lights.clear();
+	lightCount = 0;
 }

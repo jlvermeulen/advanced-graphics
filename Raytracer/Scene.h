@@ -76,6 +76,7 @@ public:
 	Camera camera;
 	std::vector<Object*> objects;
 	std::vector<Object*> lights;
+	unsigned int lightCount;
 	std::uniform_real_distribution<float> dist;
 	std::mt19937 gen;
 };
