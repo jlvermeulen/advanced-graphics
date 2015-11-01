@@ -5,6 +5,10 @@
 
 struct Triangle
 {
+private:
+	float d00, d01, d11, invDenom;
+	Vector3F v0, v1;
+
 public:
 	Vertex Vertices[3];
 	float Area;
@@ -16,6 +20,8 @@ public:
 		Vertices[0] = v1;
 		Vertices[1] = v2;
 		Vertices[2] = v3;
+
+		PreCalc();
 	}
 
 	Triangle(const Vertex v[3])
@@ -23,19 +29,32 @@ public:
 		Vertices[0] = v[0];
 		Vertices[1] = v[1];
 		Vertices[2] = v[2];
+
+		PreCalc();
+	}
+
+	void PreCalc()
+	{
+		v0 = Vertices[1].Position - Vertices[0].Position;
+		v1 = Vertices[2].Position - Vertices[0].Position;
+
+		Area = 0.5f * Vector3F::Cross(v0, v1).Length();
+		
+		d00 = Vector3F::Dot(v0, v0);
+		d01 = Vector3F::Dot(v0, v1);
+		d11 = Vector3F::Dot(v1, v1);
+		invDenom = 1.0f / (d00 * d11 - d01 * d01);
 	}
 
 	Vector3F Interpolate(Vector3F point) const
 	{
-		Vector3F p1 = Vertices[0].Position - point;
-		Vector3F p2 = Vertices[1].Position - point;
-		Vector3F p3 = Vertices[2].Position - point;
+		Vector3F v2 = point - Vertices[0].Position;
+		float d20 = Vector3F::Dot(v2, v0);
+		float d21 = Vector3F::Dot(v2, v1);
 
-		float a = Vector3F::Cross(Vertices[0].Position - Vertices[1].Position, Vertices[0].Position - Vertices[2].Position).Length();
-		float aInv = 1 / a;
-		float a1 = Vector3F::Cross(p2, p3).Length() * aInv;
-		float a2 = Vector3F::Cross(p3, p1).Length() * aInv;
-		float a3 = Vector3F::Cross(p1, p2).Length() * aInv;
+		float a2 = (d11 * d20 - d01 * d21) * invDenom;
+		float a3 = (d00 * d21 - d01 * d20) * invDenom;
+		float a1 = 1.0f - a2 - a3;
 
 		return Vector3F(a1, a2, a3);
 	}
@@ -43,14 +62,8 @@ public:
 	Vector3F surfaceNormal(Vector3F point) const
 	{
 		Vector3F factors = Interpolate(point);
-
 		return factors.X * Vertices[0].Normal + factors.Y * Vertices[1].Normal + factors.Z * Vertices[2].Normal;
 	}
-
-	void CalculateArea() { Area = 0.5f * Vector3F::Cross(Vertices[1].Position - Vertices[0].Position, Vertices[2].Position - Vertices[0].Position).Length(); }
-	void CalculateCenter() { Center = (Vertices[0].Position + Vertices[1].Position + Vertices[2].Position) / 3; }
-
-private:
 };
 
 inline bool operator==(const Triangle& lhs, const Triangle& rhs) { return lhs.Vertices[0].Position == rhs.Vertices[0].Position &&

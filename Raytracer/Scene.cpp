@@ -68,6 +68,10 @@ void Scene::TracePixels(std::pair<Color3F, float>* pixelData, int samplesPerPixe
 	float top = tanHalfFovY;
 	float bottom = -tanHalfFovY;
 
+	for (int y = 0; y < camera.Height; ++y)
+		for (int x = 0; x < camera.Width; ++x)
+			pixelData[y * camera.Width + x] = std::pair<Color3F, float>(Color3F(), 0.0f);
+
 	// Calculate pixel rays
 	for (int o = 0; o < 3; ++o) // prevent concurrent access of same array indices
 		#pragma omp parallel for schedule(dynamic)
@@ -431,12 +435,15 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 2;
 
 			objects[nr]->triangles[i]->Vertices[j].Position.X += 0.8f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Left sphere
@@ -444,6 +451,7 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 3.5f;
@@ -452,6 +460,8 @@ void Scene::LoadDefaultScene()
 			objects[nr]->triangles[i]->Vertices[j].Position.Y += 0.8f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 1.0f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Left sphere
@@ -459,6 +469,7 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 1.5f;
@@ -467,6 +478,8 @@ void Scene::LoadDefaultScene()
 			objects[nr]->triangles[i]->Vertices[j].Position.Y -= 5.0f / 6.0f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.7f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Left sphere
@@ -474,6 +487,7 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 3;
@@ -482,6 +496,8 @@ void Scene::LoadDefaultScene()
 			objects[nr]->triangles[i]->Vertices[j].Position.Y += 0.75f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z += 2.0f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Left sphere
@@ -489,6 +505,7 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 4;
@@ -497,6 +514,8 @@ void Scene::LoadDefaultScene()
 			objects[nr]->triangles[i]->Vertices[j].Position.Y -= 1.25f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z += 0.5f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Right
@@ -504,11 +523,14 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= 5;
 			objects[nr]->triangles[i]->Vertices[j].Position.X += 4;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Left
@@ -516,11 +538,14 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= 5;
 			objects[nr]->triangles[i]->Vertices[j].Position.X -= 4;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Back
@@ -528,11 +553,14 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= 5;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 4;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Top
@@ -540,11 +568,14 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= 5;
 			objects[nr]->triangles[i]->Vertices[j].Position.Y += 4;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Bottom
@@ -552,11 +583,14 @@ void Scene::LoadDefaultScene()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= 5;
 			objects[nr]->triangles[i]->Vertices[j].Position.Y -= 4;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Light
@@ -565,13 +599,15 @@ void Scene::LoadDefaultScene()
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
 	{
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 1;
 			objects[nr]->triangles[i]->Vertices[j].Position.Y += 1.5f;
 		}
-		objects[nr]->triangles[i]->CalculateArea();
-		objects[nr]->triangles[i]->CalculateCenter();
+		objects[nr]->triangles[i]->PreCalc();
+	}
+		objects[nr]->triangles[i]->PreCalc();
 	}
 	lights.push_back(objects[nr]);
 	++nr;
@@ -610,9 +646,7 @@ void Scene::LoadDefaultScene2()
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
 	{
-		objects[nr]->triangles[i]->CalculateArea();
-		objects[nr]->triangles[i]->CalculateCenter();
-	}
+		objects[nr]->triangles[i]->PreCalc();
 	lights.push_back(objects[nr]);
 	++nr;
 
@@ -626,6 +660,8 @@ void Scene::LoadDefaultScene2()
 			objects[nr]->triangles[i]->Vertices[j].Position /= 3;
 			objects[nr]->triangles[i]->Vertices[j].Position.X -= 1.5f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Right sphere
@@ -633,11 +669,14 @@ void Scene::LoadDefaultScene2()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 3;
 			objects[nr]->triangles[i]->Vertices[j].Position.X += 1.5f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Front sphere
@@ -645,11 +684,14 @@ void Scene::LoadDefaultScene2()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 3;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z += 1.5f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Back sphere
@@ -657,11 +699,14 @@ void Scene::LoadDefaultScene2()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 3;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 1.5f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	camera = Camera(Vector3F(-2.5f, 0.75f, 2.5f), Vector3F::Normalise(Vector3F(1, -0.3f, -1)), Vector3F(0, 1, 0));
@@ -704,6 +749,7 @@ void Scene::LoadDefaultScene3()
 
 	Matrix3x3F mat = Matrix3x3F::CreateRotationY(M_PI_2) * Matrix3x3F::CreateRotationX(M_PI_4);
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position.X /= 1.25f;
@@ -715,6 +761,8 @@ void Scene::LoadDefaultScene3()
 			objects[nr]->triangles[i]->Vertices[j].Position.X -= 0.75f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Y -= 0.97f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Right box
@@ -723,6 +771,7 @@ void Scene::LoadDefaultScene3()
 
 	mat = Matrix3x3F::CreateRotationY(-0.3f);
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position.X /= 1.25f;
@@ -735,6 +784,8 @@ void Scene::LoadDefaultScene3()
 			objects[nr]->triangles[i]->Vertices[j].Position.X += 0.2f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Y -= 7.0f / 6.0f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Right
@@ -742,11 +793,14 @@ void Scene::LoadDefaultScene3()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= 4;
 			objects[nr]->triangles[i]->Vertices[j].Position.X += 3.5f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Left
@@ -754,11 +808,14 @@ void Scene::LoadDefaultScene3()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= 4;
 			objects[nr]->triangles[i]->Vertices[j].Position.X -= 3.5f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Back
@@ -766,11 +823,14 @@ void Scene::LoadDefaultScene3()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= 4;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 3.5f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Top
@@ -784,8 +844,7 @@ void Scene::LoadDefaultScene3()
 			objects[nr]->triangles[i]->Vertices[j].Position *= 4;
 			objects[nr]->triangles[i]->Vertices[j].Position.Y += 3.5f;
 		}
-		objects[nr]->triangles[i]->CalculateArea();
-		objects[nr]->triangles[i]->CalculateCenter();
+		objects[nr]->triangles[i]->PreCalc();
 	}
 	lights.push_back(objects[nr]);
 	++nr;
@@ -795,11 +854,14 @@ void Scene::LoadDefaultScene3()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= 4;
 			objects[nr]->triangles[i]->Vertices[j].Position.Y -= 3.5f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	camera = Camera(Vector3F(0, 0.5f, 3.0f), Vector3F::Normalise(Vector3F(0, -0.5f, -1)), Vector3F(0, 1, 0));
@@ -835,11 +897,14 @@ void Scene::LoadDefaultScene4()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= 10;
 			objects[nr]->triangles[i]->Vertices[j].Position.Y -= 5;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Teapot
@@ -847,6 +912,7 @@ void Scene::LoadDefaultScene4()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
@@ -856,6 +922,8 @@ void Scene::LoadDefaultScene4()
 			objects[nr]->triangles[i]->Vertices[j].Position.X -= 2.5f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 1;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Teapot
@@ -863,6 +931,7 @@ void Scene::LoadDefaultScene4()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
@@ -872,6 +941,8 @@ void Scene::LoadDefaultScene4()
 			objects[nr]->triangles[i]->Vertices[j].Position.X -= 1.25f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.5f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Teapot
@@ -879,6 +950,7 @@ void Scene::LoadDefaultScene4()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
@@ -886,6 +958,8 @@ void Scene::LoadDefaultScene4()
 
 			objects[nr]->triangles[i]->Vertices[j].Position /= 1;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Teapot
@@ -893,6 +967,7 @@ void Scene::LoadDefaultScene4()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
@@ -902,6 +977,8 @@ void Scene::LoadDefaultScene4()
 			objects[nr]->triangles[i]->Vertices[j].Position.X += 1.25f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z += 0.5f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Teapot
@@ -909,6 +986,7 @@ void Scene::LoadDefaultScene4()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
@@ -918,6 +996,8 @@ void Scene::LoadDefaultScene4()
 			objects[nr]->triangles[i]->Vertices[j].Position.X += 2.5f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z += 1;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Light
@@ -926,13 +1006,15 @@ void Scene::LoadDefaultScene4()
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
 	{
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position.X *= 10;
 			objects[nr]->triangles[i]->Vertices[j].Position.Y += 4;
 		}
-		objects[nr]->triangles[i]->CalculateArea();
-		objects[nr]->triangles[i]->CalculateCenter();
+		objects[nr]->triangles[i]->PreCalc();
+	}
+		objects[nr]->triangles[i]->PreCalc();
 	}
 	lights.push_back(objects[nr]);
 	++nr;
@@ -968,11 +1050,14 @@ void Scene::LoadDefaultScene5()
 	nTriangles = objects[nr]->triangles.size();
 
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= 10;
 			objects[nr]->triangles[i]->Vertices[j].Position.Y -= 5;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Diamond
@@ -980,6 +1065,7 @@ void Scene::LoadDefaultScene5()
 	nTriangles = objects[nr]->triangles.size();
 	Matrix3x3F mat = Matrix3x3F::CreateRotationY(M_PI + M_PI_4);
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
@@ -989,6 +1075,8 @@ void Scene::LoadDefaultScene5()
 			objects[nr]->triangles[i]->Vertices[j].Position.X -= 0.25f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.25f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Diamond
@@ -996,6 +1084,7 @@ void Scene::LoadDefaultScene5()
 	nTriangles = objects[nr]->triangles.size();
 	mat = Matrix3x3F::CreateRotationY(M_PI);
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
@@ -1003,6 +1092,8 @@ void Scene::LoadDefaultScene5()
 
 			objects[nr]->triangles[i]->Vertices[j].Position /= 15;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Diamond
@@ -1010,6 +1101,7 @@ void Scene::LoadDefaultScene5()
 	nTriangles = objects[nr]->triangles.size();
 	mat = Matrix3x3F::CreateRotationY(M_PI_4);
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
@@ -1019,6 +1111,8 @@ void Scene::LoadDefaultScene5()
 			objects[nr]->triangles[i]->Vertices[j].Position.X += 0.2f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.3f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Diamond
@@ -1026,6 +1120,7 @@ void Scene::LoadDefaultScene5()
 	nTriangles = objects[nr]->triangles.size();
 	mat = Matrix3x3F::CreateRotationY(0.5f);
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
@@ -1035,6 +1130,8 @@ void Scene::LoadDefaultScene5()
 			objects[nr]->triangles[i]->Vertices[j].Position.X += 0.2f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z += 0.3f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Diamond
@@ -1042,6 +1139,7 @@ void Scene::LoadDefaultScene5()
 	nTriangles = objects[nr]->triangles.size();
 	mat = Matrix3x3F::CreateRotationY(2.0f);
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
@@ -1051,6 +1149,8 @@ void Scene::LoadDefaultScene5()
 			objects[nr]->triangles[i]->Vertices[j].Position.X -= 0.15f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z += 0.15f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Light
@@ -1064,8 +1164,7 @@ void Scene::LoadDefaultScene5()
 			objects[nr]->triangles[i]->Vertices[j].Position.X *= 10;
 			objects[nr]->triangles[i]->Vertices[j].Position.Y += 4;
 		}
-		objects[nr]->triangles[i]->CalculateArea();
-		objects[nr]->triangles[i]->CalculateCenter();
+		objects[nr]->triangles[i]->PreCalc();
 	}
 	lights.push_back(objects[nr]);
 	++nr;
@@ -1099,11 +1198,14 @@ void Scene::LoadDefaultScene6()
 	objects[nr]->material = Material(ReflectionType::diffuse, Color3F(0.7f, 0.7f, 0.7f), Color3F(), 1.0f, 0.0f, 0.0f);
 	nTriangles = objects[nr]->triangles.size();
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= 10;
 			objects[nr]->triangles[i]->Vertices[j].Position.Y -= 5;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Dragon
@@ -1111,6 +1213,7 @@ void Scene::LoadDefaultScene6()
 	nTriangles = objects[nr]->triangles.size();
 	Matrix3x3F mat = Matrix3x3F::CreateRotationY(-M_PI * (5.0f / 16.0f));
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position *= mat;
@@ -1119,6 +1222,8 @@ void Scene::LoadDefaultScene6()
 			objects[nr]->triangles[i]->Vertices[j].Position.Y += 0.27f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.1f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Mirror
@@ -1126,6 +1231,7 @@ void Scene::LoadDefaultScene6()
 	nTriangles = objects[nr]->triangles.size();
 	mat = Matrix3x3F::CreateRotationY(M_PI_4 * (3.0f / 4.0f));
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position.X *= 10;
@@ -1138,12 +1244,15 @@ void Scene::LoadDefaultScene6()
 			objects[nr]->triangles[i]->Vertices[j].Position.Y += 5.0f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z += 1.0f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Glass ball
 	objects[nr]->material = Material(ReflectionType::refractive, Color3F(0.7f, 0.7f, 0.7f), Color3F(), 2.5f, 0.0f, 0.0f);
 	nTriangles = objects[nr]->triangles.size();
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 4;
@@ -1151,12 +1260,15 @@ void Scene::LoadDefaultScene6()
 			objects[nr]->triangles[i]->Vertices[j].Position.Y += 0.25f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z += 0.2f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Shiny ball
 	objects[nr]->material = Material(ReflectionType::glossy, Color3F(0.75f, 0.75f, 0.75f), Color3F(), 1.0f, 100.0f, 0.0f);
 	nTriangles = objects[nr]->triangles.size();
 	for (unsigned int i = 0; i < nTriangles; ++i)
+	{
 		for (unsigned int j = 0; j < 3; ++j)
 		{
 			objects[nr]->triangles[i]->Vertices[j].Position /= 5;
@@ -1164,6 +1276,8 @@ void Scene::LoadDefaultScene6()
 			objects[nr]->triangles[i]->Vertices[j].Position.Y += 0.2f;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.1f;
 		}
+		objects[nr]->triangles[i]->PreCalc();
+	}
 	++nr;
 
 	// Light
@@ -1185,8 +1299,7 @@ void Scene::LoadDefaultScene6()
 			objects[nr]->triangles[i]->Vertices[j].Position.Y += 4;
 			objects[nr]->triangles[i]->Vertices[j].Position.Z -= 0.5f;
 		}
-		objects[nr]->triangles[i]->CalculateArea();
-		objects[nr]->triangles[i]->CalculateCenter();
+		objects[nr]->triangles[i]->PreCalc();
 	}
 	lights.push_back(objects[nr]);
 	++nr;
