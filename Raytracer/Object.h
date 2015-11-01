@@ -36,7 +36,7 @@ struct Object
 	void ConstructOctree(int minTriangles, int maxDepth)
 	{
 		if (octree != nullptr)
-			delete octree;
+			return;
 
 		octree = new Octree(triangles, minTriangles, maxDepth);
 	}
