@@ -3,13 +3,13 @@
 #include <limits>
 #include <immintrin.h>
 
-Octree::Octree() { }
-Octree::Octree(const std::vector<Triangle*>& triangles, int minTriangles, int maxDepth)
+Octree::Octree() : root(nullptr) { }
+Octree::Octree(const std::vector<Triangle*>& triangles)
 {
-	if (triangles.size() <= MAXSIZE || maxDepth == 0)
+	if (triangles.size() <= MAXSIZE)
 		root = new OctreeLeaf(triangles, BoundingBox::FromTriangles(triangles));
 	else
-		root = new OctreeInternal(triangles, BoundingBox::FromTriangles(triangles), minTriangles, maxDepth);
+		root = new OctreeInternal(triangles, BoundingBox::FromTriangles(triangles));
 }
 Octree::~Octree() { delete root; }
 
@@ -19,7 +19,7 @@ Triangle* Octree::Query(const Ray& ray, float& t) const
 	return root->Query(ray, t);
 }
 
-OctreeInternal::OctreeInternal(const std::vector<Triangle*>& triangles, const BoundingBox& bb, unsigned int minTriangles, unsigned int maxDepth)
+OctreeInternal::OctreeInternal(const std::vector<Triangle*>& triangles, const BoundingBox& bb)
 {
 	this->bb = bb;
 	Vector3F half = bb.Halfsize / 2;
@@ -36,10 +36,10 @@ OctreeInternal::OctreeInternal(const std::vector<Triangle*>& triangles, const Bo
 			if (Intersects(triangles[j], childBB))
 				childTriangles.push_back(triangles[j]);
 
-		if (childTriangles.size() <= MAXSIZE || maxDepth == 0)
+		if (childTriangles.size() <= MAXSIZE)
 			children[i] = new OctreeLeaf(childTriangles, childBB);
 		else
-			children[i] = new OctreeInternal(childTriangles, childBB, minTriangles, maxDepth - 1);
+			children[i] = new OctreeInternal(childTriangles, childBB);
 	}
 }
 

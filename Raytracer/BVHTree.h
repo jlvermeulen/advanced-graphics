@@ -4,32 +4,68 @@
 #include "Triangle.h"
 #include "BoundingBox.h"
 #include "Ray.h"
+#include "SpatialIndexDefines.h"
 
-class BVHTreeNode
+class BVHNode
 {
 public:
-	BVHTreeNode() : left(nullptr), right(nullptr) { };
-	~BVHTreeNode() { };
+	virtual ~BVHNode() { }
+	virtual Triangle* Query(const Ray& ray, float& t) const = 0;
+	static BVHNode* Construct(const std::vector<Triangle*>& triangles, const BoundingBox& bb);
+
+protected:
+	BoundingBox bb;
+};
+
+class BVHInternal : public BVHNode
+{
+public:
+	~BVHInternal();
 	Triangle* Query(const Ray& ray, float& t) const;
 
-	std::vector<Triangle*> triangles;
-	BoundingBox bb;
-	BVHTreeNode* left;
-	BVHTreeNode* right;
+	BVHNode* left;
+	BVHNode* right;
+};
+
+__declspec(align(32))
+class BVHLeaf : public BVHNode
+{
+public:
+	BVHLeaf(const std::vector<Triangle*>& triangles, const BoundingBox& bb);
+	Triangle* Query(const Ray& ray, float& t) const;
+
+	int count;
+	Triangle* triangles[MAXSIZE];
+
+	// Vertices[0]
+	union { float vert0X[MAXSIZE]; __m256 vert0X8[MAXSIZE / NROFLANES]; };
+	union { float vert0Y[MAXSIZE]; __m256 vert0Y8[MAXSIZE / NROFLANES]; };
+	union { float vert0Z[MAXSIZE]; __m256 vert0Z8[MAXSIZE / NROFLANES]; };
+
+	// Vertices[1] - Vertices[0]
+	union { float edge1X[MAXSIZE]; __m256 edge1X8[MAXSIZE / NROFLANES]; };
+	union { float edge1Y[MAXSIZE]; __m256 edge1Y8[MAXSIZE / NROFLANES]; };
+	union { float edge1Z[MAXSIZE]; __m256 edge1Z8[MAXSIZE / NROFLANES]; };
+
+	// Vertices[2] - Vertices[0]
+	union { float edge2X[MAXSIZE]; __m256 edge2X8[MAXSIZE / NROFLANES]; };
+	union { float edge2Y[MAXSIZE]; __m256 edge2Y8[MAXSIZE / NROFLANES]; };
+	union { float edge2Z[MAXSIZE]; __m256 edge2Z8[MAXSIZE / NROFLANES]; };
+
+	// crazy shit to ensure alignment
+	void* operator new(size_t i){ return _mm_malloc(i, 32); }
+	void operator delete(void* p) { _mm_free(p); }
 };
 
 class BVHTree
 {
 public:
-	BVHTreeNode* root;
-
-	BVHTree(const std::vector<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth);
-
+	BVHTree();
+	BVHTree(const std::vector<Triangle*>& triangles);
 	~BVHTree();
 
-	BVHTreeNode* CreateNodeX(const std::vector<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth);
-	BVHTreeNode* CreateNodeY(const std::vector<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth);
-	BVHTreeNode* CreateNodeZ(const std::vector<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth);
-	BVHTreeNode* SplitNode(const std::vector<Triangle*>& triangles, unsigned int minTriangles, unsigned int maxDepth, BoundingBox bb);
 	Triangle* Query(const Ray& ray, float& t) const;
+
+private:
+	BVHNode* root;
 };

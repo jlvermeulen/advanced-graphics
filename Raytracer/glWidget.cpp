@@ -53,7 +53,7 @@ void GLWidget::loadScene(QString& fileName)
 int GLWidget::renderScene(uchar* imageData)
 {
   QTime timer;
-  scene.PreRender(minTriangles_, maxDepth_);
+  scene.PreRender();
 
   timer.start();
   scene.Render(imageData, numberOfRays_, sigma_, useDoF_);

@@ -4,15 +4,12 @@
 #include "Triangle.h"
 #include "BoundingBox.h"
 #include "Ray.h"
-
-#define MAXSIZE 128
-#define NROFLANES 8
+#include "SpatialIndexDefines.h"
 
 class OctreeNode
 {
-	friend class GLWidget;
-
 public:
+	virtual ~OctreeNode() { }
 	virtual Triangle* Query(const Ray& ray, float& t) const = 0;
 
 protected:
@@ -22,7 +19,7 @@ protected:
 class OctreeInternal : public OctreeNode
 {
 public:
-	OctreeInternal(const std::vector<Triangle*>& triangles, const BoundingBox& bb, unsigned int minTriangles, unsigned int maxDepth);
+	OctreeInternal(const std::vector<Triangle*>& triangles, const BoundingBox& bb);
 	~OctreeInternal();
 	Triangle* Query(const Ray& ray, float& t) const;
 
@@ -59,13 +56,13 @@ public:
 	void operator delete(void* p) { _mm_free(p); }
 };
 
+#include <stdexcept>
 class Octree
 {
-	friend class GLWidget;
-
 public:
 	Octree();
-	Octree(const std::vector<Triangle*>& triangles, int minTriangles, int maxDepth);
+	Octree(const Octree& oct) { throw std::runtime_error("wut"); }
+	Octree(const std::vector<Triangle*>& triangles);
 	~Octree();
 
 	Triangle* Query(const Ray& ray, float& t) const;

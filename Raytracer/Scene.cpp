@@ -19,14 +19,14 @@ Scene::Scene() :
 
 Scene::~Scene() { }
 
-void Scene::PreRender(int minTriangles, int maxDepth)
+void Scene::PreRender()
 {
-	// Instantiate octrees
+	// Instantiate spatial indices
 	for (Object* obj : objects)
 #if TREE == 1
-		obj->ConstructBVHTree(minTriangles, maxDepth);
+		obj->ConstructBVHTree();
 #elif TREE == 0
-		obj->ConstructOctree(minTriangles, maxDepth);
+		obj->ConstructOctree();
 #endif
 }
 

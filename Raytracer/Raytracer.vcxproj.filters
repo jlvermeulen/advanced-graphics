@@ -235,6 +235,9 @@
     <ClInclude Include="Vector3F.h">
       <Filter>Header Files\Raytracer</Filter>
     </ClInclude>
+    <ClInclude Include="SpatialIndexDefines.h">
+      <Filter>Header Files\Raytracer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="window.ui">

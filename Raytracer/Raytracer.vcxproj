@@ -405,6 +405,7 @@
     </CustomBuild>
     <ClInclude Include="Reader.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SpatialIndexDefines.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vector2F.h" />
     <ClInclude Include="Vector3F.h" />

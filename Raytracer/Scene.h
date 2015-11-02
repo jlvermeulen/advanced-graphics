@@ -47,7 +47,7 @@ public:
 	Scene();
 	~Scene();
 
-	void PreRender(int minTriangles, int maxDepth);
+	void PreRender();
 	void Render(unsigned char* imageData, int samplesPerPixel, float sigma, bool useDoF);
 	void PostRender();
 

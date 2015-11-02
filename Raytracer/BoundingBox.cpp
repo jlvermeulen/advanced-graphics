@@ -25,7 +25,7 @@ BoundingBox BoundingBox::FromTriangles(const std::vector<Triangle*>& triangles)
 	return BoundingBox((max + min) / 2, (max - min) / 2);
 }
 
-float BoundingBox::SurfaceArea()
+float BoundingBox::SurfaceArea() const
 {
 	float xedge = 2 * Halfsize.X;
 	float yedge = 2 * Halfsize.Y;

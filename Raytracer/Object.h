@@ -34,22 +34,25 @@ struct Object
 
 		if (octree != nullptr)
 			delete octree;
+
+		if (bvhTree != nullptr)
+			delete bvhTree;
 	}
 
-	void ConstructOctree(int minTriangles, int maxDepth)
+	void ConstructOctree()
 	{
 		if (octree != nullptr)
 			return;
 
-		octree = new Octree(triangles, minTriangles, maxDepth);
+		octree = new Octree(triangles);
 	}
 
-	void ConstructBVHTree(int minTriangles, int maxDepth)
+	void ConstructBVHTree()
 	{
 		if (bvhTree != nullptr)
 			return;
 
-		bvhTree = new BVHTree(triangles, minTriangles, maxDepth);
+		bvhTree = new BVHTree(triangles);
 	}
 
 	BVHTree* bvhTree;

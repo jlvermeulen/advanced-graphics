@@ -14,5 +14,5 @@ public:
 	BoundingBox(const Vector3F& center, const Vector3F& halfsize);
 
 	static BoundingBox FromTriangles(const std::vector<Triangle*> & triangles);
-	float SurfaceArea();
+	float SurfaceArea() const;
 };
