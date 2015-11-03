@@ -7,16 +7,22 @@
 BVHTree::BVHTree() : root(nullptr) { }
 BVHTree::BVHTree(const std::vector<Triangle*>& triangles)
 {
-	std::vector<Triangle*> triCopy(triangles);
-	root = BVHNode::Construct(triCopy, BoundingBox::FromTriangles(triangles));
+	root = BVHNode::Construct(triangles, BoundingBox::FromTriangles(triangles));
+	root->Compact();
 }
 BVHTree::~BVHTree() { delete root; }
 
 Triangle* BVHTree::Query(const Ray& ray, float& t) const
 {
+	float x = std::numeric_limits<float>::max();
+	if (!Intersects(ray, root->bb, x))
+		return nullptr;
+
 	t = std::numeric_limits<float>::max();
 	return root->Query(ray, t);
 }
+
+void BVHTree::Compact() { if (root != nullptr) root->Compact(); }
 
 BVHNode* BVHNode::Construct(const std::vector<Triangle*>& triangles, const BoundingBox& bb)
 {
@@ -73,40 +79,77 @@ BVHNode* BVHNode::Construct(const std::vector<Triangle*>& triangles, const Bound
 
 	BVHInternal* res = new BVHInternal();
 	res->bb = bb;
-	res->left = Construct(leftTris, bbl[best.second]);
-	res->right = Construct(rightTris, bbr[best.second]);
+	res->children[0] = Construct(leftTris, bbl[best.second]);
+	res->children[1] = Construct(rightTris, bbr[best.second]);
 
 	return res;
 }
 
 BVHInternal::~BVHInternal()
 {
-	if (left != nullptr)
-		delete left;
-	if (right != nullptr)
-		delete right;
+	for (unsigned int i = 0; i < NROFLANES; i++)
+		if (children[i] != nullptr)
+			delete children[i];
 }
 
 Triangle* BVHInternal::Query(const Ray& ray, float& t) const
 {
-	float tBox = std::numeric_limits<float>::min();
-	if (!Intersects(ray, bb, tBox) || tBox > t)
-		return nullptr;
-
 	Triangle* triangle = nullptr;
-	if (left != nullptr)
+	for (unsigned int i = 0; i < NROFLANES; i++)
 	{
-		Triangle* tri = left->Query(ray, t);
-		triangle = tri == nullptr ? triangle : tri;
-	}
+		if (children[i] == nullptr)
+			break;
 
-	if (right != nullptr)
-	{
-		Triangle* tri = right->Query(ray, t);
+		float tBox = std::numeric_limits<float>::min();
+		if (!Intersects(ray, children[i]->bb, tBox) || tBox > t)
+			continue;
+
+		Triangle* tri = children[i]->Query(ray, t);
 		triangle = tri == nullptr ? triangle : tri;
 	}
 
 	return triangle;
+}
+
+void BVHInternal::Compact()
+{
+	unsigned int levels = 0, lanes = NROFLANES, childCount = 0;
+	while (lanes > 1)
+	{
+		lanes >>= 1;
+		levels++;
+	}
+
+	std::vector<BVHNode*> levelChildren;
+	levelChildren.push_back(children[0]);
+	levelChildren.push_back(children[1]);
+	while (levels-- > 1)
+	{
+		std::vector<BVHNode*> childrensChildren;
+		for (BVHNode* child : levelChildren)
+		{
+			BVHNode** c = child->GatherChildren();
+			if (c == nullptr)
+			{
+				children[childCount++] = child;
+				continue;
+			}
+
+			childrensChildren.push_back(c[0]);
+			childrensChildren.push_back(c[1]);
+
+			c[0] = nullptr;
+			c[1] = nullptr;
+			delete child;
+		}
+		levelChildren = childrensChildren;
+	}
+
+	for (BVHNode* child : levelChildren)
+	{
+		children[childCount++] = child;
+		child->Compact();
+	}
 }
 
 BVHLeaf::BVHLeaf(const std::vector<Triangle*>& triangles, const BoundingBox& bb)
@@ -145,9 +188,9 @@ BVHLeaf::BVHLeaf(const std::vector<Triangle*>& triangles, const BoundingBox& bb)
 
 Triangle* BVHLeaf::Query(const Ray& ray, float& t) const
 {
-	float tBox = std::numeric_limits<float>::min();
+	/*float tBox = std::numeric_limits<float>::min();
 	if (!Intersects(ray, bb, tBox) || tBox > t)
-		return nullptr;
+		return nullptr;*/
 
 	const __m256 rayDirX = _mm256_set1_ps(ray.Direction.X);
 	const __m256 rayDirY = _mm256_set1_ps(ray.Direction.Y);
