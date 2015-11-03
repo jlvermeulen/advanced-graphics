@@ -13,9 +13,7 @@ public:
 	virtual Triangle* Query(const Ray& ray, float& t) const = 0;
 	static BVHNode* Construct(const std::vector<Triangle*>& triangles, const BoundingBox& bb);
 	virtual void Compact() { }
-	virtual BVHNode** GatherChildren() { return nullptr; }
-
-	BoundingBox bb;
+	virtual BVHNode** GetChildren() { return nullptr; }
 };
 
 class BVHInternal : public BVHNode
@@ -28,13 +26,23 @@ public:
 	BVHNode** GetChildren() { return &children[0]; }
 
 	BVHNode* children[NROFLANES];
+
+	// Min
+	union { float bboxMinX[NROFLANES]; __m256 bboxMinX8; };
+	union { float bboxMinY[NROFLANES]; __m256 bboxMinY8; };
+	union { float bboxMinZ[NROFLANES]; __m256 bboxMinZ8; };
+
+	// Max
+	union { float bboxMaxX[NROFLANES]; __m256 bboxMaxX8; };
+	union { float bboxMaxY[NROFLANES]; __m256 bboxMaxY8; };
+	union { float bboxMaxZ[NROFLANES]; __m256 bboxMaxZ8; };
 };
 
 __declspec(align(32))
 class BVHLeaf : public BVHNode
 {
 public:
-	BVHLeaf(const std::vector<Triangle*>& triangles, const BoundingBox& bb);
+	BVHLeaf(const std::vector<Triangle*>& triangles);
 	Triangle* Query(const Ray& ray, float& t) const;
 
 	// crazy shit to ensure alignment
@@ -72,6 +80,5 @@ public:
 
 private:
 	BVHNode* root;
-
-	void Compact();
+	BoundingBox rootBB;
 };

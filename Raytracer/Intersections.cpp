@@ -25,7 +25,7 @@ bool Intersects(const Ray& ray, const BoundingBox& bb, float& t)
 	tmin = std::max(tmin, std::min(t1, t2));
 	tmax = std::min(tmax, std::max(t1, t2));
 
-	if (tmax >= 0 && tmax >= tmin)
+	if (tmax > 0 && tmax >= tmin)
 	{
 		t = tmin;
 		return true;

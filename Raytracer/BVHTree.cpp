@@ -3,11 +3,13 @@
 #include <limits>
 #include <immintrin.h>
 #include <algorithm>
+#include <tuple>
 
 BVHTree::BVHTree() : root(nullptr) { }
 BVHTree::BVHTree(const std::vector<Triangle*>& triangles)
 {
 	root = BVHNode::Construct(triangles, BoundingBox::FromTriangles(triangles));
+	this->rootBB = BoundingBox::FromTriangles(triangles);
 	root->Compact();
 }
 BVHTree::~BVHTree() { delete root; }
@@ -15,20 +17,18 @@ BVHTree::~BVHTree() { delete root; }
 Triangle* BVHTree::Query(const Ray& ray, float& t) const
 {
 	float x = std::numeric_limits<float>::max();
-	if (!Intersects(ray, root->bb, x))
+	if (!Intersects(ray, rootBB, x))
 		return nullptr;
 
 	t = std::numeric_limits<float>::max();
 	return root->Query(ray, t);
 }
 
-void BVHTree::Compact() { if (root != nullptr) root->Compact(); }
-
 BVHNode* BVHNode::Construct(const std::vector<Triangle*>& triangles, const BoundingBox& bb)
 {
 	int s = triangles.size();
 	if (triangles.size() <= MAXSIZE)
-		return new BVHLeaf(triangles, bb);
+		return new BVHLeaf(triangles);
 
 	int dim = 0;
 	if (bb.Halfsize.Y > bb.Halfsize.X)
@@ -75,12 +75,25 @@ BVHNode* BVHNode::Construct(const std::vector<Triangle*>& triangles, const Bound
 	}
 
 	if (best.second == -1)
-		return new BVHLeaf(triangles, bb);
+		return new BVHLeaf(triangles);
 
 	BVHInternal* res = new BVHInternal();
-	res->bb = bb;
 	res->children[0] = Construct(leftTris, bbl[best.second]);
 	res->children[1] = Construct(rightTris, bbr[best.second]);
+
+	res->bboxMinX[0] = bbl[best.second].Center.X - bbl[best.second].Halfsize.X;
+	res->bboxMinY[0] = bbl[best.second].Center.Y - bbl[best.second].Halfsize.Y;
+	res->bboxMinZ[0] = bbl[best.second].Center.Z - bbl[best.second].Halfsize.Z;
+	res->bboxMaxX[0] = bbl[best.second].Center.X + bbl[best.second].Halfsize.X;
+	res->bboxMaxY[0] = bbl[best.second].Center.Y + bbl[best.second].Halfsize.Y;
+	res->bboxMaxZ[0] = bbl[best.second].Center.Z + bbl[best.second].Halfsize.Z;
+
+	res->bboxMinX[1] = bbr[best.second].Center.X - bbr[best.second].Halfsize.X;
+	res->bboxMinY[1] = bbr[best.second].Center.Y - bbr[best.second].Halfsize.Y;
+	res->bboxMinZ[1] = bbr[best.second].Center.Z - bbr[best.second].Halfsize.Z;
+	res->bboxMaxX[1] = bbr[best.second].Center.X + bbr[best.second].Halfsize.X;
+	res->bboxMaxY[1] = bbr[best.second].Center.Y + bbr[best.second].Halfsize.Y;
+	res->bboxMaxZ[1] = bbr[best.second].Center.Z + bbr[best.second].Halfsize.Z;
 
 	return res;
 }
@@ -94,18 +107,75 @@ BVHInternal::~BVHInternal()
 
 Triangle* BVHInternal::Query(const Ray& ray, float& t) const
 {
+	//	float tBox = std::numeric_limits<float>::min();
+	//	if (!Intersects(ray, children[i]->bb, tBox) || tBox > t)
+	//		continue;
+
+	const __m256 rayDirInvX = _mm256_set1_ps(ray.InverseDirection.X);
+	const __m256 rayDirInvY = _mm256_set1_ps(ray.InverseDirection.Y);
+	const __m256 rayDirInvZ = _mm256_set1_ps(ray.InverseDirection.Z);
+
+	const __m256 rayPosX = _mm256_set1_ps(ray.Origin.X);
+	const __m256 rayPosY = _mm256_set1_ps(ray.Origin.Y);
+	const __m256 rayPosZ = _mm256_set1_ps(ray.Origin.Z);
+
+	//Vector3F lb = bb.Center - bb.Halfsize - ray.Origin, rt = bb.Center + bb.Halfsize - ray.Origin;
+	const __m256 minX = _mm256_sub_ps(bboxMinX8, rayPosX);
+	const __m256 minY = _mm256_sub_ps(bboxMinY8, rayPosY);
+	const __m256 minZ = _mm256_sub_ps(bboxMinZ8, rayPosZ);
+
+	const __m256 maxX = _mm256_sub_ps(bboxMaxX8, rayPosX);
+	const __m256 maxY = _mm256_sub_ps(bboxMaxY8, rayPosY);
+	const __m256 maxZ = _mm256_sub_ps(bboxMaxZ8, rayPosZ);
+
+	//float t1 = lb.X * ray.InverseDirection.X;
+	//float t2 = rt.X * ray.InverseDirection.X;
+	__m256 t1 = _mm256_mul_ps(minX, rayDirInvX);
+	__m256 t2 = _mm256_mul_ps(maxX, rayDirInvX);
+
+	//float tmin = std::min(t1, t2);
+	//float tmax = std::max(t1, t2);
+	__m256 tmin = _mm256_min_ps(t1, t2);
+	__m256 tmax = _mm256_max_ps(t1, t2);
+
+	//t1 = lb.Y * ray.InverseDirection.Y;
+	//t2 = rt.Y * ray.InverseDirection.Y;
+	t1 = _mm256_mul_ps(minY, rayDirInvY);
+	t2 = _mm256_mul_ps(maxY, rayDirInvY);
+
+	//tmin = std::max(tmin, std::min(t1, t2));
+	//tmax = std::min(tmax, std::max(t1, t2));
+	tmin = _mm256_max_ps(tmin, _mm256_min_ps(t1, t2));
+	tmax = _mm256_min_ps(tmax, _mm256_max_ps(t1, t2));
+
+	//t1 = lb.Z * ray.InverseDirection.Z;
+	//t2 = rt.Z * ray.InverseDirection.Z;
+	t1 = _mm256_mul_ps(minZ, rayDirInvZ);
+	t2 = _mm256_mul_ps(maxZ, rayDirInvZ);
+
+	//tmin = std::max(tmin, std::min(t1, t2));
+	//tmax = std::min(tmax, std::max(t1, t2));
+	tmin = _mm256_max_ps(tmin, _mm256_min_ps(t1, t2));
+	tmax = _mm256_min_ps(tmax, _mm256_max_ps(t1, t2));
+
+	//if (tmax >= 0 && tmax >= tmin)
+	//{
+	//	t = tmin;
+	//	return true;
+	//}
+
 	Triangle* triangle = nullptr;
-	for (unsigned int i = 0; i < NROFLANES; i++)
+	for (int i = 0; i < NROFLANES; i++)
 	{
-		if (children[i] == nullptr)
-			break;
+		float ttmax = tmax.m256_f32[i];
+		float ttmin = tmin.m256_f32[i];
 
-		float tBox = std::numeric_limits<float>::min();
-		if (!Intersects(ray, children[i]->bb, tBox) || tBox > t)
-			continue;
-
-		Triangle* tri = children[i]->Query(ray, t);
-		triangle = tri == nullptr ? triangle : tri;
+		// we hit the bbox, and it's closer than our current closest hit
+		if (ttmax > 0 && ttmax >= ttmin && ttmin < t)
+		{
+			Triangle* tri = children[i]->Query(ray, t); // so we query the child node
+			triangle = tri == nullptr ? triangle : tri;
+		}
 	}
 
 	return triangle;
@@ -120,42 +190,77 @@ void BVHInternal::Compact()
 		levels++;
 	}
 
-	std::vector<BVHNode*> levelChildren;
-	levelChildren.push_back(children[0]);
-	levelChildren.push_back(children[1]);
+	std::vector<std::tuple<BVHNode*, BVHInternal*, int>> levelChildren;
+	std::vector<BVHNode*> toDelete;
+	levelChildren.push_back(std::tuple<BVHNode*, BVHInternal*, int>(children[0], this, 0));
+	levelChildren.push_back(std::tuple<BVHNode*, BVHInternal*, int>(children[1], this, 1));
 	while (levels-- > 1)
 	{
-		std::vector<BVHNode*> childrensChildren;
-		for (BVHNode* child : levelChildren)
+		std::vector<std::tuple<BVHNode*, BVHInternal*, int>> childrensChildren;
+		for (std::tuple<BVHNode*, BVHInternal*, int>& tup : levelChildren)
 		{
-			BVHNode** c = child->GatherChildren();
+			BVHNode** c = std::get<0>(tup)->GetChildren();
 			if (c == nullptr)
 			{
-				children[childCount++] = child;
+				children[childCount] = std::get<0>(tup);
+
+				bboxMinX[childCount] = std::get<1>(tup)->bboxMinX[std::get<2>(tup)];
+				bboxMinY[childCount] = std::get<1>(tup)->bboxMinY[std::get<2>(tup)];
+				bboxMinZ[childCount] = std::get<1>(tup)->bboxMinZ[std::get<2>(tup)];
+				bboxMaxX[childCount] = std::get<1>(tup)->bboxMaxX[std::get<2>(tup)];
+				bboxMaxY[childCount] = std::get<1>(tup)->bboxMaxY[std::get<2>(tup)];
+				bboxMaxZ[childCount] = std::get<1>(tup)->bboxMaxZ[std::get<2>(tup)];
+
+				childCount++;
+
 				continue;
 			}
 
-			childrensChildren.push_back(c[0]);
-			childrensChildren.push_back(c[1]);
+			childrensChildren.push_back(std::tuple<BVHNode*, BVHInternal*, int>(c[0], reinterpret_cast<BVHInternal*>(std::get<0>(tup)), 0));
+			childrensChildren.push_back(std::tuple<BVHNode*, BVHInternal*, int>(c[1], reinterpret_cast<BVHInternal*>(std::get<0>(tup)), 1));
 
 			c[0] = nullptr;
 			c[1] = nullptr;
-			delete child;
+			toDelete.push_back(std::get<0>(tup));
 		}
 		levelChildren = childrensChildren;
 	}
 
-	for (BVHNode* child : levelChildren)
+	for (std::tuple<BVHNode*, BVHInternal*, int>& tup : levelChildren)
 	{
-		children[childCount++] = child;
-		child->Compact();
+		children[childCount] = std::get<0>(tup);
+
+		bboxMinX[childCount] = std::get<1>(tup)->bboxMinX[std::get<2>(tup)];
+		bboxMinY[childCount] = std::get<1>(tup)->bboxMinY[std::get<2>(tup)];
+		bboxMinZ[childCount] = std::get<1>(tup)->bboxMinZ[std::get<2>(tup)];
+		bboxMaxX[childCount] = std::get<1>(tup)->bboxMaxX[std::get<2>(tup)];
+		bboxMaxY[childCount] = std::get<1>(tup)->bboxMaxY[std::get<2>(tup)];
+		bboxMaxZ[childCount] = std::get<1>(tup)->bboxMaxZ[std::get<2>(tup)];
+
+		childCount++;
+
+		std::get<0>(tup)->Compact();
 	}
+
+	while (childCount < NROFLANES)
+	{
+		children[childCount] = nullptr;
+		bboxMinX[childCount] = 0.0f;
+		bboxMinY[childCount] = 0.0f;
+		bboxMinZ[childCount] = 0.0f;
+		bboxMaxX[childCount] = 0.0f;
+		bboxMaxY[childCount] = 0.0f;
+		bboxMaxZ[childCount] = 0.0f;
+
+		childCount++;
+	}
+
+	for (BVHNode* node : toDelete)
+		delete node;
 }
 
-BVHLeaf::BVHLeaf(const std::vector<Triangle*>& triangles, const BoundingBox& bb)
+BVHLeaf::BVHLeaf(const std::vector<Triangle*>& triangles)
 {
-	this->bb = bb;
-
 	unsigned int i = 0;
 	for (; i < triangles.size(); i++)
 	{
