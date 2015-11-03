@@ -28,6 +28,9 @@ void Scene::PreRender()
 #elif TREE == 0
 		obj->ConstructOctree();
 #endif
+
+	// precalc light stuff
+
 }
 
 void Scene::Render(uchar* imageData, int samplesPerPixel, float sigma, bool useDoF)
@@ -364,11 +367,31 @@ std::pair<Ray, Triangle*>* Scene::SampleLight(const Vector3F& hitPoint, float& w
 			Vector3F triPoint = v1 * u + v2 * v + t->Vertices[0].Position;
 
 			Vector3F outgoingRay = hitPoint - triPoint;
-			float distance = outgoingRay.LengthSquared();
-			Vector3F normal = t->surfaceNormal(triPoint);
-			outgoingRay.Normalise();
 
-			float f = t->Area * std::max(0.0f, Vector3F::Dot(outgoingRay, normal)) / distance;
+			//float distance = outgoingRay.LengthSquared();
+			float distance = outgoingRay.X * outgoingRay.X + outgoingRay.Y * outgoingRay.Y + outgoingRay.Z * outgoingRay.Z; 
+
+			//Vector3F normal = t->surfaceNormal(triPoint);
+				//Vector3F factors = Interpolate(point); inside surfaceNormal()
+			Vector3F v3 = triPoint - t->Vertices[0].Position;
+				//Vector3F::Dot(v3, t->v0);
+			float d20 = v3.X * t->v0.X + v3.Y * t->v0.Y + v3.Z * t->v0.Z;
+				//Vector3F::Dot(v3, t->v1);
+			float d21 = v3.X * t->v1.X + v3.Y * t->v1.Y + v3.Z * t->v1.Z;
+
+			float a2 = (t->d11 * d20 - t->d01 * d21) * t->invDenom;
+			float a3 = (t->d00 * d21 - t->d01 * d20) * t->invDenom;
+			float a1 = 1.0f - a2 - a3;
+			Vector3F factors(a1, a2, a3);
+			//
+			Vector3F normal = factors.X * t->Vertices[0].Normal + factors.Y * t->Vertices[1].Normal + factors.Z * t->Vertices[2].Normal;
+
+			//outgoingRay.Normalise();
+			outgoingRay /= sqrtf(outgoingRay.X * outgoingRay.X + outgoingRay.Y * outgoingRay.Y + outgoingRay.Z * outgoingRay.Z);
+
+			//float f = t->Area * std::max(0.0f, Vector3F::Dot(outgoingRay, normal)) / distance;
+			float fh = outgoingRay.X * normal.X + outgoingRay.Y * normal.Y + outgoingRay.Z * normal.Z;
+			float f = t->Area * std::max(0.0f, fh) / distance;
 			weight += f; // projected area of all lightsources on hemisphere
 			f *= o->material.emission.R; // we assume non-coloured emissions
 

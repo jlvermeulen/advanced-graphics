@@ -5,7 +5,7 @@
 
 struct Triangle
 {
-private:
+public://private:
 	float d00, d01, d11, invDenom;
 	Vector3F v0, v1;
 
