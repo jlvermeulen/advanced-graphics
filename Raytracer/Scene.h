@@ -59,7 +59,7 @@ public:
 	void LoadDefaultScene6();
 	void Clear();
 
-	union{ float posv0X[MAXLIGHTS]; __m256 posv0x8[MAXLIGHTS / NROFLANES]; };
+	union{ float  posv0X[MAXLIGHTS]; __m256 posv0X8[MAXLIGHTS / NROFLANES]; };
 	union{ float  posv1X[MAXLIGHTS]; __m256 posv1X8[MAXLIGHTS / NROFLANES]; };
 	union{ float  posv2X[MAXLIGHTS]; __m256 posv2X8[MAXLIGHTS / NROFLANES]; };
 	union{ float  posv0Y[MAXLIGHTS]; __m256 posv0Y8[MAXLIGHTS / NROFLANES]; };

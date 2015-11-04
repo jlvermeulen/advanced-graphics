@@ -443,89 +443,115 @@ std::pair<Ray, Triangle*>* Scene::SampleLight(const Vector3F& hitPoint, float& w
 	}
 
 	unsigned int i = 0;
-	float flux[MAXLIGHTS];// = new std::pair<float, unsigned int>[lightCount];
+	//float flux[MAXLIGHTS];// = new std::pair<float, unsigned int>[lightCount];
 	float totalflux = 0;
+
+	// prepare for AVX loop
+	float count = lightCount / NROFLANES;
+	const __m256 u8 = _mm256_set1_ps(u);
+	const __m256 v8 = _mm256_set1_ps(v);
+
+	const __m256 hitPointX = _mm256_set1_ps(hitPoint.X);
+	const __m256 hitPointY = _mm256_set1_ps(hitPoint.Y);
+	const __m256 hitPointZ = _mm256_set1_ps(hitPoint.Z);
+
+	const __m256 one = _mm256_set1_ps(1.0f);
+	const __m256 zero = _mm256_set1_ps(0.0f);
+
+	__m256 weights = _mm256_set1_ps(0.0f);
+	union{ float flux[MAXLIGHTS]; __m256 flux8[MAXLIGHTS / NROFLANES]; };
+	__m256 totalflux8 = _mm256_set1_ps(0.0f);
 	// loop over all lightsources
 //	unsigned int c = 0;
 	//for (Object* o : lights)
 	//{
 	//	for (Triangle* t : o->triangles)
-	for (unsigned int c = 0; c < lightCount; ++c)
+	for (unsigned int c = 0; c < count; ++c)
 	{
 		//	c++; // counter for triangles
 
 		//Vector3F v1 = t->Vertices[1].Position - t->Vertices[0].Position;
-		float locv1X = posv1X[c] - posv0X[c];
-		float locv1Y = posv1Y[c] - posv0Y[c];
-		float locv1Z = posv1Z[c] - posv0Z[c];
+		const __m256 locv1X = _mm256_sub_ps(posv1X8[c], posv0X8[c]);
+		const __m256 locv1Y = _mm256_sub_ps(posv1Y8[c], posv0Y8[c]);
+		const __m256 locv1Z = _mm256_sub_ps(posv1Z8[c], posv0Z8[c]);
 
 		//Vector3F v2 = t->Vertices[2].Position - t->Vertices[0].Position;
-		float locv2X = posv2X[c] - posv0X[c];
-		float locv2Y = posv2Y[c] - posv0Y[c];
-		float locv2Z = posv2Z[c] - posv0Z[c];
+		const __m256 locv2X = _mm256_sub_ps(posv2X8[c], posv0X8[c]);
+		const __m256 locv2Y = _mm256_sub_ps(posv2Y8[c], posv0Y8[c]);
+		const __m256 locv2Z = _mm256_sub_ps(posv2Z8[c], posv0Z8[c]);
 
 		//Vector3F triPoint = v1 * u + v2 * v + t->Vertices[0].Position;
-		float triPointX = locv1X * u + locv2X*v + posv0X[c];
-		float triPointY = locv1Y * u + locv2Y*v + posv0Y[c];
-		float triPointZ = locv1Z * u + locv2Z*v + posv0Z[c];
+		const __m256 triPointX = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(locv1X, u8), _mm256_mul_ps(locv2X, v8)), posv0X8[c]);
+		const __m256 triPointY = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(locv1Y, u8), _mm256_mul_ps(locv2Y, v8)), posv0Y8[c]);
+		const __m256 triPointZ = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(locv1Z, u8), _mm256_mul_ps(locv2Z, v8)), posv0Z8[c]);
 
 		//Vector3F outgoingRay = hitPoint - triPoint;
-		float outgoingRayX = hitPoint.X - triPointX;
-		float outgoingRayY = hitPoint.Y - triPointY;
-		float outgoingRayZ = hitPoint.Z - triPointZ;
+		__m256 outgoingRayX = _mm256_sub_ps(hitPointX, triPointX);
+		__m256 outgoingRayY = _mm256_sub_ps(hitPointY, triPointY);
+		__m256 outgoingRayZ = _mm256_sub_ps(hitPointZ, triPointZ);
 
 		//float distance = outgoingRay.LengthSquared();
 		////float distance = outgoingRay.X * outgoingRay.X + outgoingRay.Y * outgoingRay.Y + outgoingRay.Z * outgoingRay.Z; 
-		float distance = outgoingRayX*outgoingRayX + outgoingRayY*outgoingRayY + outgoingRayZ*outgoingRayZ;
+		const __m256 distance = _mm256_add_ps( _mm256_add_ps(_mm256_mul_ps(outgoingRayX, outgoingRayX),	_mm256_mul_ps(outgoingRayY,outgoingRayY)), _mm256_mul_ps(outgoingRayZ,outgoingRayZ));
 
 		//Vector3F normal = t->surfaceNormal(triPoint);
 		//Vector3F factors = Interpolate(point); inside surfaceNormal()
 		////Vector3F v3 = triPoint - t->Vertices[0].Position;
-		float locv3X = triPointX - posv0X[c];
-		float locv3Y = triPointY - posv0Y[c];
-		float locv3Z = triPointZ - posv0Z[c];
+		const __m256  locv3X = _mm256_sub_ps( triPointX  ,  posv0X8[c]);
+		const __m256  locv3Y = _mm256_sub_ps( triPointY  ,  posv0Y8[c]);
+		const __m256  locv3Z = _mm256_sub_ps( triPointZ  ,  posv0Z8[c]);
 
 		//Vector3F::Dot(v3, t->v0);
 		////float d20o = v3.X * t->v0.X + v3.Y * t->v0.Y + v3.Z * t->v0.Z;
-		float d20 = locv3X*prev0X[c] + locv3Y*prev0Y[c] + locv3Z*prev0Z[c];
+		const __m256 d20 = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(locv3X, prev0X8[c]), _mm256_mul_ps(locv3Y, prev0Y8[c])), _mm256_mul_ps(locv3Z, prev0Z8[c]));
 		//Vector3F::Dot(v3, t->v1);
 		////float d21o = v3.X * t->v1.X + v3.Y * t->v1.Y + v3.Z * t->v1.Z;
-		float d21 = locv3X*prev1X[c] + locv3Y*prev1Y[c] + locv3Z*prev1Z[c];
+		const __m256 d21 = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(locv3X, prev1X8[c]), _mm256_mul_ps(locv3Y, prev1Y8[c])), _mm256_mul_ps(locv3Z, prev1Z8[c]));
 
 		//float a2 = (t->d11 * d20o - t->d01 * d21o) * t->invDenom;
-		float facY = (d11[c] * d20 - d01[c] * d21)*invDenom[c];
+		const __m256 facY = _mm256_mul_ps(_mm256_sub_ps(_mm256_mul_ps(d118[c], d20), _mm256_mul_ps(d018[c], d21)), invDenom8[c]);
 
 		//float a3 = (t->d00 * d21o - t->d01 * d20o) * t->invDenom;
-		float facZ = (d00[c] * d21 - d01[c] * d20) * invDenom[c];
+		const __m256 facZ = _mm256_mul_ps(_mm256_sub_ps(_mm256_mul_ps(d008[c], d21), _mm256_mul_ps(d018[c], d20)), invDenom8[c]);
 
 		//float a1 = 1.0f - a2 - a3;
-		float facX = 1.0f - facY - facZ;
+		const __m256 facX = _mm256_sub_ps(_mm256_sub_ps(one, facY), facZ);
 		//Vector3F factors(a1, a2, a3);
 		// end of inside surfaceNormal()
 
 		//Vector3F normal = factors.X * t->Vertices[0].Normal + factors.Y * t->Vertices[1].Normal + factors.Z * t->Vertices[2].Normal;
-		float normalX = facX * norv0X[c] + facY * norv1X[c] + facZ * norv2X[c];
-		float normalY = facX * norv0Y[c] + facY * norv1Y[c] + facZ * norv2Y[c];
-		float normalZ = facX * norv0Z[c] + facY * norv1Z[c] + facZ * norv2Z[c];
-
+		//--float normalX = facX * norv0X[c] + facY * norv1X[c] + facZ * norv2X[c]; 
+		const __m256 normalX = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(facX, norv0X8[c]), _mm256_mul_ps(facY, norv1X8[c])), _mm256_mul_ps(facZ, norv2X8[c]));
+		const __m256 normalY = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(facY, norv0Y8[c]), _mm256_mul_ps(facY, norv1Y8[c])), _mm256_mul_ps(facZ, norv2Y8[c]));
+		const __m256 normalZ = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(facZ, norv0Z8[c]), _mm256_mul_ps(facY, norv1Z8[c])), _mm256_mul_ps(facZ, norv2Z8[c]));
 		//outgoingRay.Normalise();
 		//Vector3F outgoingRay(outgoingRayX, outgoingRayY, outgoingRayZ);//
 		//outgoingRay /= sqrtf(outgoingRay.X * outgoingRay.X + outgoingRay.Y * outgoingRay.Y + outgoingRay.Z * outgoingRay.Z);
-		float sqrt = sqrtf(outgoingRayX * outgoingRayX + outgoingRayY * outgoingRayY + outgoingRayZ * outgoingRayZ);
-		outgoingRayX /= sqrt;
-		outgoingRayY /= sqrt;
-		outgoingRayZ /= sqrt;
+		//--float sqrt = sqrtf(outgoingRayX * outgoingRayX + outgoingRayY * outgoingRayY + outgoingRayZ * outgoingRayZ);
+		const __m256 rsqrt = _mm256_rsqrt_ps(_mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(outgoingRayX, outgoingRayX), _mm256_mul_ps(outgoingRayY, outgoingRayY)), _mm256_mul_ps(outgoingRayZ, outgoingRayZ)));
+		outgoingRayX = _mm256_mul_ps(outgoingRayX, rsqrt);
+		outgoingRayY = _mm256_mul_ps(outgoingRayY, rsqrt);
+		outgoingRayZ = _mm256_mul_ps(outgoingRayZ, rsqrt);
 
 		//float fold = t->Area * std::max(0.0f, Vector3F::Dot(outgoingRay, normal)) / distanceo;
-		float fdot = outgoingRayX * normalX + outgoingRayY * normalY + outgoingRayZ * normalZ;
-		float f = area[c] * std::max(0.0f, fdot) / distance;
-		weight += f; // projected area of all lightsources on hemisphere
-		f *= emissionR[c]; // we assume non-coloured emissions
+		//--float fdot = outgoingRayX * normalX + outgoingRayY * normalY + outgoingRayZ * normalZ;
+		const __m256 fdot = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(outgoingRayX, normalX), _mm256_mul_ps(outgoingRayY, normalY)), _mm256_mul_ps(outgoingRayZ, normalZ));
+		//--float f = area[c] * std::max(0.0f, fdot) / distance;
+		__m256 f = _mm256_div_ps(_mm256_mul_ps(area8[c], _mm256_max_ps(zero, fdot)), distance);
 
-		flux[c] = f;
-		totalflux += f;
+		weights = _mm256_add_ps(weights, f); // projected area of all lightsources on hemisphere
+		f = _mm256_mul_ps(f, emissionR8[c]); // we assume non-coloured emissions
+
+		flux8[c] = f;
+		totalflux8 = _mm256_add_ps(totalflux8, f);
 	}
 	//}
+	// go from AVX to floats (weights, totalflux)
+	// sum parts of totalflux
+	totalflux = totalflux8.m256_f32[0] + totalflux8.m256_f32[1] + totalflux8.m256_f32[2] + totalflux8.m256_f32[3] + totalflux8.m256_f32[4] + totalflux8.m256_f32[5] + totalflux8.m256_f32[6] + totalflux8.m256_f32[7];
+	weight = weights.m256_f32[0] + weights.m256_f32[1] + weights.m256_f32[2] + weights.m256_f32[3] + weights.m256_f32[4] + weights.m256_f32[5] + weights.m256_f32[6] + weights.m256_f32[7];
+	
+
 
 	if (totalflux < 0.001f)
 		return nullptr;
