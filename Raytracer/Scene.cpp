@@ -551,14 +551,13 @@ std::pair<Ray, Triangle*>* Scene::SampleLight(const Vector3F& hitPoint, float& w
 	totalflux = totalflux8.m256_f32[0] + totalflux8.m256_f32[1] + totalflux8.m256_f32[2] + totalflux8.m256_f32[3] + totalflux8.m256_f32[4] + totalflux8.m256_f32[5] + totalflux8.m256_f32[6] + totalflux8.m256_f32[7];
 	weight = weights.m256_f32[0] + weights.m256_f32[1] + weights.m256_f32[2] + weights.m256_f32[3] + weights.m256_f32[4] + weights.m256_f32[5] + weights.m256_f32[6] + weights.m256_f32[7];
 	
-
-
 	if (totalflux < 0.001f)
 		return nullptr;
 
 	// divide all flux values by the total flux gives the probabilities
-	for (i = 0; i < lightCount; ++i)
-		flux[i] /= totalflux;
+	totalflux8 = _mm256_set1_ps(totalflux);
+	for (i = 0; i < count; ++i)
+		flux8[i] = _mm256_div_ps(flux8[i], totalflux8);
 
 	// get the light using the probabilities and a random float between 0 and 1
 	float r = dist(gen);
