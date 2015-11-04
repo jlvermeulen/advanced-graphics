@@ -165,7 +165,7 @@ Triangle* BVHInternal::Query(const Ray& ray, float& t) const
 	//}
 
 	Triangle* triangle = nullptr;
-	for (int i = 0; i < NROFLANES; i++)
+	for (int i = 0; i < nChildren; i++)
 	{
 		float ttmax = tmax.m256_f32[i];
 		float ttmin = tmin.m256_f32[i];
@@ -242,6 +242,9 @@ void BVHInternal::Compact()
 		std::get<0>(tup)->Compact();
 	}
 
+	this->nChildren = childCount;
+
+	// pad with zeroes
 	while (childCount < NROFLANES)
 	{
 		children[childCount] = nullptr;
@@ -286,9 +289,10 @@ BVHLeaf::BVHLeaf(const std::vector<Triangle*>& triangles)
 		edge2X[i] = edge2Y[i] = edge2Z[i] = 0.0f;
 	}
 
-	this->count = triangles.size() / NROFLANES;
+	this->nTriangles = triangles.size();
+	this->nTriangles8 = triangles.size() / NROFLANES;
 	if (triangles.size() % NROFLANES != 0)
-		this->count++;
+		this->nTriangles8++;
 }
 
 Triangle* BVHLeaf::Query(const Ray& ray, float& t) const
@@ -307,7 +311,7 @@ Triangle* BVHLeaf::Query(const Ray& ray, float& t) const
 
 	union { float dists[MAXSIZE]; __m256 distances[MAXSIZE / NROFLANES]; };
 
-	for (int i = 0; i < count; i++)
+	for (int i = 0; i < nTriangles8; i++)
 	{
 		// Vector3F e1 = triangle.Vertices[1].Position - triangle.Vertices[0].Position;
 		const __m256 e1X = edge1X8[i];
@@ -372,7 +376,7 @@ Triangle* BVHLeaf::Query(const Ray& ray, float& t) const
 	}
 
 	Triangle* triangle = nullptr;
-	for (int i = 0; i < count * NROFLANES; i++)
+	for (int i = 0; i < nTriangles; i++)
 		if (dists[i] < t && dists[i] > EPSILON)
 		{
 			t = dists[i];

@@ -26,6 +26,7 @@ public:
 	BVHNode** GetChildren() { return &children[0]; }
 
 	BVHNode* children[NROFLANES];
+	int nChildren;
 
 	// Min
 	union { float bboxMinX[NROFLANES]; __m256 bboxMinX8; };
@@ -50,7 +51,7 @@ public:
 	void operator delete(void* p) { _mm_free(p); }
 
 protected:
-	int count;
+	int nTriangles, nTriangles8;
 	Triangle* triangles[MAXSIZE];
 
 	// Vertices[0]
