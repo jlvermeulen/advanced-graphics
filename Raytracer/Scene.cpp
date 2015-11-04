@@ -3,7 +3,7 @@
 
 #define MIN_PATH_LENGTH 2
 #define TREE 1 // 0 octtree 1 bvh
-#define MAXLIGHTS 32  
+//#define MAXLIGHTS 32  
 
 #include "Scene.h"
 
@@ -20,39 +20,7 @@ Scene::Scene() :
 
 Scene::~Scene() { }
 
-float posv0X[MAXLIGHTS];
-float posv1X[MAXLIGHTS];
-float posv2X[MAXLIGHTS];
-float posv0Y[MAXLIGHTS];
-float posv1Y[MAXLIGHTS];
-float posv2Y[MAXLIGHTS];
-float posv0Z[MAXLIGHTS];
-float posv1Z[MAXLIGHTS];
-float posv2Z[MAXLIGHTS];
 
-float norv0X[MAXLIGHTS];
-float norv1X[MAXLIGHTS];
-float norv2X[MAXLIGHTS];
-float norv0Y[MAXLIGHTS];
-float norv1Y[MAXLIGHTS];
-float norv2Y[MAXLIGHTS];
-float norv0Z[MAXLIGHTS];
-float norv1Z[MAXLIGHTS];
-float norv2Z[MAXLIGHTS];
-
-float prev0X[MAXLIGHTS];
-float prev0Y[MAXLIGHTS];
-float prev0Z[MAXLIGHTS];
-float prev1X[MAXLIGHTS];
-float prev1Y[MAXLIGHTS];
-float prev1Z[MAXLIGHTS];
-
-float area[MAXLIGHTS];
-float emissionR[MAXLIGHTS];
-float invDenom[MAXLIGHTS];
-float d00[MAXLIGHTS];
-float d01[MAXLIGHTS];
-float d11[MAXLIGHTS];
 void Scene::PreRender()
 {
 	// Instantiate spatial indices
@@ -62,6 +30,7 @@ void Scene::PreRender()
 #elif TREE == 0
 		obj->ConstructOctree();
 #endif
+	// prepare sample light stuff
 	unsigned int c = 0;
 	for (Object* o : lights)
 	{
@@ -101,10 +70,55 @@ void Scene::PreRender()
 			d01[c] = t->d01;
 			d11[c] = t->d11;
 
+			lightTriangles[c] = t;
+
 			c++;
 		}
 	}
-	// precalc light stuff
+	// padding with 0's
+	unsigned int pad = 8-(lightCount % 8);
+	lightCount += pad;
+	if (pad < 8)
+	{
+		for (int i = 0; i < pad; ++i)
+		{
+			posv0X[c] = 0.0f;
+			posv1X[c] = 0.0f;
+			posv2X[c] = 0.0f;
+			posv0Y[c] = 0.0f;
+			posv1Y[c] = 0.0f;
+			posv2Y[c] = 0.0f;
+			posv0Z[c] = 0.0f;
+			posv1Z[c] = 0.0f;
+			posv2Z[c] = 0.0f;
+
+			norv0X[c] = 0.0f;
+			norv1X[c] = 0.0f;
+			norv2X[c] = 0.0f;
+			norv0Y[c] = 0.0f;
+			norv1Y[c] = 0.0f;
+			norv2Y[c] = 0.0f;
+			norv0Z[c] = 0.0f;
+			norv1Z[c] = 0.0f;
+			norv2Z[c] = 0.0f;
+
+			prev0X[c] = 0.0f;
+			prev0Y[c] = 0.0f;
+			prev0Z[c] = 0.0f;
+			prev1X[c] = 0.0f;
+			prev1Y[c] = 0.0f;
+			prev1Z[c] = 0.0f;
+
+			area[c] = 0.0f;
+			emissionR[c] = 0.0f;
+			invDenom[c] = 0.0f;
+			d00[c] = 0.0f;
+			d01[c] = 0.0f;
+			d11[c] = 0.0f;
+
+			c++;
+		}
+	}
 }
 
 void Scene::Render(uchar* imageData, int samplesPerPixel, float sigma, bool useDoF)
@@ -429,117 +443,119 @@ std::pair<Ray, Triangle*>* Scene::SampleLight(const Vector3F& hitPoint, float& w
 	}
 
 	unsigned int i = 0;
-	std::pair<float, Triangle*>* flux = new std::pair<float, Triangle*>[lightCount];
+	float flux[MAXLIGHTS];// = new std::pair<float, unsigned int>[lightCount];
 	float totalflux = 0;
 	// loop over all lightsources
-	unsigned int c = 0;
-	for (Object* o : lights)
+//	unsigned int c = 0;
+	//for (Object* o : lights)
+	//{
+	//	for (Triangle* t : o->triangles)
+	for (unsigned int c = 0; c < lightCount; ++c)
 	{
-		for (Triangle* t : o->triangles)
-		{
-			c++; // counter for triangles
+		//	c++; // counter for triangles
 
-			//Vector3F v1 = t->Vertices[1].Position - t->Vertices[0].Position;
-			float locv1X = posv1X - posv0X;
-			float locv1Y = posv1Y - posv0Y;
-			float locv1Z = posv1Z - posv0Z;
+		//Vector3F v1 = t->Vertices[1].Position - t->Vertices[0].Position;
+		float locv1X = posv1X[c] - posv0X[c];
+		float locv1Y = posv1Y[c] - posv0Y[c];
+		float locv1Z = posv1Z[c] - posv0Z[c];
 
-			//Vector3F v2 = t->Vertices[2].Position - t->Vertices[0].Position;
-			float locv2X = posv2X - posv0X;
-			float locv2Y = posv2Y - posv0Y;
-			float locv2Z = posv2Z - posv0Z;
+		//Vector3F v2 = t->Vertices[2].Position - t->Vertices[0].Position;
+		float locv2X = posv2X[c] - posv0X[c];
+		float locv2Y = posv2Y[c] - posv0Y[c];
+		float locv2Z = posv2Z[c] - posv0Z[c];
 
-			//Vector3F triPoint = v1 * u + v2 * v + t->Vertices[0].Position;
-			float triPointX = locv1X * u + locv2X*v + posv0X[c];
-			float triPointY = locv1Y * u + locv2Y*v + posv0Y[c];
-			float triPointZ = locv1Z * u + locv2Z*v + posv0Z[c];
+		//Vector3F triPoint = v1 * u + v2 * v + t->Vertices[0].Position;
+		float triPointX = locv1X * u + locv2X*v + posv0X[c];
+		float triPointY = locv1Y * u + locv2Y*v + posv0Y[c];
+		float triPointZ = locv1Z * u + locv2Z*v + posv0Z[c];
 
-			//Vector3F outgoingRay = hitPoint - triPoint;
-			float outgoingRayX = hitPoint.X - triPointX;
-			float outgoingRayY = hitPoint.Y - triPointY;
-			float outgoingRayZ = hitPoint.Z - triPointZ;
+		//Vector3F outgoingRay = hitPoint - triPoint;
+		float outgoingRayX = hitPoint.X - triPointX;
+		float outgoingRayY = hitPoint.Y - triPointY;
+		float outgoingRayZ = hitPoint.Z - triPointZ;
 
-			//float distance = outgoingRay.LengthSquared();
-			////float distance = outgoingRay.X * outgoingRay.X + outgoingRay.Y * outgoingRay.Y + outgoingRay.Z * outgoingRay.Z; 
-			float distance = outgoingRayX*outgoingRayX + outgoingRayY*outgoingRayY + outgoingRayZ*outgoingRayZ;
+		//float distance = outgoingRay.LengthSquared();
+		////float distance = outgoingRay.X * outgoingRay.X + outgoingRay.Y * outgoingRay.Y + outgoingRay.Z * outgoingRay.Z; 
+		float distance = outgoingRayX*outgoingRayX + outgoingRayY*outgoingRayY + outgoingRayZ*outgoingRayZ;
 
-			//Vector3F normal = t->surfaceNormal(triPoint);
-				//Vector3F factors = Interpolate(point); inside surfaceNormal()
-				////Vector3F v3 = triPoint - t->Vertices[0].Position;
-			float locv3X = triPointX - posv0X[c];
-			float locv3Y = triPointY - posv0Y[c];
-			float locv3Z = triPointZ - posv0Z[c];
+		//Vector3F normal = t->surfaceNormal(triPoint);
+		//Vector3F factors = Interpolate(point); inside surfaceNormal()
+		////Vector3F v3 = triPoint - t->Vertices[0].Position;
+		float locv3X = triPointX - posv0X[c];
+		float locv3Y = triPointY - posv0Y[c];
+		float locv3Z = triPointZ - posv0Z[c];
 
-				//Vector3F::Dot(v3, t->v0);
-				////float d20 = v3.X * t->v0.X + v3.Y * t->v0.Y + v3.Z * t->v0.Z;
-			float d20 = locv3X*prev0X[c] + locv3Y*prev0Y[c] + locv3Z*prev0Z[c];
-				//Vector3F::Dot(v3, t->v1);
-				////float d21 = v3.X * t->v1.X + v3.Y * t->v1.Y + v3.Z * t->v1.Z;
-			float d21 = locv3X*prev1X[c] + locv3Y*prev1Y[c] + locv3Z*prev1Z[c];
-			
-				//float a2 = (t->d11 * d20 - t->d01 * d21) * t->invDenom;
-			float facY = (d11[c] * d20 - d01[c] * d21)*invDenom[c];
+		//Vector3F::Dot(v3, t->v0);
+		////float d20o = v3.X * t->v0.X + v3.Y * t->v0.Y + v3.Z * t->v0.Z;
+		float d20 = locv3X*prev0X[c] + locv3Y*prev0Y[c] + locv3Z*prev0Z[c];
+		//Vector3F::Dot(v3, t->v1);
+		////float d21o = v3.X * t->v1.X + v3.Y * t->v1.Y + v3.Z * t->v1.Z;
+		float d21 = locv3X*prev1X[c] + locv3Y*prev1Y[c] + locv3Z*prev1Z[c];
 
-				//float a3 = (t->d00 * d21 - t->d01 * d20) * t->invDenom;
-			float facZ = (d00[c] * d21 - d01[c] * d20) * invDenom[c];
+		//float a2 = (t->d11 * d20o - t->d01 * d21o) * t->invDenom;
+		float facY = (d11[c] * d20 - d01[c] * d21)*invDenom[c];
 
-				//float a1 = 1.0f - a2 - a3;
-			float facX = 1.0f - facY - facZ;
-				//Vector3F factors(a1, a2, a3);
-			// end of inside surfaceNormal()
+		//float a3 = (t->d00 * d21o - t->d01 * d20o) * t->invDenom;
+		float facZ = (d00[c] * d21 - d01[c] * d20) * invDenom[c];
 
-			//Vector3F normal = factors.X * t->Vertices[0].Normal + factors.Y * t->Vertices[1].Normal + factors.Z * t->Vertices[2].Normal;
-			float normalX = facX * norv0X[c] + facY * norv1X[c] + facZ * norv2X[c];
-			float normalY = facX * norv0Y[c] + facY * norv1Y[c] + facZ * norv2Y[c];
-			float normalZ = facX * norv0Z[c] + facY * norv1Z[c] + facZ * norv2Z[c];
+		//float a1 = 1.0f - a2 - a3;
+		float facX = 1.0f - facY - facZ;
+		//Vector3F factors(a1, a2, a3);
+		// end of inside surfaceNormal()
 
-			//outgoingRay.Normalise();
-			//outgoingRay /= sqrtf(outgoingRay.X * outgoingRay.X + outgoingRay.Y * outgoingRay.Y + outgoingRay.Z * outgoingRay.Z);
-			float sqrt = sqrtf(outgoingRayX * outgoingRayX + outgoingRayY * outgoingRayY + outgoingRayZ * outgoingRayZ);
-			outgoingRayX /= sqrt;
-			outgoingRayY /= sqrt;
-			outgoingRayZ /= sqrt;
+		//Vector3F normal = factors.X * t->Vertices[0].Normal + factors.Y * t->Vertices[1].Normal + factors.Z * t->Vertices[2].Normal;
+		float normalX = facX * norv0X[c] + facY * norv1X[c] + facZ * norv2X[c];
+		float normalY = facX * norv0Y[c] + facY * norv1Y[c] + facZ * norv2Y[c];
+		float normalZ = facX * norv0Z[c] + facY * norv1Z[c] + facZ * norv2Z[c];
 
-			//float f = t->Area * std::max(0.0f, Vector3F::Dot(outgoingRay, normal)) / distance;
-			float fdot = outgoingRayX * normalX + outgoingRayY * normalY + outgoingRayZ * normalZ;
-			float f = area[c] * std::max(0.0f, fdot) / distance;
-			weight += f; // projected area of all lightsources on hemisphere
-			f *= o->material.emission.R; // we assume non-coloured emissions
+		//outgoingRay.Normalise();
+		//Vector3F outgoingRay(outgoingRayX, outgoingRayY, outgoingRayZ);//
+		//outgoingRay /= sqrtf(outgoingRay.X * outgoingRay.X + outgoingRay.Y * outgoingRay.Y + outgoingRay.Z * outgoingRay.Z);
+		float sqrt = sqrtf(outgoingRayX * outgoingRayX + outgoingRayY * outgoingRayY + outgoingRayZ * outgoingRayZ);
+		outgoingRayX /= sqrt;
+		outgoingRayY /= sqrt;
+		outgoingRayZ /= sqrt;
 
-			flux[i++] = std::pair<float, Triangle*>(f, t);
-			totalflux += f;
-		}
+		//float fold = t->Area * std::max(0.0f, Vector3F::Dot(outgoingRay, normal)) / distanceo;
+		float fdot = outgoingRayX * normalX + outgoingRayY * normalY + outgoingRayZ * normalZ;
+		float f = area[c] * std::max(0.0f, fdot) / distance;
+		weight += f; // projected area of all lightsources on hemisphere
+		f *= emissionR[c]; // we assume non-coloured emissions
+
+		flux[c] = f;
+		totalflux += f;
 	}
+	//}
 
 	if (totalflux < 0.001f)
 		return nullptr;
 
 	// divide all flux values by the total flux gives the probabilities
 	for (i = 0; i < lightCount; ++i)
-		flux[i].first /= totalflux;
+		flux[i] /= totalflux;
 
 	// get the light using the probabilities and a random float between 0 and 1
 	float r = dist(gen);
-	const std::pair<float, Triangle*>* pair = nullptr;
+	int p = 0;//const std::pair<float, Triangle*>* pair = nullptr;
 	for (i = 0; i < lightCount; ++i)
 	{
-		const std::pair<float, Triangle*>& p = flux[i];
+		//const std::pair<float, Triangle*>& p = flux[i];
 
-		if (p.first + 0.001f >= r) // add small value to prevent floating point errors
+		if (flux[i] + 0.001f >= r) // add small value to prevent floating point errors
 		{
-			pair = &p;
+			p = i;
 			break;
 		}
 		else
-			r -= p.first;
+			r -= flux[i];
 	}
 
-	Vector3F v1 = pair->second->Vertices[1].Position - pair->second->Vertices[0].Position;
-	Vector3F v2 = pair->second->Vertices[2].Position - pair->second->Vertices[0].Position;
+	Vector3F v1 = lightTriangles[p]->Vertices[1].Position - lightTriangles[p]->Vertices[0].Position;
+	Vector3F v2 = lightTriangles[p]->Vertices[2].Position - lightTriangles[p]->Vertices[0].Position;
 
 	// return ray towards chosen point
-	std::pair<Ray, Triangle*>* result = new std::pair<Ray, Triangle*>(Ray(hitPoint, Vector3F::Normalise(v1 * u + v2 * v + pair->second->Vertices[0].Position - hitPoint)), pair->second);
-	delete [] flux;
+	std::pair<Ray, Triangle*>* result = new std::pair<Ray, Triangle*>(Ray(hitPoint, Vector3F::Normalise(v1 * u + v2 * v + lightTriangles[p]->Vertices[0].Position - hitPoint)), lightTriangles[p]);
+	//delete [] flux;
 	return result;
 }
 

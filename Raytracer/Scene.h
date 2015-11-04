@@ -12,7 +12,7 @@
 #include <tuple>
 #include <random>
 #include <stdexcept>
-
+#define MAXLIGHTS 32
 typedef unsigned char uchar;
 
 struct Intersection
@@ -58,6 +58,41 @@ public:
 	void LoadDefaultScene5();
 	void LoadDefaultScene6();
 	void Clear();
+
+	union{ float posv0X[MAXLIGHTS]; __m256 posv0x8[MAXLIGHTS / NROFLANES]; };
+	union{ float  posv1X[MAXLIGHTS]; __m256 posv1X8[MAXLIGHTS / NROFLANES]; };
+	union{ float  posv2X[MAXLIGHTS]; __m256 posv2X8[MAXLIGHTS / NROFLANES]; };
+	union{ float  posv0Y[MAXLIGHTS]; __m256 posv0Y8[MAXLIGHTS / NROFLANES]; };
+	union{ float  posv1Y[MAXLIGHTS]; __m256 posv1Y8[MAXLIGHTS / NROFLANES]; };
+	union{ float  posv2Y[MAXLIGHTS]; __m256 posv2Y8[MAXLIGHTS / NROFLANES]; };
+	union{ float  posv0Z[MAXLIGHTS]; __m256 posv0Z8[MAXLIGHTS / NROFLANES]; };
+	union{ float  posv1Z[MAXLIGHTS]; __m256 posv1Z8[MAXLIGHTS / NROFLANES]; };
+	union{ float  posv2Z[MAXLIGHTS]; __m256 posv2Z8[MAXLIGHTS / NROFLANES]; };
+
+	union{ float  norv0X[MAXLIGHTS]; __m256 norv0X8[MAXLIGHTS / NROFLANES]; };
+	union{ float  norv1X[MAXLIGHTS]; __m256 norv1X8[MAXLIGHTS / NROFLANES]; };
+	union{ float  norv2X[MAXLIGHTS]; __m256 norv2X8[MAXLIGHTS / NROFLANES]; };
+	union{ float  norv0Y[MAXLIGHTS]; __m256 norv0Y8[MAXLIGHTS / NROFLANES]; };
+	union{ float  norv1Y[MAXLIGHTS]; __m256 norv1Y8[MAXLIGHTS / NROFLANES]; };
+	union{ float  norv2Y[MAXLIGHTS]; __m256 norv2Y8[MAXLIGHTS / NROFLANES]; };
+	union{ float  norv0Z[MAXLIGHTS]; __m256 norv0Z8[MAXLIGHTS / NROFLANES]; };
+	union{ float  norv1Z[MAXLIGHTS]; __m256 norv1Z8[MAXLIGHTS / NROFLANES]; };
+	union{ float  norv2Z[MAXLIGHTS]; __m256 norv2Z8[MAXLIGHTS / NROFLANES]; };
+
+	union{ float  prev0X[MAXLIGHTS]; __m256 prev0X8[MAXLIGHTS / NROFLANES]; };
+	union{ float  prev0Y[MAXLIGHTS]; __m256 prev0Y8[MAXLIGHTS / NROFLANES]; };
+	union{ float  prev0Z[MAXLIGHTS]; __m256 prev0Z8[MAXLIGHTS / NROFLANES]; };
+	union{ float  prev1X[MAXLIGHTS]; __m256 prev1X8[MAXLIGHTS / NROFLANES]; };
+	union{ float  prev1Y[MAXLIGHTS]; __m256 prev1Y8[MAXLIGHTS / NROFLANES]; };
+	union{ float  prev1Z[MAXLIGHTS]; __m256 prev1Z8[MAXLIGHTS / NROFLANES]; };
+
+	union{ float  area[MAXLIGHTS]; __m256 area8[MAXLIGHTS / NROFLANES]; };
+	union{ float  emissionR[MAXLIGHTS]; __m256 emissionR8[MAXLIGHTS / NROFLANES]; };
+	union{ float  invDenom[MAXLIGHTS]; __m256 invDenom8[MAXLIGHTS / NROFLANES]; };
+	union{ float  d00[MAXLIGHTS]; __m256 d008[MAXLIGHTS / NROFLANES]; };
+	union{ float  d01[MAXLIGHTS]; __m256 d018[MAXLIGHTS / NROFLANES]; };
+	union{ float  d11[MAXLIGHTS]; __m256 d118[MAXLIGHTS / NROFLANES]; };
+	Triangle* lightTriangles[MAXLIGHTS];
 
 private:
 	Color3F TraceRay(const Ray& ray, bool nee);
