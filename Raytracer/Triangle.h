@@ -59,7 +59,7 @@ public:
 		return Vector3F(a1, a2, a3);
 	}
   
-	Vector3F surfaceNormal(Vector3F point) const
+	Vector3F SurfaceNormal(Vector3F point) const
 	{
 		Vector3F factors = Interpolate(point);
 		return factors.X * Vertices[0].Normal + factors.Y * Vertices[1].Normal + factors.Z * Vertices[2].Normal;

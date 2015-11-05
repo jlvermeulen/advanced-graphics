@@ -61,7 +61,6 @@ class Octree
 {
 public:
 	Octree();
-	Octree(const Octree& oct) { throw std::runtime_error("wut"); }
 	Octree(const std::vector<Triangle*>& triangles);
 	~Octree();
 

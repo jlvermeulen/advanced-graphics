@@ -10,7 +10,7 @@ class BVHNode
 {
 public:
 	virtual ~BVHNode() { }
-	virtual Triangle* Query(const Ray& ray, float& t) const = 0;
+	virtual Triangle* Query(const Ray& ray, float& t) = 0;
 	static BVHNode* Construct(const std::vector<Triangle*>& triangles, const BoundingBox& bb);
 	virtual void Compact() { }
 	virtual BVHNode** GetChildren() { return nullptr; }
@@ -21,7 +21,7 @@ class BVHInternal : public BVHNode
 public:
 	BVHInternal() { for (unsigned int i = 0; i < NROFLANES; i++) children[i] = nullptr; }
 	~BVHInternal();
-	Triangle* Query(const Ray& ray, float& t) const;
+	Triangle* Query(const Ray& ray, float& t);
 	void Compact();
 	BVHNode** GetChildren() { return &children[0]; }
 
@@ -44,7 +44,7 @@ class BVHLeaf : public BVHNode
 {
 public:
 	BVHLeaf(const std::vector<Triangle*>& triangles);
-	Triangle* Query(const Ray& ray, float& t) const;
+	Triangle* Query(const Ray& ray, float& t);
 
 	// crazy shit to ensure alignment
 	void* operator new(size_t i){ return _mm_malloc(i, 32); }

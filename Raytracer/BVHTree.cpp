@@ -105,11 +105,10 @@ BVHInternal::~BVHInternal()
 			delete children[i];
 }
 
-Triangle* BVHInternal::Query(const Ray& ray, float& t) const
+Triangle* BVHInternal::Query(const Ray& ray, float& t)
 {
-	//	float tBox = std::numeric_limits<float>::min();
-	//	if (!Intersects(ray, children[i]->bb, tBox) || tBox > t)
-	//		continue;
+	union { float tmin[NROFLANES]; __m256 tmin8; };
+	union { float tmax[NROFLANES]; __m256 tmax8; };
 
 	const __m256 rayDirInvX = _mm256_set1_ps(ray.InverseDirection.X);
 	const __m256 rayDirInvY = _mm256_set1_ps(ray.InverseDirection.Y);
@@ -135,8 +134,8 @@ Triangle* BVHInternal::Query(const Ray& ray, float& t) const
 
 	//float tmin = std::min(t1, t2);
 	//float tmax = std::max(t1, t2);
-	__m256 tmin = _mm256_min_ps(t1, t2);
-	__m256 tmax = _mm256_max_ps(t1, t2);
+	tmin8 = _mm256_min_ps(t1, t2);
+	tmax8 = _mm256_max_ps(t1, t2);
 
 	//t1 = lb.Y * ray.InverseDirection.Y;
 	//t2 = rt.Y * ray.InverseDirection.Y;
@@ -145,8 +144,8 @@ Triangle* BVHInternal::Query(const Ray& ray, float& t) const
 
 	//tmin = std::max(tmin, std::min(t1, t2));
 	//tmax = std::min(tmax, std::max(t1, t2));
-	tmin = _mm256_max_ps(tmin, _mm256_min_ps(t1, t2));
-	tmax = _mm256_min_ps(tmax, _mm256_max_ps(t1, t2));
+	tmin8 = _mm256_max_ps(tmin8, _mm256_min_ps(t1, t2));
+	tmax8 = _mm256_min_ps(tmax8, _mm256_max_ps(t1, t2));
 
 	//t1 = lb.Z * ray.InverseDirection.Z;
 	//t2 = rt.Z * ray.InverseDirection.Z;
@@ -155,8 +154,8 @@ Triangle* BVHInternal::Query(const Ray& ray, float& t) const
 
 	//tmin = std::max(tmin, std::min(t1, t2));
 	//tmax = std::min(tmax, std::max(t1, t2));
-	tmin = _mm256_max_ps(tmin, _mm256_min_ps(t1, t2));
-	tmax = _mm256_min_ps(tmax, _mm256_max_ps(t1, t2));
+	tmin8 = _mm256_max_ps(tmin8, _mm256_min_ps(t1, t2));
+	tmax8 = _mm256_min_ps(tmax8, _mm256_max_ps(t1, t2));
 
 	//if (tmax >= 0 && tmax >= tmin)
 	//{
@@ -164,18 +163,55 @@ Triangle* BVHInternal::Query(const Ray& ray, float& t) const
 	//	return true;
 	//}
 
-	Triangle* triangle = nullptr;
-	for (int i = 0; i < nChildren; i++)
-	{
-		float ttmax = tmax.m256_f32[i];
-		float ttmin = tmin.m256_f32[i];
+	BVHNode* childCopy[NROFLANES];
+	memcpy(childCopy, children, NROFLANES * sizeof(BVHNode*));
 
-		// we hit the bbox, and it's closer than our current closest hit
-		if (ttmax > 0 && ttmax >= ttmin && ttmin < t)
+	// disregard all boxes that weren't hit
+	unsigned int k = nChildren;
+	for (unsigned int i = 0; i < k; i++)
+	{
+		float ttmax = tmax[i];
+		float ttmin = tmin[i];
+
+		// we didn't hit the bbox, or it's further away than our current closest hit
+		if (ttmax <= 0 || ttmax < ttmin || ttmin >= t)
 		{
-			Triangle* tri = children[i]->Query(ray, t); // so we query the child node
-			triangle = tri == nullptr ? triangle : tri;
+			k--;
+			tmin[i] = tmin[k];
+			tmax[i] = tmax[k];
+			childCopy[i] = childCopy[k];
+			i--;
 		}
+	}
+
+	// sort children based on distance to bbox intersection
+	for (unsigned int i = 1; i < k; i++)
+	{
+		BVHNode* child = childCopy[i];
+		float ttmax = tmax[i];
+		float ttmin = tmin[i];
+		unsigned int j = i;
+		while (j > 0 && tmin[j - 1] > ttmin)
+		{
+			tmin[j] = tmin[j - 1];
+			tmax[j] = tmax[j - 1];
+			childCopy[j] = childCopy[j - 1];
+			j--;
+		}
+
+		tmin[j] = ttmin;
+		tmax[j] = ttmax;
+		childCopy[j] = child;
+	}
+
+	Triangle* triangle = nullptr;
+	for (unsigned int i = 0; i < k; i++)
+	{
+		float ttmax = tmax[i];
+		float ttmin = tmin[i];
+
+		Triangle* tri = childCopy[i]->Query(ray, t);
+		triangle = tri == nullptr ? triangle : tri;
 	}
 
 	return triangle;
@@ -295,12 +331,8 @@ BVHLeaf::BVHLeaf(const std::vector<Triangle*>& triangles)
 		this->nTriangles8++;
 }
 
-Triangle* BVHLeaf::Query(const Ray& ray, float& t) const
+Triangle* BVHLeaf::Query(const Ray& ray, float& t)
 {
-	/*float tBox = std::numeric_limits<float>::min();
-	if (!Intersects(ray, bb, tBox) || tBox > t)
-		return nullptr;*/
-
 	const __m256 rayDirX = _mm256_set1_ps(ray.Direction.X);
 	const __m256 rayDirY = _mm256_set1_ps(ray.Direction.Y);
 	const __m256 rayDirZ = _mm256_set1_ps(ray.Direction.Z);

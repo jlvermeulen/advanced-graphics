@@ -256,7 +256,7 @@ Color3F Scene::TraceRay(const Ray& ray, bool nee)
 //--------------------------------------------------------------------------------
 Color3F Scene::ComputeRadiance(const Vector3F& point, const Vector3F& in, Triangle* triangle, const Material& material, unsigned int depth, bool nee)
 {
-	const Vector3F& normal = triangle->surfaceNormal(point);
+	const Vector3F& normal = triangle->SurfaceNormal(point);
 	Color3F c = material.emission;
 	if (c.IsSignificant())
 		return c;
@@ -299,7 +299,7 @@ Color3F Scene::DirectIllumination(const Vector3F& point, const Vector3F& in, con
 	delete sample;
 
 	Vector3F hitPoint = ray.Origin + hitTime * ray.Direction;
-	Vector3F triNormal = hitTriangle->surfaceNormal(hitPoint);
+	Vector3F triNormal = hitTriangle->SurfaceNormal(hitPoint);
 	float weight = lightWeight * std::max(0.0f, Vector3F::Dot(ray.Direction, normal));
 	if (material.reflType == ReflectionType::diffuse)
 	{
